@@ -93,9 +93,9 @@
                                 <button class="btn-sm" onclick="viewPerson(1)">
                                     <i class="fas fa-eye"></i> Xem
                                 </button>
-                                <button class="btn-sm" onclick="editPerson(1)">
+                                <a href="{% url 'suank' 1 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                             </td>
                         </tr>
                         <tr>
@@ -110,9 +110,9 @@
                                 <button class="btn-sm" onclick="viewPerson(2)">
                                     <i class="fas fa-eye"></i> Xem
                                 </button>
-                                <button class="btn-sm" onclick="editPerson(2)">
+                                <a href="{% url 'suank' 2 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                             </td>
                         </tr>
                         <tr>
@@ -127,9 +127,9 @@
                                 <button class="btn-sm" onclick="viewPerson(3)">
                                     <i class="fas fa-eye"></i> Xem
                                 </button>
-                                <button class="btn-sm" onclick="editPerson(3)">
+                                <a href="{% url 'suank' 3 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                             </td>
                         </tr>
                     </tbody>

@@ -319,6 +319,9 @@ def nhankhau(request):
 def themnk(request):
     return render(request, "themnk.html")
 
+def suank(request, person_id):
+    return render(request, "form_sua_nk.html", {"person_id": person_id})
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages
@@ -537,3 +540,5 @@ def biendong(request):
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
 
+def page_not_found(request):
+    return render(request, "404.html")
