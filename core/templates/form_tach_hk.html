@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tách hộ khẩu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/form_tach_hk.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Tách hộ khẩu</h2>
+</div>
+<br>
+<!-- Main Form Panel -->
+<div class="dashboard-panels">
+    <div class="panel">
+        <div class="panel-body">
+            <form id="splitHouseholdForm">
+                <!-- Phần 1: Thông tin hộ khẩu gốc -->
+                <div class="form-section">
+                    <h4>Thông tin hộ khẩu hiện tại</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mã hộ khẩu</label>
+                            <input type="text" id="originalHouseholdCode" class="form-input" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Chủ hộ hiện tại</label>
+                            <input type="text" id="originalHeadName" class="form-input" readonly>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Địa chỉ</label>
+                        <input type="text" id="originalAddress" class="form-input" readonly>
+                    </div>
+                </div>
+
+                <!-- Phần 2: Danh sách nhân khẩu để tách -->
+                <div class="form-section">
+                    <h4>Chọn nhân khẩu tách ra</h4>
+                    
+                    <div class="members-table-container">
+                        <table class="members-table">
+                            <thead>
+                                <tr>
+                                    <th>Họ và tên</th>
+                                    <th width="100">Tách hộ</th>
+                                    <th width="120">Chủ hộ mới</th>
+                                    <th width="250">Quan hệ với chủ hộ mới</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTableBody">
+                                <!-- Will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="validation-messages" id="validationMessages" style="display: none;">
+                        <!-- Validation messages will appear here -->
+                    </div>
+                </div>
+
+                <!-- Phần 3: Thông tin hộ khẩu mới -->
+                <div class="form-section" id="newHouseholdSection" style="display: none;">
+                    <h4>Thông tin hộ khẩu mới</h4>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mã hộ khẩu mới <span class="required">*</span></label>
+                            <input type="text" id="newHouseholdCode" class="form-input" placeholder="" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>Ngày tách hộ <span class="required">*</span></label>
+                            <input type="date" id="splitDate" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Địa chỉ hộ khẩu mới <span class="required">*</span></label>
+                        <input type="text" id="newAddress" class="form-input" placeholder="Số nhà, đường/ngõ/phố, phường, quận" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Lý do tách hộ</label>
+                        <textarea id="splitReason" class="form-input" rows="3" placeholder="Nhập lý do tách hộ..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        Xác nhận tách hộ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- <script>
+    const HOUSEHOLD_ID = {{ household_id|default:0 }};
+</script> -->
+<script src="{% static 'js/form_tach_hk.js' %}"></script>
+{% endblock %}

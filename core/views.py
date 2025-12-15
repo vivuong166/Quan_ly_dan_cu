@@ -328,6 +328,9 @@ def suahk(request, household_id):
 def chitiet_hk(request, household_id):
     return render(request, "chitiet_hk.html", {"household_id": household_id})
 
+def tachhk(request, household_id):
+    return render(request, "form_tach_hk.html", {"household_id": household_id})
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages

@@ -154,11 +154,224 @@ const sampleHouseholds = {
                 workplace: "Bệnh viện Đa khoa",
                 status: "Thường trú",
                 isHead: true
+            },
+            {
+                id: 6,
+                name: "Trần Thị N",
+                birthDate: "1982-07-15",
+                gender: "Nữ",
+                idCard: "001082056789",
+                phone: "0934567890",
+                relationship: "Vợ",
+                occupation: "Dược sĩ",
+                workplace: "Nhà thuốc Sức khỏe",
+                status: "Thường trú",
+                isHead: false
+            },
+            {
+                id: 7,
+                name: "Lê Văn O",
+                birthDate: "2008-12-05",
+                gender: "Nam",
+                idCard: "001008067890",
+                phone: "0945678901",
+                relationship: "Con",
+                occupation: "Học sinh",
+                workplace: "Trường THCS Chu Văn An",
+                status: "Thường trú",
+                isHead: false
             }
         ],
-        personChanges: [],
-        householdChanges: [],
-        temporaryResidents: []
+        personChanges: [
+            {
+                id: 1,
+                date: "2023-01-10",
+                name: "Lê Thị P",
+                birthDate: "2023-01-10",
+                changeType: "Mới sinh"
+            },
+            {
+                id: 2,
+                date: "2023-07-20",
+                name: "Nguyễn Văn Q",
+                birthDate: "1990-05-12",
+                changeType: "Chuyển đến"
+            }
+        ],
+        householdChanges: [
+            {
+                id: 1,
+                date: "2023-04-10",
+                field: "Phường",
+                content: "Thay đổi từ 'Phường Bách Khoa' thành 'Phường Đồng Tâm'"
+            },
+            {
+                id: 2,
+                date: "2023-08-25",
+                field: "Số điện thoại",
+                content: "Cập nhật số điện thoại liên hệ"
+            }
+        ],
+        temporaryResidents: [
+            {
+                id: 1,
+                name: "Phạm Thị R",
+                birthDate: "1996-03-18",
+                startDate: "2023-09-01",
+                endDate: "2024-02-28",
+                status: "Hoàn thành"
+            },
+            {
+                id: 2,
+                name: "Hoàng Văn S",
+                birthDate: "1993-11-22",
+                startDate: "2023-11-01",
+                endDate: "2024-04-30",
+                status: "Hoàn thành"
+            }
+        ]
+    },
+    3: {
+        id: 3,
+        code: "HK003",
+        address: "Số 789, Đường Nguyễn Trãi, Phường Thanh Xuân Bắc, Quận Thanh Xuân, Hà Nội",
+        headName: "Phạm Thị T",
+        members: [
+            {
+                id: 8,
+                name: "Phạm Thị T",
+                birthDate: "1985-09-10",
+                gender: "Nữ",
+                idCard: "001085078901",
+                phone: "0956789012",
+                relationship: "Chủ hộ",
+                occupation: "Kế toán trưởng",
+                workplace: "Công ty TNHH XYZ",
+                status: "Thường trú",
+                isHead: true
+            },
+            {
+                id: 9,
+                name: "Đỗ Văn U",
+                birthDate: "1983-04-25",
+                gender: "Nam",
+                idCard: "001083089012",
+                phone: "0967890123",
+                relationship: "Chồng",
+                occupation: "Kiến trúc sư",
+                workplace: "Công ty Thiết kế ABC",
+                status: "Thường trú",
+                isHead: false
+            },
+            {
+                id: 10,
+                name: "Phạm Đỗ Văn V",
+                birthDate: "2012-06-15",
+                gender: "Nam",
+                idCard: "",
+                phone: "",
+                relationship: "Con",
+                occupation: "Học sinh",
+                workplace: "Trường THCS Kim Liên",
+                status: "Thường trú",
+                isHead: false
+            },
+            {
+                id: 11,
+                name: "Phạm Đỗ Thị W",
+                birthDate: "2015-02-20",
+                gender: "Nữ",
+                idCard: "",
+                phone: "",
+                relationship: "Con",
+                occupation: "Học sinh",
+                workplace: "Trường Tiểu học Kim Liên",
+                status: "Thường trú",
+                isHead: false
+            },
+            {
+                id: 12,
+                name: "Phạm Thị X",
+                birthDate: "1955-12-08",
+                gender: "Nữ",
+                idCard: "001055090123",
+                phone: "0978901234",
+                relationship: "Mẹ",
+                occupation: "Nghỉ hưu",
+                workplace: "",
+                status: "Thường trú",
+                isHead: false
+            }
+        ],
+        personChanges: [
+            {
+                id: 1,
+                date: "2023-02-14",
+                name: "Phạm Đỗ Văn Y",
+                birthDate: "2023-02-14",
+                changeType: "Mới sinh"
+            },
+            {
+                id: 2,
+                date: "2023-05-10",
+                name: "Nguyễn Văn Z",
+                birthDate: "1970-03-05",
+                changeType: "Chuyển đi"
+            },
+            {
+                id: 3,
+                date: "2023-10-15",
+                name: "Trần Thị AA",
+                birthDate: "1992-08-20",
+                changeType: "Chuyển đến"
+            }
+        ],
+        householdChanges: [
+            {
+                id: 1,
+                date: "2023-01-20",
+                field: "Chủ hộ",
+                content: "Thay đổi từ 'Đỗ Văn U' thành 'Phạm Thị T'"
+            },
+            {
+                id: 2,
+                date: "2023-06-05",
+                field: "Địa chỉ",
+                content: "Cập nhật số nhà từ '787' thành '789'"
+            },
+            {
+                id: 3,
+                date: "2023-09-12",
+                field: "Quận",
+                content: "Điều chỉnh tên quận theo quy định mới"
+            }
+        ],
+        temporaryResidents: [
+            {
+                id: 1,
+                name: "Lý Văn BB",
+                birthDate: "1994-05-30",
+                startDate: "2023-08-15",
+                endDate: "2023-12-31",
+                status: "Hoàn thành"
+            },
+            {
+                id: 2,
+                name: "Vũ Thị CC",
+                birthDate: "1997-10-12",
+                startDate: "2023-10-01",
+                endDate: "2024-05-31",
+                status: "Hoàn thành"
+            },
+            {
+                id: 3,
+                name: "Bùi Văn DD",
+                birthDate: "1991-07-08",
+                startDate: "2023-12-01",
+                endDate: "2024-06-30",
+                status: "Hoàn thành"
+            }
+        ]
     }
 };
 

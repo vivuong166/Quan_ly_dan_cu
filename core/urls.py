@@ -25,6 +25,7 @@ urlpatterns = [
     path("qlhk_nk/hokhau/taohokhau/<str:household_id>/", views.taohokhau, name="taohokhau_edit"),
     path("qlhk_nk/hokhau/suahk/<int:household_id>/", views.suahk, name="suahk"),
     path("qlhk_nk/hokhau/chitiet/<int:household_id>/", views.chitiet_hk, name="chitiet_hk"),
+    path("qlhk_nk/hokhau/tachhk/<int:household_id>/", views.tachhk, name="tachhk"),
     path("qlhk_nk/nhankhau/", views.nhankhau, name="nhankhau"),
     path("qlhk_nk/nhankhau/themnk/", views.themnk, name="themnk"),
     path("qlhk_nk/nhankhau/suank/<int:person_id>/", views.suank, name="suank"),

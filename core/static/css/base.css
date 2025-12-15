@@ -397,13 +397,15 @@ body {
     padding: 4px 8px;
     border-radius: 4px;
     background: #f3f4f6;
+    color: #1f2937;
     border: 1px solid #e6e9ef;
     cursor: pointer;
     font-size: 12px;
+    text-decoration: none;
 }
 
-.btn-sm:hover {
-    background: #e5e7eb;
+.btn-sm i {
+    color: #1f2937;
 }
 
 .form-actions {
