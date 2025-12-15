@@ -5,16 +5,11 @@
     <h2 class="page-title">
         <span id="pageTitle">{% if is_edit %}Cập nhật hộ khẩu{% else %}Tạo hộ khẩu mới{% endif %}</span>
     </h2>
+    <br>
     <div class="header-actions">
         <a href="{% url 'sohokhau' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
-        <button class="btn secondary" id="previewBtn" onclick="previewHousehold()">
-            <i class="fas fa-eye"></i> Xem trước
-        </button>
-        <button class="btn primary" id="saveBtn" onclick="saveHousehold()">
-            <i class="fas fa-save"></i> Lưu hộ khẩu
-        </button>
     </div>
 </div>
 
@@ -26,14 +21,10 @@
     </div>
     <div class="step" data-step="2">
         <div class="step-number">2</div>
-        <div class="step-label">Địa chỉ thường trú</div>
+        <div class="step-label">Thông tin chủ hộ</div>
     </div>
     <div class="step" data-step="3">
         <div class="step-number">3</div>
-        <div class="step-label">Thông tin chủ hộ</div>
-    </div>
-    <div class="step" data-step="4">
-        <div class="step-number">4</div>
         <div class="step-label">Hoàn tất</div>
     </div>
 </div>
@@ -41,20 +32,20 @@
 <!-- Main Form Container -->
 <div class="form-container">
     <form id="householdForm" class="household-form">
-        <!-- Step 1: Basic Information -->
+        <!-- Step 1: Basic Information & Address -->
         <div class="form-step active" id="step-1">
             <div class="step-header">
-                <h3><i class="fas fa-info-circle"></i> Thông tin cơ bản</h3>
-                <p>Nhập thông tin cơ bản về hộ khẩu</p>
+                <h3><i class="fas fa-info-circle"></i> Thông tin cơ bản và địa chỉ</h3>
+                <p>Nhập thông tin cơ bản về hộ khẩu và địa chỉ thường trú</p>
             </div>
             
             <div class="form-section">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="householdCode">Mã hộ khẩu</label>
+                        <label for="householdCode" class="required">Mã hộ khẩu</label>
                         <input type="text" id="householdCode" class="form-input" 
-                               placeholder="HK-XXX (Tự động tạo nếu để trống)">
-                        <small class="form-help">Mã hộ khẩu sẽ được tự động tạo nếu bạn để trống</small>
+                               placeholder="HK-XXX" required pattern="HK-[0-9]{3}">
+                        <small class="form-help">Nhập theo định dạng HK-XXX (VD: HK-001, HK-123)</small>
                     </div>
                     <div class="form-group">
                         <label for="creationDate" class="required">Ngày lập sổ</label>
@@ -81,23 +72,10 @@
                               placeholder="Mô tả cụ thể lý do lập sổ hộ khẩu..."></textarea>
                 </div>
                 
-                <div class="form-group">
-                    <label for="previousHousehold">Hộ khẩu trước đây (nếu có)</label>
-                    <input type="text" id="previousHousehold" class="form-input" 
-                           placeholder="Mã hộ khẩu cũ hoặc địa chỉ nơi ở trước">
-                    <small class="form-help">Chỉ áp dụng cho trường hợp tách hộ hoặc chuyển đến</small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 2: Address Information -->
-        <div class="form-step" id="step-2">
-            <div class="step-header">
-                <h3><i class="fas fa-map-marker-alt"></i> Địa chỉ thường trú</h3>
-                <p>Nhập đầy đủ thông tin địa chỉ nơi ở thường xuyên</p>
-            </div>
-            
-            <div class="form-section">
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <h4 style="margin-bottom: 16px; color: #1f2937;">Địa chễ thường trú</h4>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="houseNumber" class="required">Số nhà</label>
@@ -110,53 +88,11 @@
                                placeholder="Đường Lạc Long Quân, Ngõ 123..." required>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="wardName" class="required">Phường/Xã</label>
-                        <select id="wardName" class="form-input" required>
-                            <option value="">-- Chọn phường/xã --</option>
-                            <option value="La Khê">Phường La Khê</option>
-                            <option value="Phú La">Phường Phú La</option>
-                            <option value="Phú Lương">Phường Phú Lương</option>
-                            <option value="Phúc La">Phường Phúc La</option>
-                            <option value="Kiến Hưng">Phường Kiến Hưng</option>
-                            <option value="Hà Cầu">Phường Hà Cầu</option>
-                            <option value="Yên Nghĩa">Phường Yên Nghĩa</option>
-                            <option value="Biên Giang">Phường Biên Giang</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="districtName" class="required">Quận/Huyện</label>
-                        <input type="text" id="districtName" class="form-input" 
-                               value="Hà Đông" readonly>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="provinceName" class="required">Tỉnh/Thành phố</label>
-                        <input type="text" id="provinceName" class="form-input" 
-                               value="Hà Nội" readonly>
-                    </div>
-                    <div class="form-group">
-                        <label for="postalCode">Mã bưu điện</label>
-                        <input type="text" id="postalCode" class="form-input" 
-                               placeholder="100000">
-                    </div>
-                </div>
-                
-                <div class="address-preview">
-                    <h4>Địa chỉ đầy đủ:</h4>
-                    <div id="fullAddress" class="address-display">
-                        Chưa nhập đủ thông tin địa chỉ
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Step 3: Head of Household Information -->
-        <div class="form-step" id="step-3">
+        <!-- Step 2: Head of Household Information -->
+        <div class="form-step" id="step-2">
             <div class="step-header">
                 <h3><i class="fas fa-user-tie"></i> Thông tin chủ hộ</h3>
                 <p>Nhập thông tin cá nhân của chủ hộ gia đình</p>
@@ -170,7 +106,7 @@
                                placeholder="Nguyễn Văn An" required>
                     </div>
                     <div class="form-group">
-                        <label for="headAlias">Tên thường gọi</label>
+                        <label for="headAlias">Bí danh</label>
                         <input type="text" id="headAlias" class="form-input" 
                                placeholder="An, Anh An...">
                     </div>
@@ -193,6 +129,19 @@
                 
                 <div class="form-row">
                     <div class="form-group">
+                        <label for="headBirthPlace">Nơi sinh</label>
+                        <input type="text" id="headBirthPlace" class="form-input" 
+                               placeholder="Bệnh viện Hoàng Long, Hà Nội...">
+                    </div>
+                    <div class="form-group">
+                        <label for="headHometown">Quê quán</label>
+                        <input type="text" id="headHometown" class="form-input" 
+                               placeholder="Xã Thanh Xuân, Huyện Soc Sơn, Tỉnh Bắc Kạn...">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
                         <label for="headIdNumber" class="required">Số CMND/CCCD</label>
                         <input type="text" id="headIdNumber" class="form-input" 
                                placeholder="001234567890" required 
@@ -210,6 +159,26 @@
                     <input type="text" id="headIdIssuePlace" class="form-input" 
                            placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư">
                 </div>
+                
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <h4 style="margin-bottom: 16px; color: #1f2937;">Thông tin đăng ký thường trú</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="headResidenceRegDate">Ngày đăng ký thường trú</label>
+                        <input type="date" id="headResidenceRegDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label for="headPreviousResidence">Địa chỉ nơi thường trú trước khi chuyển đến</label>
+                        <input type="text" id="headPreviousResidence" class="form-input" 
+                               placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
+                    </div>
+                </div>
+                
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <h4 style="margin-bottom: 16px; color: #1f2937;">Thông tin khác</h4>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -285,11 +254,11 @@
             </div>
         </div>
 
-        <!-- Step 4: Summary and Additional Information -->
-        <div class="form-step" id="step-4">
+        <!-- Step 3: Summary and Confirmation -->
+        <div class="form-step" id="step-3">
             <div class="step-header">
                 <h3><i class="fas fa-check-circle"></i> Hoàn tất và xác nhận</h3>
-                <p>Kiểm tra lại thông tin và thêm ghi chú nếu cần</p>
+                <p>Kiểm tra lại thông tin trước khi lưu</p>
             </div>
             
             <div class="form-section">
@@ -306,28 +275,10 @@
                             <span id="summaryHeadName">-</span>
                         </div>
                         <div class="summary-item">
-                            <label>Ngày lập:</label>
-                            <span id="summaryDate">-</span>
-                        </div>
-                        <div class="summary-item">
                             <label>Địa chỉ:</label>
                             <span id="summaryAddress">-</span>
                         </div>
-                        <div class="summary-item">
-                            <label>CMND/CCCD:</label>
-                            <span id="summaryIdNumber">-</span>
-                        </div>
-                        <div class="summary-item">
-                            <label>Nghề nghiệp:</label>
-                            <span id="summaryOccupation">-</span>
-                        </div>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="householdNotes">Ghi chú bổ sung</label>
-                    <textarea id="householdNotes" class="form-input" rows="4" 
-                              placeholder="Ghi chú thêm về hộ khẩu này (tùy chọn)..."></textarea>
                 </div>
                 
                 <div class="confirmation-section">

@@ -111,7 +111,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td><strong>${household.code}</strong></td>
                 <td>${household.head_name}</td>
                 <td>${household.address}</td>
-                <td>${household.member_count} người</td>
                 <td>
                     <button class="btn-sm" onclick="viewHousehold('${household.code}')">
                         <i class="fas fa-eye"></i> Xem
@@ -127,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (filteredHouseholds.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td colspan="5" style="text-align: center; color: #6b7280; padding: 20px;">
+                <td colspan="4" style="text-align: center; color: #6b7280; padding: 20px;">
                     <i class="fas fa-search"></i> Không tìm thấy hộ khẩu nào
                 </td>
             `;
