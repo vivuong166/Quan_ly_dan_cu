@@ -98,20 +98,6 @@
                         </button>
 
                         <div class="user-dropdown" id="userDropdown" role="menu" aria-labelledby="userMenuButton">
-
-                            <a href="#" class="dropdown-item">
-                                Thông tin tài khoản
-                            </a>
-
-                            <!-- Chỉ CÁN BỘ mới thấy "Quản lý truy cập" -->
-                            {% if request.session.user_role == "CAN_BO" %}
-                                <a href="{% url 'quanly_truycap' %}" class="dropdown-item">
-                                    Quản lý truy cập
-                                </a>
-                            {% endif %}
-
-                            <div class="dropdown-divider"></div>
-
                             <a href="{% url 'login' %}" class="dropdown-item logout">
                                 Đăng xuất
                             </a>

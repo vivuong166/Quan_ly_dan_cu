@@ -20,7 +20,7 @@
                 <input id="tt_nghe_nghiep" placeholder="Nghề nghiệp">
             </div>
             <div class="row">
-                <label>Địa chỉ tạm trú (chủ nhà)</label>
+                <label>Hộ khẩu tạm trú</label>
                 <input id="tt_dia_chi" placeholder="Địa chỉ, chủ nhà">
             </div>
             <div class="row">
@@ -31,17 +31,41 @@
             </div>
             <div class="form-actions">
                 <button type="button" id="addTt" class="btn primary">Thêm tạm trú</button>
-                <button type="button" id="printTt" class="btn">In giấy tạm trú</button>
             </div>
         </form>
 
         <div class="list-panel">
-            <h3>Danh sách đang tạm trú</h3>
-            <input id="searchTt" class="search-small" placeholder="Tìm theo tên / CMND / chủ nhà">
-            <ul id="ttList" class="list-plain">
-                <!-- mẫu tĩnh -->
-                <li data-id="1">Nguyễn Văn C — 2001-05-12 — CCCD: 012345678 — Địa chỉ: Số 5, phố Z (chủ: A)</li>
-            </ul>
+            <h3>Danh sách quá thời hạn tạm trú</h3>
+            <div class="table-container">
+                <table class="table-basic">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th style="text-align: center;">Trạng thái hoàn thành</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ttList">
+                        <!-- Dữ liệu mẫu -->
+                        <tr data-id="1">
+                            <td><strong>Nguyễn Văn C</strong></td>
+                            <td>12/05/2001</td>
+                            <td>01/11/2025</td>
+                            <td>15/11/2025</td>
+                            <td style="text-align: center;"><input type="checkbox" checked></td>
+                        </tr>
+                        <tr data-id="2">
+                            <td><strong>Lê Thị D</strong></td>
+                            <td>08/09/1995</td>
+                            <td>10/11/2025</td>
+                            <td>20/11/2025</td>
+                            <td style="text-align: center;"><input type="checkbox"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 </div>
@@ -49,4 +73,5 @@
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
+<link rel="stylesheet" href="{% static 'css/nhankhau.css' %}">
 {% endblock %}

@@ -159,21 +159,17 @@
         </div>
         <div class="modal-body">
             <form id="personForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Chọn hộ khẩu *</label>
-                        <select id="personHousehold" class="form-input" required>
-                            <option value="">-- Chọn hộ khẩu --</option>
-                            <option value="HK-001">HK-001 - Nguyễn Văn A</option>
-                            <option value="HK-002">HK-002 - Trần Thị B</option>
-                            <option value="HK-003">HK-003 - Lê Văn C</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="checkbox-inline">
-                            <input type="checkbox" id="personIsHead"> Là chủ hộ
-                        </label>
-                    </div>
+                <div class="form-group">
+                    <label>Chọn hộ khẩu *</label>
+                    <select id="personHousehold" class="form-input" required>
+                        <option value="">-- Chọn hộ khẩu --</option>
+                        <option value="HK-001">HK-001 - Nguyễn Văn A</option>
+                        <option value="HK-002">HK-002 - Trần Thị B</option>
+                        <option value="HK-003">HK-003 - Lê Văn C</option>
+                    </select>
+                    <small class="form-help" style="color: #f59e0b; font-style: italic;">
+                        <i class="fas fa-info-circle"></i> Lưu ý: Chủ hộ phải được tạo cùng hộ khẩu
+                    </small>
                 </div>
                 
                 <div class="form-row">
@@ -183,9 +179,9 @@
                                placeholder="Họ và tên đầy đủ" required>
                     </div>
                     <div class="form-group">
-                        <label>Tên thường gọi</label>
+                        <label>Bí danh</label>
                         <input type="text" id="personAlias" class="form-input" 
-                               placeholder="Tên thường gọi">
+                               placeholder="Tên khác, tên thường gọi...">
                     </div>
                 </div>
                 
@@ -200,43 +196,71 @@
                             <option value="">-- Chọn --</option>
                             <option value="M">Nam</option>
                             <option value="F">Nữ</option>
-                            <option value="O">Khác</option>
                         </select>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Quan hệ với chủ hộ</label>
-                        <select id="personRelation" class="form-input">
-                            <option value="">-- Chọn quan hệ --</option>
-                            <option value="Chủ hộ">Chủ hộ</option>
-                            <option value="Vợ/Chồng">Vợ/Chồng</option>
-                            <option value="Con">Con</option>
-                            <option value="Cha/Mẹ">Cha/Mẹ</option>
-                            <option value="Anh/Chị/Em">Anh/Chị/Em</option>
-                            <option value="Ông/Bà">Ông/Bà</option>
-                            <option value="Cháu">Cháu</option>
-                            <option value="Khác">Khác</option>
-                        </select>
+                        <label>Nơi sinh</label>
+                        <input type="text" id="personBirthPlace" class="form-input" 
+                               placeholder="Bệnh viện Hoàng Long, Hà Nội...">
                     </div>
+                    <div class="form-group">
+                        <label>Quê quán</label>
+                        <input type="text" id="personHometown" class="form-input" 
+                               placeholder="Xã Thanh Xuân, Huyện Soc Sơn, Tỉnh Bắc Kạn...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Quan hệ với chủ hộ</label>
+                    <input type="text" id="personRelation" class="form-input" 
+                           placeholder="Vợ/Chồng, Con, Cha/Mẹ, Anh/Chị/Em...">
+                </div>
+                
+                <div class="form-row">
                     <div class="form-group">
                         <label>Số CMND/CCCD</label>
                         <input type="text" id="personIdNumber" class="form-input" 
-                               placeholder="Số căn cước công dân">
+                               placeholder="001234567890" pattern="[0-9]{9,12}" maxlength="12">
+                    </div>
+                    <div class="form-group">
+                        <label>Ngày cấp CMND/CCCD</label>
+                        <input type="date" id="personIdIssueDate" class="form-input">
                     </div>
                 </div>
+                
+                <div class="form-group">
+                    <label>Nơi cấp CMND/CCCD</label>
+                    <input type="text" id="personIdIssuePlace" class="form-input" 
+                           placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư">
+                </div>
+                
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <h4 style="margin-bottom: 16px; color: #1f2937; font-size: 16px;">Thông tin đăng ký thường trú</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ngày đăng ký thường trú</label>
+                        <input type="date" id="personResidenceRegDate" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Địa chỉ nơi thường trú trước khi chuyển đến</label>
+                        <input type="text" id="personPreviousResidence" class="form-input" 
+                               placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
+                    </div>
+                </div>
+                
+                <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
+                
+                <h4 style="margin-bottom: 16px; color: #1f2937; font-size: 16px;">Thông tin khác</h4>
                 
                 <div class="form-group">
                     <label>Nghề nghiệp</label>
                     <input type="text" id="personOccupation" class="form-input" 
-                           placeholder="Nghề nghiệp hiện tại">
-                </div>
-                
-                <div class="form-group">
-                    <label>Ghi chú</label>
-                    <textarea id="personNotes" class="form-input" rows="3" 
-                              placeholder="Thông tin bổ sung"></textarea>
+                           placeholder="Kỹ sư, Giáo viên, Công nhân...">
                 </div>
             </form>
         </div>
@@ -316,7 +340,6 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn" onclick="closeViewModal()">Đóng</button>
             <button class="btn primary" onclick="editFromView()">Chỉnh sửa</button>
         </div>
     </div>
