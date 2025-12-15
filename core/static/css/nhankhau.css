@@ -409,6 +409,8 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    cursor: pointer;
+    text-decoration: none;
 }
 
 .table-basic .btn-sm:hover {

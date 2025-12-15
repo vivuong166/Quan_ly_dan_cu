@@ -25,7 +25,10 @@ urlpatterns = [
     path("qlhk_nk/hokhau/taohokhau/<str:household_id>/", views.taohokhau, name="taohokhau_edit"),
     path("qlhk_nk/nhankhau/", views.nhankhau, name="nhankhau"),
     path("qlhk_nk/nhankhau/themnk/", views.themnk, name="themnk"),
+    path("qlhk_nk/nhankhau/suank/<int:person_id>/", views.suank, name="suank"),
     path("biendong/", views.biendong, name="biendong"),
     path("login/", views.login_view, name="login"),
     path("formdoichuho/", views.formdoichuho, name="formdoichuho"),
+    path("404/", views.page_not_found, name="404"),
+
 ]

@@ -177,9 +177,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn-sm" onclick="viewPerson(${person.id})">
                         <i class="fas fa-eye"></i> Xem
                     </button>
-                    <button class="btn-sm" onclick="editPerson(${person.id})">
+                    <a href="/qlhk_nk/nhankhau/suank/${person.id}/" class="btn-sm">
                         <i class="fas fa-edit"></i> Sửa
-                    </button>
+                    </a>
                 </td>
             `;
             personList.appendChild(row);
