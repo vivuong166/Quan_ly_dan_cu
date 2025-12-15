@@ -119,9 +119,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <a href="/qlhk_nk/hokhau/suahk/${householdId}/" class="btn-sm">
                         <i class="fas fa-edit"></i> Sửa
                     </a>
-                    <button class="btn-sm" onclick="splitHousehold('${household.code}')">
-                        <i class="fas fa-split"></i> Tách hộ
-                    </button>
+                    <a href="/qlhk_nk/hokhau/tachhk/${householdId}/" class="btn-sm">
+                        <i class="fas fa-code-branch"></i> Tách hộ
+                    </a>
                 </td>
             `;
             householdList.appendChild(row);
