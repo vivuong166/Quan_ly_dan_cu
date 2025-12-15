@@ -131,9 +131,12 @@ document.addEventListener("DOMContentLoaded", function () {
         '<div class="no-results">Không tìm thấy nhân khẩu nào</div>';
     } else {
       results.forEach((person) => {
-        const resultItem = document.createElement("a");
+        const resultItem = document.createElement("div");
         resultItem.className = "res";
-        resultItem.href = `/nhan-khau/${person.id}/`;
+        resultItem.style.cursor = "pointer";
+        resultItem.onclick = function() {
+          showPersonDetail(person);
+        };
         resultItem.innerHTML = `
                     <div class="res-main">${person.full_name}</div>
                     <div class="res-sub">CCCD: ${person.id_number} | Hộ khẩu: ${person.household_code}</div>
@@ -173,3 +176,35 @@ document.addEventListener("DOMContentLoaded", function () {
   if (householdResults) householdResults.style.display = "none";
   if (personResults) personResults.style.display = "none";
 });
+
+// Show person detail modal
+function showPersonDetail(person) {
+  const modal = document.getElementById("personDetailModal");
+  
+  // Fill in the details
+  document.getElementById("detail-fullname").textContent = person.full_name || "N/A";
+  document.getElementById("detail-dob").textContent = person.dob || "N/A";
+  document.getElementById("detail-gender").textContent = person.gender === "M" ? "Nam" : person.gender === "F" ? "Nữ" : "Khác";
+  document.getElementById("detail-idnumber").textContent = person.id_number || "N/A";
+  document.getElementById("detail-household").textContent = person.household_code || "N/A";
+  document.getElementById("detail-relation").textContent = person.relation_to_head || "N/A";
+  document.getElementById("detail-occupation").textContent = person.occupation || "N/A";
+  document.getElementById("detail-ethnicity").textContent = person.ethnicity || "N/A";
+  
+  // Show modal
+  modal.style.display = "flex";
+}
+
+// Close person detail modal
+function closePersonDetailModal() {
+  const modal = document.getElementById("personDetailModal");
+  modal.style.display = "none";
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  const modal = document.getElementById("personDetailModal");
+  if (event.target === modal) {
+    closePersonDetailModal();
+  }
+};

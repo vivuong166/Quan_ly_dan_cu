@@ -39,7 +39,7 @@
       </div>
     </form>
 
-    <div id="hkResults" class="search-results">
+    <div id="hkResults" class="search-results" style="display: none;">
       <div class="results-header">Kết quả Hộ khẩu ({{ household_count }})</div>
       <div class="results-body">
         <ul>
@@ -74,7 +74,7 @@
       </div>
     </form>
 
-    <div id="nkResults" class="search-results">
+    <div id="nkResults" class="search-results" style="display: none;">
       <div class="results-header">Kết quả Nhân khẩu ({{ person_count }})</div>
       <div class="results-body">
         <ul>
@@ -92,6 +92,52 @@
   </div>
 </div>
 
+
+<!-- Modal hiển thị thông tin nhân khẩu -->
+<div id="personDetailModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3><i class="fas fa-user"></i> Thông tin Nhân khẩu</h3>
+      <span class="close" onclick="closePersonDetailModal()">&times;</span>
+    </div>
+    <div class="modal-body">
+      <div class="person-detail-grid">
+        <div class="detail-item">
+          <label>Họ và tên:</label>
+          <span id="detail-fullname"></span>
+        </div>
+        <div class="detail-item">
+          <label>Ngày sinh:</label>
+          <span id="detail-dob"></span>
+        </div>
+        <div class="detail-item">
+          <label>Giới tính:</label>
+          <span id="detail-gender"></span>
+        </div>
+        <div class="detail-item">
+          <label>CMND/CCCD:</label>
+          <span id="detail-idnumber"></span>
+        </div>
+        <div class="detail-item">
+          <label>Mã hộ khẩu:</label>
+          <span id="detail-household"></span>
+        </div>
+        <div class="detail-item">
+          <label>Quan hệ với chủ hộ:</label>
+          <span id="detail-relation"></span>
+        </div>
+        <div class="detail-item">
+          <label>Nghề nghiệp:</label>
+          <span id="detail-occupation"></span>
+        </div>
+        <div class="detail-item">
+          <label>Dân tộc:</label>
+          <span id="detail-ethnicity"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
   window.households = JSON.parse("{{ households_json|escapejs }}");

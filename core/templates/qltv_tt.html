@@ -1,16 +1,89 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Quản lý Tạm Vắng / Tạm Trú</h2>
-
-<div class="tvtt-buttons">
-  <a href="{% url 'tamvang' %}" class="btn-large">
-    <i class="fas fa-plane-departure"></i> Tạm vắng
-  </a>
-  <a href="{% url 'tamtru' %}" class="btn-large">
-    <i class="fas fa-user-clock"></i> Tạm trú
-  </a>
+<div class="page-header">
+    <h2 class="page-title">Quản Lý Tạm Trú - Tạm Vắng</h2>
 </div>
 
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <a class="action-card" href="{% url 'tamvang' %}">
+        <i class="fas fa-suitcase-rolling"></i>
+        <div class="action-content">
+            <h3>Tạm vắng</h3>
+            <p>Xem danh sách, thêm mới tạm vắng</p>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+    </a>
+    <a class="action-card" href="{% url 'tamtru' %}">
+        <i class="fas fa-user-clock"></i>
+        <div class="action-content">
+            <h3>Tạm trú</h3>
+            <p>Xem danh sách, thêm mới tạm trú</p>
+        </div>
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+
+<div class="search-panel">
+    <!-- Tìm kiếm Tạm vắng -->
+    <div class="search-block">
+        <form method="GET">
+            <label for="searchTamVang">
+                <i class="fas fa-suitcase-rolling"></i> Tìm Tạm vắng
+            </label>
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                    name="searchTamVang"
+                    id="searchTamVang"
+                    class="search-input"
+                    placeholder="Nhập họ tên / CMND/CCCD / ngày sinh"
+                    value="{{ searchTamVang }}"
+                />
+            </div>
+        </form>
+
+        <div id="tvResults" class="search-results" style="display: none;">
+            <div class="results-header">Kết quả Tạm vắng (0)</div>
+            <div class="results-body">
+                <ul>
+                    <li>Chưa có kết quả tìm kiếm</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tìm kiếm Tạm trú -->
+    <div class="search-block">
+        <form method="GET">
+            <label for="searchTamTru">
+                <i class="fas fa-user-clock"></i> Tìm Tạm trú
+            </label>
+            <div class="search-input-wrapper">
+                <i class="fas fa-search"></i>
+                <input
+                    name="searchTamTru"
+                    id="searchTamTru"
+                    class="search-input"
+                    placeholder="Nhập họ tên / CMND/CCCD / ngày sinh"
+                    value="{{ searchTamTru }}"
+                />
+            </div>
+        </form>
+
+        <div id="ttResults" class="search-results" style="display: none;">
+            <div class="results-header">Kết quả Tạm trú (0)</div>
+            <div class="results-body">
+                <ul>
+                    <li>Chưa có kết quả tìm kiếm</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'js/qltv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
+<link rel="stylesheet" href="{% static 'css/qlnk.css' %}">
 {% endblock %}

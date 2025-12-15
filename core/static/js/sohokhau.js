@@ -118,6 +118,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn-sm" onclick="editHousehold('${household.code}')">
                         <i class="fas fa-edit"></i> Sửa
                     </button>
+                    <button class="btn-sm" onclick="splitHousehold('${household.code}')">
+                        <i class="fas fa-split"></i> Tách hộ
+                    </button>
                 </td>
             `;
             householdList.appendChild(row);
@@ -763,3 +766,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
+
+// Global functions for household actions
+window.viewHousehold = function(householdCode) {
+    console.log('Xem hộ khẩu:', householdCode);
+    alert(`Xem chi tiết hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
+};
+
+window.editHousehold = function(householdCode) {
+    console.log('Sửa hộ khẩu:', householdCode);
+    alert(`Chỉnh sửa hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
+};
+
+window.splitHousehold = function(householdCode) {
+    console.log('Tách hộ khẩu:', householdCode);
+    if (confirm(`Bạn có chắc chắn muốn tách hộ khẩu ${householdCode}?\n\nThao tác này sẽ tạo ra một hộ khẩu mới từ các thành viên được chọn.`)) {
+        alert(`Tách hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
+        // TODO: Implement split household logic
+        // - Show modal to select members to split
+        // - Create new household with selected members
+        // - Update original household
+    }
+};
