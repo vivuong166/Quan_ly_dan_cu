@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     let currentStep = 1;
-    const totalSteps = 4;
+    const totalSteps = 3;
     
     // Initialize form
     initializeForm();
@@ -61,20 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Real-time summary updates
         const summaryFields = [
-            'householdCode', 'headFullName', 'creationDate', 
-            'headIdNumber', 'headOccupation'
+            'householdCode', 'headFullName', 'houseNumber', 'streetName'
         ];
         summaryFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.addEventListener('input', updateSummary);
-                field.addEventListener('change', updateSummary);
-            }
-        });
-        
-        // Address fields for summary
-        const addressFields = ['houseNumber', 'streetName', 'wardName'];
-        addressFields.forEach(fieldId => {
             const field = document.getElementById(fieldId);
             if (field) {
                 field.addEventListener('input', updateSummary);
@@ -108,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         updateFormNavigation();
         
         // Update summary when reaching final step
-        if (stepNumber === 4) {
+        if (stepNumber === 3) {
             updateSummary();
         }
     }
@@ -152,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         // Additional validation for specific steps
-        if (currentStep === 3) {
+        if (currentStep === 2) {
             const idNumber = document.getElementById('headIdNumber').value;
             if (idNumber && (idNumber.length < 9 || idNumber.length > 12)) {
                 isValid = false;
@@ -160,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        if (currentStep === 4) {
+        if (currentStep === 3) {
             const confirmCheckbox = document.getElementById('confirmInformation');
             if (!confirmCheckbox.checked) {
                 isValid = false;
@@ -183,43 +172,40 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateAddressPreview() {
         const houseNumber = document.getElementById('houseNumber').value.trim();
         const streetName = document.getElementById('streetName').value.trim();
-        const wardName = document.getElementById('wardName').value;
-        const districtName = document.getElementById('districtName').value;
-        const provinceName = document.getElementById('provinceName').value;
         
         const addressParts = [];
         if (houseNumber) addressParts.push(houseNumber);
         if (streetName) addressParts.push(streetName);
-        if (wardName) addressParts.push(wardName);
-        if (districtName) addressParts.push(districtName);
-        if (provinceName) addressParts.push(provinceName);
+        
+        // Always add fixed parts if any address entered
+        if (addressParts.length > 0) {
+            addressParts.push('Phường La Khê', 'Quận Hà Đông', 'Thành phố Hà Nội');
+        }
         
         const fullAddress = addressParts.length > 0 ? 
             addressParts.join(', ') : 
             'Chưa nhập đủ thông tin địa chỉ';
             
-        document.getElementById('fullAddress').textContent = fullAddress;
+        const addressDisplay = document.getElementById('fullAddress');
+        if (addressDisplay) {
+            addressDisplay.textContent = fullAddress;
+        }
     }
     
     function updateSummary() {
         // Update summary fields
-        const code = document.getElementById('householdCode').value.trim() || 'Tự động tạo';
+        const code = document.getElementById('householdCode').value.trim() || '-';
         const headName = document.getElementById('headFullName').value.trim() || '-';
-        const date = document.getElementById('creationDate').value || '-';
-        const idNumber = document.getElementById('headIdNumber').value.trim() || '-';
-        const occupation = document.getElementById('headOccupation').value.trim() || '-';
         
-        // Build address
+        // Build address - automatically add "Phường La Khê, Quận Hà Đông, Thành phố Hà Nội"
         const houseNumber = document.getElementById('houseNumber').value.trim();
         const streetName = document.getElementById('streetName').value.trim();
-        const wardName = document.getElementById('wardName').value;
         
         const addressParts = [];
         if (houseNumber) addressParts.push(houseNumber);
         if (streetName) addressParts.push(streetName);
-        if (wardName) addressParts.push(wardName);
         if (addressParts.length > 0) {
-            addressParts.push('Hà Đông', 'Hà Nội');
+            addressParts.push('Phường La Khê', 'Quận Hà Đông', 'Thành phố Hà Nội');
         }
         
         const address = addressParts.length > 0 ? addressParts.join(', ') : '-';
@@ -227,10 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update summary display
         document.getElementById('summaryCode').textContent = code;
         document.getElementById('summaryHeadName').textContent = headName;
-        document.getElementById('summaryDate').textContent = date;
         document.getElementById('summaryAddress').textContent = address;
-        document.getElementById('summaryIdNumber').textContent = idNumber;
-        document.getElementById('summaryOccupation').textContent = occupation;
     }
     
     function generateHouseholdCode() {
@@ -243,45 +226,39 @@ document.addEventListener('DOMContentLoaded', function() {
     function collectFormData() {
         const formData = {
             // Basic information
-            householdCode: document.getElementById('householdCode').value.trim() || generateHouseholdCode(),
+            householdCode: document.getElementById('householdCode').value.trim(),
             creationDate: document.getElementById('creationDate').value,
             creationReason: document.getElementById('creationReason').value,
             otherReason: document.getElementById('otherReason').value.trim(),
-            previousHousehold: document.getElementById('previousHousehold').value.trim(),
             
             // Address information
             houseNumber: document.getElementById('houseNumber').value.trim(),
             streetName: document.getElementById('streetName').value.trim(),
-            wardName: document.getElementById('wardName').value,
-            districtName: document.getElementById('districtName').value,
-            provinceName: document.getElementById('provinceName').value,
-            postalCode: document.getElementById('postalCode').value.trim(),
             
             // Head of household information
             headFullName: document.getElementById('headFullName').value.trim(),
             headAlias: document.getElementById('headAlias').value.trim(),
             headDob: document.getElementById('headDob').value,
             headGender: document.getElementById('headGender').value,
+            headBirthPlace: document.getElementById('headBirthPlace').value.trim(),
+            headHometown: document.getElementById('headHometown').value.trim(),
             headIdNumber: document.getElementById('headIdNumber').value.trim(),
             headIdIssueDate: document.getElementById('headIdIssueDate').value,
             headIdIssuePlace: document.getElementById('headIdIssuePlace').value.trim(),
+            headResidenceRegDate: document.getElementById('headResidenceRegDate').value,
+            headPreviousResidence: document.getElementById('headPreviousResidence').value.trim(),
             headOccupation: document.getElementById('headOccupation').value.trim(),
             headWorkplace: document.getElementById('headWorkplace').value.trim(),
             headEthnicity: document.getElementById('headEthnicity').value,
             headReligion: document.getElementById('headReligion').value,
-            headEducation: document.getElementById('headEducation').value,
-            
-            // Additional information
-            householdNotes: document.getElementById('householdNotes').value.trim()
+            headEducation: document.getElementById('headEducation').value
         };
         
-        // Build full address
+        // Build full address - automatically add fixed parts
         const addressParts = [];
         if (formData.houseNumber) addressParts.push(formData.houseNumber);
         if (formData.streetName) addressParts.push(formData.streetName);
-        if (formData.wardName) addressParts.push(formData.wardName);
-        if (formData.districtName) addressParts.push(formData.districtName);
-        if (formData.provinceName) addressParts.push(formData.provinceName);
+        addressParts.push('Phường La Khê', 'Quận Hà Đông', 'Thành phố Hà Nội');
         
         formData.fullAddress = addressParts.join(', ');
         

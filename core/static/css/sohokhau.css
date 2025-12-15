@@ -280,11 +280,11 @@
 
 /* Dashboard Panels Layout */
 .dashboard-panels {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 24px;
     margin-bottom: 24px;
-    align-items: start;
+    max-width: 100%;
 }
 
 /* Panel Styling */
@@ -394,6 +394,12 @@
     overflow-x: auto;
     border-radius: 8px;
     border: 1px solid #e9ecef;
+    max-width: 100%;
+}
+
+.table-basic {
+    width: 100%;
+    table-layout: auto;
 }
 
 .filter-row label {
@@ -711,6 +717,11 @@
     border-bottom: 2px solid #e5e7eb;
 }
 
+.table-basic thead th:last-child {
+    width: 200px;
+    text-align: center;
+}
+
 .table-basic tbody tr {
     transition: background-color 0.2s;
 }
@@ -723,6 +734,11 @@
     padding: 12px;
     border-bottom: 1px solid #f3f4f6;
     color: #1f2937;
+}
+
+.table-basic tbody td:last-child {
+    text-align: center;
+    white-space: nowrap;
 }
 
 .table-basic .btn-sm {

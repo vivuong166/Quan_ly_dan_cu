@@ -1,82 +1,12 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
-<h2>Quản Lý Nhân Khẩu</h2>
-
-<div class="search-panel">
-  <!-- Tìm kiếm Hộ khẩu -->
-  <form method="GET" class="search-block">
-    <label for="searchHoKhau">
-      <i class="fas fa-home"></i> Tìm Hộ khẩu / Chủ hộ
-    </label>
-    <div class="search-input-wrapper">
-      <i class="fas fa-search"></i>
-      <input
-        name="searchHoKhau"
-        id="searchHoKhau"
-        class="search-input"
-        placeholder="Nhập số hộ khẩu / tên chủ hộ / địa chỉ"
-        value="{{ searchHoKhau }}"
-      />
-    </div>
-    <button type="submit" class="btn">Tìm</button>
-  </form>
-
-  <div id="hkResults" class="search-results">
-    <div class="results-header">Kết quả Hộ khẩu ({{ household_count }})</div>
-    <div class="results-body">
-      <ul>
-        {% for h in households %}
-        <li>
-          {{ h.code }} - {{ h.head_name }} - {{ h.address }} ({{ h.person_count
-          }} người)
-        </li>
-        {% empty %}
-        <li>Không có kết quả</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <!-- Tìm kiếm Nhân khẩu -->
-  <form method="GET" class="search-block">
-    <label for="searchNhanKhau">
-      <i class="fas fa-user"></i> Tìm Nhân khẩu
-    </label>
-    <div class="search-input-wrapper">
-      <i class="fas fa-search"></i>
-      <input
-        name="search_nk"
-        id="searchNhanKhau"
-        class="search-input"
-        placeholder="Nhập họ tên / CMND/CCCD / ngày sinh"
-        value="{{ search_query_nk }}"
-      />
-    </div>
-    <button type="submit" class="btn">Tìm</button>
-  </form>
-
-  <div id="nkResults" class="search-results">
-    <div class="results-header">Kết quả Nhân khẩu ({{ person_count }})</div>
-    <div class="results-body">
-      <ul>
-        {% for p in persons %}
-        <li>
-          {{ p.full_name }} - {{ p.dob }} - {{ p.id_number }} - {{
-          p.household_code }}
-        </li>
-        {% empty %}
-        <li>Không có kết quả</li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-</div>
-
+<h2>Quản Lý Thông tin Hộ Khẩu - Nhân Khẩu</h2>
+<br>
 <!-- Quick Actions -->
 <div class="quick-actions">
   <a class="action-card" href="{% url 'sohokhau' %}">
     <i class="fas fa-book"></i>
     <div class="action-content">
-      <h3>Sổ hộ khẩu</h3>
+      <h3>Quản lý hộ khẩu</h3>
       <p>Xem danh sách, thêm mới, tách hộ</p>
     </div>
     <i class="fas fa-chevron-right"></i>
@@ -84,29 +14,85 @@
   <a class="action-card" href="{% url 'nhankhau' %}">
     <i class="fas fa-user-plus"></i>
     <div class="action-content">
-      <h3>Nhân khẩu</h3>
+      <h3>Quản lý nhân khẩu</h3>
       <p>Thêm mới, cập nhật thông tin</p>
     </div>
     <i class="fas fa-chevron-right"></i>
   </a>
-  <a class="action-card" href="{% url 'biendong' %}">
-    <i class="fas fa-exchange-alt"></i>
-    <div class="action-content">
-      <h3>Biến động</h3>
-      <p>Chuyển đi, qua đời, đổi chủ hộ</p>
+</div>
+<div class="search-panel">
+  <!-- Tìm kiếm Hộ khẩu -->
+  <div class="search-block">
+    <form method="GET">
+      <label for="searchHoKhau">
+        <i class="fas fa-home"></i> Tìm Hộ khẩu / Chủ hộ
+      </label>
+      <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input
+          name="searchHoKhau"
+          id="searchHoKhau"
+          class="search-input"
+          placeholder="Nhập số hộ khẩu / tên chủ hộ / địa chỉ"
+          value="{{ searchHoKhau }}"
+        />
+      </div>
+    </form>
+
+    <div id="hkResults" class="search-results">
+      <div class="results-header">Kết quả Hộ khẩu ({{ household_count }})</div>
+      <div class="results-body">
+        <ul>
+          {% for h in households %}
+          <li>
+            {{ h.code }} - {{ h.head_name }} - {{ h.address }} ({{ h.person_count
+            }} người)
+          </li>
+          {% empty %}
+          <li>Không có kết quả</li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
-    <i class="fas fa-chevron-right"></i>
-  </a>
+  </div>
+
+  <!-- Tìm kiếm Nhân khẩu -->
+  <div class="search-block">
+    <form method="GET">
+      <label for="searchNhanKhau">
+        <i class="fas fa-user"></i> Tìm Nhân khẩu
+      </label>
+      <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input
+          name="search_nk"
+          id="searchNhanKhau"
+          class="search-input"
+          placeholder="Nhập họ tên / CMND/CCCD / ngày sinh"
+          value="{{ search_query_nk }}"
+        />
+      </div>
+    </form>
+
+    <div id="nkResults" class="search-results">
+      <div class="results-header">Kết quả Nhân khẩu ({{ person_count }})</div>
+      <div class="results-body">
+        <ul>
+          {% for p in persons %}
+          <li>
+            {{ p.full_name }} - {{ p.dob }} - {{ p.id_number }} - {{
+            p.household_code }}
+          </li>
+          {% empty %}
+          <li>Không có kết quả</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- Sửa href formdoichuho tránh NoReverseMatch -->
-<div class="task-list">
-  <li>
-    <span class="task-icon"><i class="fas fa-crown"></i></span>
-    <span class="task-text">Đổi chủ hộ</span>
-    <a href="{% url 'formdoichuho' %}" class="task-action" onclick="showChangeHeadModal()">Thay đổi</a>
-  </li>
-</div>
+
 <script>
   window.households = JSON.parse("{{ households_json|escapejs }}");
   window.persons = JSON.parse("{{ persons_json|escapejs }}");

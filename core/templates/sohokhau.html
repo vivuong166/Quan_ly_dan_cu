@@ -2,7 +2,7 @@
 {% load static %}
 {% block content %}
 <div class="page-header">
-    <h2 class="page-title">Sổ hộ khẩu</h2>
+    <h2 class="page-title">Quản Lý Hộ Khẩu</h2>
     <div class="header-actions">
         <a href="{% url 'taohokhau' %}" class="btn primary" id="addHouseholdBtn">
             <i class="fas fa-plus"></i> Tạo hộ khẩu mới
@@ -14,17 +14,6 @@
 </div>
 <!-- Search Panel -->
 <div class="search-panel">
-    <div class="search-block">
-        <label for="searchHousehold">
-            <i class="fas fa-home"></i>
-            Tìm kiếm hộ khẩu
-        </label>
-        <div class="search-input-wrapper">
-            <i class="fas fa-search"></i>
-            <input id="searchHousehold" class="search-input" 
-                   placeholder="Nhập mã hộ khẩu, tên chủ hộ hoặc địa chỉ">
-        </div>
-    </div>
 
     <div class="search-block" id="advancedSearch" style="display: none;">
         <h3>Tìm kiếm nâng cao</h3>
@@ -62,7 +51,6 @@
                             <th>Mã hộ khẩu</th>
                             <th>Chủ hộ</th>
                             <th>Địa chỉ</th>
-                            <th>Số nhân khẩu</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -72,7 +60,6 @@
                             <td><strong>HK-001</strong></td>
                             <td>Nguyễn Văn A</td>
                             <td>Số 12, Đường X, La Khê</td>
-                            <td>4 người</td>
                             <td>
                                 <button class="btn-sm" onclick="viewHousehold('HK-001')">
                                     <i class="fas fa-eye"></i> Xem
@@ -80,16 +67,12 @@
                                 <button class="btn-sm" onclick="editHousehold('HK-001')">
                                     <i class="fas fa-edit"></i> Sửa
                                 </button>
-                                <button class="btn-sm" onclick="changeHouseholdHead('HK-001')">
-                                    <i class="fas fa-crown"></i> Đổi chủ hộ
-                                </button>
                             </td>
                         </tr>
                         <tr>
                             <td><strong>HK-002</strong></td>
                             <td>Trần Thị B</td>
                             <td>Số 34, Ngõ Y, La Khê</td>
-                            <td>3 người</td>
                             <td>
                                 <button class="btn-sm" onclick="viewHousehold('HK-002')">
                                     <i class="fas fa-eye"></i> Xem
@@ -97,25 +80,18 @@
                                 <button class="btn-sm" onclick="editHousehold('HK-002')">
                                     <i class="fas fa-edit"></i> Sửa
                                 </button>
-                                <button class="btn-sm" onclick="changeHouseholdHead('HK-002')">
-                                    <i class="fas fa-crown"></i> Đổi chủ hộ
-                                </button>
                             </td>
                         </tr>
                         <tr>
                             <td><strong>HK-003</strong></td>
                             <td>Lê Văn C</td>
                             <td>Số 56, Phố Z, La Khê</td>
-                            <td>5 người</td>
                             <td>
                                 <button class="btn-sm" onclick="viewHousehold('HK-003')">
                                     <i class="fas fa-eye"></i> Xem
                                 </button>
                                 <button class="btn-sm" onclick="editHousehold('HK-003')">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
-                                <button class="btn-sm" onclick="changeHouseholdHead('HK-003')">
-                                    <i class="fas fa-crown"></i> Đổi chủ hộ
                                 </button>
                             </td>
                         </tr>
@@ -125,260 +101,6 @@
         </div>
     </div>
 
-    <!-- Quick Actions Panel -->
-    <div class="panel">
-        <div class="panel-header">
-            <h3><i class="fas fa-tasks"></i> Thao tác nhanh</h3>
-        </div>
-        <div class="panel-body">
-            <ul class="task-list">
-                <li>
-                    <span class="task-icon"><i class="fas fa-plus"></i></span>
-                    <span class="task-text">Tạo hộ khẩu mới</span>
-                    <a href="{% url 'taohokhau' %}" class="task-action">Thêm</a>
-                </li>
-                <li>
-                    <span class="task-icon"><i class="fas fa-user-plus"></i></span>
-                    <span class="task-text">Thêm nhân khẩu</span>
-                    <a href="{% url 'themnk' %}" class="task-action" onclick="showAddPersonForm()">Thêm</a>
-                </li>
-                <li>
-                    <span class="task-icon"><i class="fas fa-crown"></i></span>
-                    <span class="task-text">Đổi chủ hộ</span>
-                    <a href="{% url 'formdoichuho' %}" class="task-action" onclick="showChangeHeadModal()">Thay đổi</a>
-                </li>
-                <li>
-                    <span class="task-icon"><i class="fas fa-exchange-alt"></i></span>
-                    <span class="task-text">Chuyển hộ khẩu</span>
-                    <a href="#" class="task-action">Xử lý</a>
-                </li>
-                <li>
-                    <span class="task-icon"><i class="fas fa-file-export"></i></span>
-                    <span class="task-text">Xuất danh sách</span>
-                    <a href="#" class="task-action" onclick="exportHouseholds()">Xuất</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</div>
-
-<!-- Household History Section -->
-<div class="history-section">
-    <div class="section-header">
-        <h2><i class="fas fa-history"></i> Lịch sử thay đổi hộ khẩu</h2>
-        <div class="header-actions">
-            <button class="btn" id="refreshHistoryBtn" onclick="refreshHistory()">
-                <i class="fas fa-sync-alt"></i> Làm mới
-            </button>
-            <button class="btn secondary" id="exportHistoryBtn" onclick="exportHistory()">
-                <i class="fas fa-download"></i> Xuất báo cáo
-            </button>
-        </div>
-    </div>
-
-    <!-- History Filters -->
-    <div class="history-filters">
-        <div class="filter-row">
-            <div class="filter-group">
-                <label for="historyDateFrom">Từ ngày:</label>
-                <input type="date" id="historyDateFrom" class="form-input">
-            </div>
-            <div class="filter-group">
-                <label for="historyDateTo">Đến ngày:</label>
-                <input type="date" id="historyDateTo" class="form-input">
-            </div>
-            <div class="filter-group">
-                <label for="historyAction">Loại thao tác:</label>
-                <select id="historyAction" class="form-input">
-                    <option value="">-- Tất cả --</option>
-                    <option value="CREATE">Tạo mới</option>
-                    <option value="UPDATE">Cập nhật</option>
-                    <option value="SPLIT">Tách hộ</option>
-                    <option value="MERGE">Nhập hộ</option>
-                    <option value="TRANSFER">Chuyển hộ</option>
-                    <option value="DELETE">Xóa hộ</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label for="historyHousehold">Mã hộ khẩu:</label>
-                <input type="text" id="historyHousehold" class="form-input" 
-                       placeholder="HK-001">
-            </div>
-            <div class="filter-actions">
-                <button class="btn primary" onclick="applyHistoryFilters()">
-                    <i class="fas fa-search"></i> Tìm kiếm
-                </button>
-                <button class="btn" onclick="clearHistoryFilters()">
-                    <i class="fas fa-times"></i> Xóa bộ lọc
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- History Timeline -->
-    <div class="history-content">
-        <div class="history-timeline" id="historyTimeline">
-            <!-- Sample History Items -->
-            <div class="timeline-item">
-                <div class="timeline-marker create">
-                    <i class="fas fa-plus"></i>
-                </div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <h4>Tạo hộ khẩu mới</h4>
-                        <span class="timeline-date">24/11/2025 - 14:30</span>
-                    </div>
-                    <div class="timeline-details">
-                        <div class="detail-row">
-                            <span class="label">Mã hộ khẩu:</span>
-                            <span class="value">HK-2025001</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Chủ hộ:</span>
-                            <span class="value">Nguyễn Văn An</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Địa chỉ:</span>
-                            <span class="value">Số 123, Đường ABC, La Khê, Hà Đông, Hà Nội</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Người thực hiện:</span>
-                            <span class="value">Admin - Nguyễn Thị Mai</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker update">
-                    <i class="fas fa-edit"></i>
-                </div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <h4>Cập nhật thông tin hộ khẩu</h4>
-                        <span class="timeline-date">23/11/2025 - 10:15</span>
-                    </div>
-                    <div class="timeline-details">
-                        <div class="detail-row">
-                            <span class="label">Mã hộ khẩu:</span>
-                            <span class="value">HK-001</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Thay đổi:</span>
-                            <span class="value">Cập nhật địa chỉ thường trú</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Từ:</span>
-                            <span class="value">Số 12, Đường X, La Khê</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Thành:</span>
-                            <span class="value">Số 15, Đường Y, La Khê, Hà Đông, Hà Nội</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Người thực hiện:</span>
-                            <span class="value">Admin - Nguyễn Thị Mai</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker split">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <h4>Tách hộ khẩu</h4>
-                        <span class="timeline-date">22/11/2025 - 16:45</span>
-                    </div>
-                    <div class="timeline-details">
-                        <div class="detail-row">
-                            <span class="label">Hộ gốc:</span>
-                            <span class="value">HK-002 - Trần Thị B</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Hộ mới:</span>
-                            <span class="value">HK-2025002 - Trần Văn Nam</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Lý do:</span>
-                            <span class="value">Kết hôn lập gia đình riêng</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Thành viên tách:</span>
-                            <span class="value">2 người (Trần Văn Nam, Nguyễn Thị Lan)</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Người thực hiện:</span>
-                            <span class="value">Admin - Nguyễn Thị Mai</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-marker transfer">
-                    <i class="fas fa-exchange-alt"></i>
-                </div>
-                <div class="timeline-content">
-                    <div class="timeline-header">
-                        <h4>Chuyển hộ khẩu</h4>
-                        <span class="timeline-date">20/11/2025 - 09:20</span>
-                    </div>
-                    <div class="timeline-details">
-                        <div class="detail-row">
-                            <span class="label">Mã hộ khẩu:</span>
-                            <span class="value">HK-003</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Từ địa phương:</span>
-                            <span class="value">Huyện Thạch Thất, Hà Nội</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Đến địa phương:</span>
-                            <span class="value">Quận Hà Đông, Hà Nội</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Lý do:</span>
-                            <span class="value">Chuyển công tác</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">Người thực hiện:</span>
-                            <span class="value">Admin - Nguyễn Thị Mai</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="history-pagination">
-            <div class="pagination-info">
-                Hiển thị <span id="historyStart">1</span> - <span id="historyEnd">10</span> 
-                trong tổng số <span id="historyTotal">25</span> bản ghi
-            </div>
-            <div class="pagination-controls">
-                <button class="btn" id="historyFirstBtn" onclick="goToHistoryPage(1)">
-                    <i class="fas fa-angle-double-left"></i>
-                </button>
-                <button class="btn" id="historyPrevBtn" onclick="goToPreviousHistoryPage()">
-                    <i class="fas fa-angle-left"></i> Trước
-                </button>
-                <div class="page-numbers">
-                    <button class="btn active" onclick="goToHistoryPage(1)">1</button>
-                    <button class="btn" onclick="goToHistoryPage(2)">2</button>
-                    <button class="btn" onclick="goToHistoryPage(3)">3</button>
-                </div>
-                <button class="btn" id="historyNextBtn" onclick="goToNextHistoryPage()">
-                    Sau <i class="fas fa-angle-right"></i>
-                </button>
-                <button class="btn" id="historyLastBtn" onclick="goToHistoryPage(3)">
-                    <i class="fas fa-angle-double-right"></i>
-                </button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Modal for Adding/Editing Household -->
