@@ -322,6 +322,12 @@ def themnk(request):
 def suank(request, person_id):
     return render(request, "form_sua_nk.html", {"person_id": person_id})
 
+def suahk(request, household_id):
+    return render(request, "form_sua_hk.html", {"household_id": household_id})
+
+def chitiet_hk(request, household_id):
+    return render(request, "chitiet_hk.html", {"household_id": household_id})
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
 from django.contrib import messages

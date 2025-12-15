@@ -105,19 +105,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateHouseholdList() {
         householdList.innerHTML = '';
         
-        filteredHouseholds.forEach(household => {
+        filteredHouseholds.forEach((household, index) => {
+            const householdId = index + 1; // Use index + 1 as ID
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td><strong>${household.code}</strong></td>
                 <td>${household.head_name}</td>
                 <td>${household.address}</td>
                 <td>
-                    <button class="btn-sm" onclick="viewHousehold('${household.code}')">
+                    <a href="/qlhk_nk/hokhau/chitiet/${householdId}/" class="btn-sm">
                         <i class="fas fa-eye"></i> Xem
-                    </button>
-                    <button class="btn-sm" onclick="editHousehold('${household.code}')">
+                    </a>
+                    <a href="/qlhk_nk/hokhau/suahk/${householdId}/" class="btn-sm">
                         <i class="fas fa-edit"></i> Sửa
-                    </button>
+                    </a>
                     <button class="btn-sm" onclick="splitHousehold('${household.code}')">
                         <i class="fas fa-split"></i> Tách hộ
                     </button>

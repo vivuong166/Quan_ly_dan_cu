@@ -61,12 +61,12 @@
                             <td>Nguyễn Văn A</td>
                             <td>Số 12, Đường X, La Khê</td>
                             <td>
-                                <button class="btn-sm" onclick="viewHousehold('HK-001')">
+                                <a href="{% url 'chitiet_hk' 1 %}" class="btn-sm">
                                     <i class="fas fa-eye"></i> Xem
-                                </button>
-                                <button class="btn-sm" onclick="editHousehold('HK-001')">
+                                </a>
+                                <a href="{% url 'suahk' 1 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                                 <button class="btn-sm" onclick="splitHousehold('HK-001')">
                                     <i class="fas fa-split"></i> Tách hộ
                                 </button>
@@ -77,12 +77,12 @@
                             <td>Trần Thị B</td>
                             <td>Số 34, Ngõ Y, La Khê</td>
                             <td>
-                                <button class="btn-sm" onclick="viewHousehold('HK-002')">
+                                <a href="{% url 'chitiet_hk' 2 %}" class="btn-sm">
                                     <i class="fas fa-eye"></i> Xem
-                                </button>
-                                <button class="btn-sm" onclick="editHousehold('HK-002')">
+                                </a>
+                                <a href="{% url 'suahk' 2 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                                 <button class="btn-sm" onclick="splitHousehold('HK-002')">
                                     <i class="fas fa-split"></i> Tách hộ
                                 </button>
@@ -93,12 +93,12 @@
                             <td>Lê Văn C</td>
                             <td>Số 56, Phố Z, La Khê</td>
                             <td>
-                                <button class="btn-sm" onclick="viewHousehold('HK-003')">
+                                <a href="{% url 'chitiet_hk' 3 %}" class="btn-sm">
                                     <i class="fas fa-eye"></i> Xem
-                                </button>
-                                <button class="btn-sm" onclick="editHousehold('HK-003')">
+                                </a>
+                                <a href="{% url 'suahk' 3 %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
-                                </button>
+                                </a>
                                 <button class="btn-sm" onclick="splitHousehold('HK-003')">
                                     <i class="fas fa-split"></i> Tách hộ
                                 </button>
