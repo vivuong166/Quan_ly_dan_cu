@@ -204,12 +204,8 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     }
 
-    // Print functionality - removed per user request
-    // const printFeeBtn = document.getElementById('printFee');
-
     // Donation functionality placeholder
     const addDonationBtn = document.getElementById('addDonation');
-    const printDonationBtn = document.getElementById('printDonation');
     
     if (addDonationBtn) {
         addDonationBtn.addEventListener('click', function(){
@@ -241,9 +237,6 @@ document.addEventListener('DOMContentLoaded', function(){
             
             const formattedAmount = parseInt(donationAmount).toLocaleString('vi-VN') + 'đ';
             
-            // Update donation statistics
-            updateDonationStatistics(donationType, parseInt(donationAmount));
-            
             alert(`Đã ghi nhận đóng góp:\n` +
                   `- Đợt: ${campaignName}\n` +
                   `- Hộ gia đình: ${householdInfo}\n` +
@@ -253,12 +246,6 @@ document.addEventListener('DOMContentLoaded', function(){
             document.getElementById('donationType').value = '';
             document.getElementById('donationHousehold').value = '';
             document.getElementById('donationAmount').value = '';
-        });
-    }
-    
-    if (printDonationBtn) {
-        printDonationBtn.addEventListener('click', function(){
-            alert('Chức năng in biên nhận đang được phát triển!');
         });
     }
 });
@@ -297,37 +284,6 @@ function handleFeeAction(btn, householdId, year) {
     }, 150);
 }
 
-// Global function for status toggling - kept for backward compatibility
-function toggleStatus(statusElement) {
-    const isPaid = statusElement.classList.contains('paid');
-    
-    if (isPaid) {
-        // Change from "Đã thu" to "Chưa thu"
-        statusElement.classList.remove('paid');
-        statusElement.classList.add('unpaid');
-        statusElement.textContent = 'Chưa thu';
-    } else {
-        // Change from "Chưa thu" to "Đã thu"
-        statusElement.classList.remove('unpaid');
-        statusElement.classList.add('paid');
-        statusElement.textContent = 'Đã thu';
-    }
-    
-    // Visual feedback
-    statusElement.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-        statusElement.style.transform = 'scale(1)';
-    }, 150);
-    
-    // Optional: Show notification
-    const status = statusElement.textContent;
-    const row = statusElement.closest('tr');
-    const houseId = row.cells[0].textContent;
-    const chuHo = row.cells[1].textContent;
-    
-    console.log(`Cập nhật trạng thái: ${houseId} (${chuHo}) - ${status}`);
-}
-
 // Modal functions
 function showCreateCampaignModal() {
     const modal = document.getElementById('createCampaignModal');
@@ -339,7 +295,6 @@ function showCreateCampaignModal() {
         
         document.getElementById('startDate').value = today;
         document.getElementById('endDate').value = nextWeek;
-        document.getElementById('campaignStatus').value = 'planned';
     }
 }
 
@@ -392,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Validate required fields
             if (!campaignData.campaignName || !campaignData.startDate || 
-                !campaignData.endDate || !campaignData.campaignType) {
+                !campaignData.endDate) {
                 alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
                 return;
             }
@@ -409,8 +364,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Process the campaign creation
             console.log('Tạo đợt đóng góp:', campaignData);
             
-            // Add to the donation list (mock)
-            addCampaignToList(campaignData);
+            // Add campaign to dropdown
+            const donationTypeSelect = document.getElementById('donationType');
+            if (donationTypeSelect) {
+                const campaignId = campaignData.campaignName.toLowerCase().replace(/\s+/g, '_');
+                const option = document.createElement('option');
+                option.value = campaignId;
+                option.textContent = campaignData.campaignName;
+                donationTypeSelect.appendChild(option);
+            }
             
             alert('Tạo đợt đóng góp thành công!');
             closeCreateCampaignModal();
@@ -418,103 +380,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function addCampaignToList(campaignData) {
-    const donationList = document.getElementById('donationList');
-    if (!donationList) return;
-    
-    const tr = document.createElement('tr');
-    const targetAmount = campaignData.targetAmount ? 
-        parseInt(campaignData.targetAmount).toLocaleString('vi-VN') + 'đ' : 
-        'Không giới hạn';
-    
-    // Set data attribute for tracking
-    const campaignId = campaignData.campaignName.toLowerCase().replace(/\s+/g, '_');
-    tr.setAttribute('data-campaign-id', campaignId);
-    
-    tr.innerHTML = `
-        <td>${campaignData.campaignName}</td>
-        <td>0 hộ</td>
-        <td>0đ / ${targetAmount}</td>
-        <td><button class="btn-sm" onclick="showCampaignDetails('${campaignId}')">Chi tiết</button></td>
-    `;
-    
-    // Insert at the beginning of the list
-    donationList.insertBefore(tr, donationList.firstChild);
-    
-    // Add to dropdown selection
-    const donationTypeSelect = document.getElementById('donationType');
-    if (donationTypeSelect) {
-        const option = document.createElement('option');
-        option.value = campaignId;
-        option.textContent = campaignData.campaignName;
-        donationTypeSelect.appendChild(option);
-    }
-}
-
-// Function to update donation statistics in the table
-function updateDonationStatistics(campaignId, amount) {
-    const donationList = document.getElementById('donationList');
-    if (!donationList) return;
-    
-    // Find the row for this campaign by data-campaign-id or by matching name
-    let campaignRow = null;
-    const rows = donationList.getElementsByTagName('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        
-        // First check by data attribute
-        if (row.getAttribute('data-campaign-id') === campaignId) {
-            campaignRow = row;
-            break;
-        }
-        
-        // Fallback: check by campaign name matching
-        const campaignCell = row.cells[0];
-        if (campaignCell) {
-            const campaignOption = document.querySelector(`#donationType option[value="${campaignId}"]`);
-            const campaignName = campaignOption ? campaignOption.textContent : '';
-            
-            if (campaignCell.textContent === campaignName) {
-                campaignRow = row;
-                // Set data attribute for future updates
-                row.setAttribute('data-campaign-id', campaignId);
-                break;
-            }
-        }
-    }
-    
-    if (campaignRow) {
-        // Update existing campaign
-        const participantsCell = campaignRow.cells[1];
-        const amountCell = campaignRow.cells[2];
-        
-        // Extract current numbers
-        const currentParticipants = parseInt(participantsCell.textContent.replace(/\D/g, '')) || 0;
-        const currentAmountText = amountCell.textContent.split('/')[0].trim();
-        const currentAmount = parseInt(currentAmountText.replace(/\D/g, '')) || 0;
-        
-        // Update with new values
-        const newParticipants = currentParticipants + 1;
-        const newAmount = currentAmount + amount;
-        
-        participantsCell.textContent = `${newParticipants} hộ`;
-        
-        // Keep target amount if it exists
-        const targetPart = amountCell.textContent.includes('/') ? 
-            ' / ' + amountCell.textContent.split('/')[1].trim() : '';
-        
-        amountCell.textContent = newAmount.toLocaleString('vi-VN') + 'đ' + targetPart;
-        
-        // Visual feedback
-        campaignRow.style.backgroundColor = '#e8f5e8';
-        setTimeout(() => {
-            campaignRow.style.backgroundColor = '';
-        }, 2000);
-    }
-}
-
-// Function to show campaign details (placeholder)
-function showCampaignDetails(campaignId) {
-    alert(`Chi tiết đợt đóng góp: ${campaignId}\n\nChức năng đang được phát triển!`);
-}

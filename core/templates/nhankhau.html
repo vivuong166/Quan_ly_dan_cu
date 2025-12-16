@@ -7,49 +7,6 @@
         <a href="{% url 'themnk' %}" class="btn primary" id="addPersonBtn">
             <i class="fas fa-user-plus"></i> Thêm nhân khẩu
         </a>
-        <button class="btn" id="advancedSearchBtn">
-            <i class="fas fa-filter"></i> Tìm kiếm nâng cao
-        </button>
-    </div>
-</div>
-
-<!-- Search Panel -->
-<div class="search-panel">
-
-
-    <div class="search-block" id="advancedSearch">
-        <h3>Tìm kiếm nâng cao</h3>
-        <div class="filter-row">
-            <label>Họ và tên
-                <input type="text" id="filterFullName" placeholder="Nguyễn Văn A">
-            </label>
-            <label>CMND/CCCD
-                <input type="text" id="filterIdNumber" placeholder="012345678">
-            </label>
-            <label>Mã hộ khẩu
-                <input type="text" id="filterHouseholdCode" placeholder="HK-001">
-            </label>
-        </div>
-        <div class="filter-row">
-            <label>Giới tính
-                <select id="filterGender">
-                    <option value="">-- Tất cả --</option>
-                    <option value="M">Nam</option>
-                    <option value="F">Nữ</option>
-                    <option value="O">Khác</option>
-                </select>
-            </label>
-            <label>Tuổi từ
-                <input type="number" id="filterAgeFrom" placeholder="18" min="0" max="120">
-            </label>
-            <label>Tuổi đến
-                <input type="number" id="filterAgeTo" placeholder="65" min="0" max="120">
-            </label>
-        </div>
-        <div class="actions">
-            <button class="btn primary" id="applyFilters">Áp dụng</button>
-            <button class="btn" id="clearFilters">Xóa bộ lọc</button>
-        </div>
     </div>
 </div>
 

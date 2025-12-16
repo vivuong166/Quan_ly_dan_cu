@@ -66,16 +66,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DOM elements
     const searchInput = document.getElementById('searchPerson');
-    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
-    const advancedSearch = document.getElementById('advancedSearch');
     const addPersonBtn = document.getElementById('addPersonBtn');
     const exportBtn = document.getElementById('exportBtn');
     const personModal = document.getElementById('personModal');
     const viewPersonModal = document.getElementById('viewPersonModal');
     const personList = document.getElementById('personList');
     const personCount = document.getElementById('personCount');
-    const applyFiltersBtn = document.getElementById('applyFilters');
-    const clearFiltersBtn = document.getElementById('clearFilters');
 
     // Initialize
     updatePersonList();
@@ -86,23 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchInput) {
         searchInput.addEventListener('input', handleSearch);
     }
-    advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', applyAdvancedFilters);
-    }
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', clearAdvancedFilters);
-    }
     if (addPersonBtn) {
         addPersonBtn.addEventListener('click', showAddPersonForm);
     }
     if (exportBtn) {
         exportBtn.addEventListener('click', exportPersons);
     }
-    
-    // Filter inputs
-    document.getElementById('applyFilters').addEventListener('click', applyAdvancedFilters);
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
 
     function handleSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -119,59 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.classList.contains('show');
-        if (isVisible) {
-            advancedSearch.classList.remove('show');
-        } else {
-            advancedSearch.classList.add('show');
-        }
-        advancedSearchBtn.innerHTML = isVisible ? 
-            '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
-            '<i class="fas fa-times"></i> Đóng tìm kiếm';
-    }
-
-    function applyAdvancedFilters() {
-        const nameFilter = document.getElementById('filterFullName').value.toLowerCase();
-        const idFilter = document.getElementById('filterIdNumber').value.toLowerCase();
-        const householdFilter = document.getElementById('filterHouseholdCode').value.toLowerCase();
-        const genderFilter = document.getElementById('filterGender').value;
-        const ageFromFilter = parseInt(document.getElementById('filterAgeFrom').value) || 0;
-        const ageToFilter = parseInt(document.getElementById('filterAgeTo').value) || 999;
-
-        filteredPersons = persons.filter(person => {
-            const age = calculateAge(person.dob);
-            
-            return (!nameFilter || person.full_name.toLowerCase().includes(nameFilter)) &&
-                   (!idFilter || person.id_number.toLowerCase().includes(idFilter)) &&
-                   (!householdFilter || person.household.code.toLowerCase().includes(householdFilter)) &&
-                   (!genderFilter || person.gender === genderFilter) &&
-                   (age >= ageFromFilter && age <= ageToFilter);
-        });
-
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function clearAdvancedFilters() {
-        document.getElementById('filterFullName').value = '';
-        document.getElementById('filterIdNumber').value = '';
-        document.getElementById('filterHouseholdCode').value = '';
-        document.getElementById('filterGender').value = '';
-        document.getElementById('filterAgeFrom').value = '';
-        document.getElementById('filterAgeTo').value = '';
-        if (searchInput) {
-            searchInput.value = '';
-        }
-        filteredPersons = [...persons];
         currentPage = 1;
         updatePersonList();
         updateStatistics();

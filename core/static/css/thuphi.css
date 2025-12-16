@@ -84,10 +84,6 @@
     margin-top: 20px;
 }
 
-.list-header {
-    margin-bottom: 15px;
-}
-
 .filter-row {
     display: flex;
     align-items: center;
@@ -140,10 +136,6 @@
     text-decoration: none;
 }
 
-.btn-icon {
-    font-size: 14px;
-}
-
 .btn.primary {
     background-color: #0b57d0;
     color: white;
@@ -157,20 +149,6 @@
 }
 
 .btn:hover {
-    opacity: 0.9;
-}
-
-.btn-sm {
-    padding: 6px 12px;
-    font-size: 12px;
-    background-color: #6c757d;
-    color: white;
-    border: 1px solid #6c757d;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn-sm:hover {
     opacity: 0.9;
 }
 
@@ -211,11 +189,6 @@
     font-size: 12px;
     font-weight: 500;
     border: 1px solid transparent;
-}
-
-.status.clickable {
-    cursor: pointer;
-    user-select: none;
 }
 
 .status.paid {

@@ -214,28 +214,6 @@
     font-style: italic;
 }
 
-/* Address Preview */
-.address-preview {
-    margin-top: 24px;
-    padding: 16px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-}
-
-.address-preview h4 {
-    margin: 0 0 8px 0;
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-}
-
-.address-display {
-    font-size: 16px;
-    color: #1f2937;
-    font-weight: 500;
-}
-
 /* Summary Preview */
 .summary-preview {
     background: #f8fafc;
