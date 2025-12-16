@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<h2>Quản Lý Thu Phí & Đóng Góp</h2>
+<h2>Quản Lý Thu Phí - Đóng Góp</h2>
 
 <div class="fee-tabs">
     <button class="tab-btn active" data-tab="fee">Thu phí vệ sinh</button>
@@ -17,14 +17,25 @@
     <!-- Thu phí vệ sinh -->
     <section id="tab-fee" class="fee-panel active">
         <div class="fee-form">
+            <div class="row">
+                <label>Chọn năm lập phiếu</label>
+                <select id="feeYear">
+                    <option value="">-- Chọn năm --</option>
+                </select>
+            </div>
             <div class="form-actions">
                 <button type="button" id="addFee" class="btn primary">Lập phiếu thu</button>
-                <button type="button" id="printFee" class="btn">In phiếu thu</button>
             </div>
         </div>
 
         <div class="list-panel">
             <h3>Phiếu thu gần đây</h3>
+            <div class="filter-row">
+                <label>Lọc theo năm:</label>
+                <select id="filterYear">
+                    <option value="">-- Tất cả --</option>
+                </select>
+            </div>
             <div class="table-container">
                 <table class="fee-table">
                     <thead>
@@ -32,9 +43,10 @@
                             <th>Số hộ khẩu</th>
                             <th>Chủ hộ</th>
                             <th>Số nhân khẩu</th>
-                            <th>Tháng</th>
+                            <th>Năm</th>
                             <th>Số tiền</th>
                             <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="feeList">
@@ -42,9 +54,10 @@
                             <td>HK-001</td>
                             <td>Nguyễn Văn A</td>
                             <td>4</td>
-                            <td>10/2025</td>
+                            <td>2025</td>
                             <td>24.000đ</td>
-                            <td><span class="status paid clickable" onclick="toggleStatus(this)">Đã thu</span></td>
+                            <td><span class="status paid">Đã thu</span></td>
+                            <td><button class="btn-action" onclick="handleFeeAction(this, 'HK-001', 2025)">Hoàn tác</button></td>
                         </tr>
                     </tbody>
                 </table>
@@ -87,33 +100,9 @@
             </div>
             <div class="form-actions">
                 <button type="button" id="addDonation" class="btn primary">Ghi nhận</button>
-                <button type="button" id="printDonation" class="btn">In biên nhận</button>
             </div>
         </div>
 
-        <div class="list-panel">
-            <h3>Thống kê đóng góp</h3>
-            <div class="table-container">
-                <table class="fee-table">
-                    <thead>
-                        <tr>
-                            <th>Đợt đóng góp</th>
-                            <th>Số hộ tham gia</th>
-                            <th>Tổng số tiền</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody id="donationList">
-                        <tr data-campaign-id="default1">
-                            <td>Ủng hộ ngày thương binh-liệt sỹ 27/07</td>
-                            <td>125 hộ</td>
-                            <td>12.500.000đ</td>
-                            <td><button class="btn-sm" onclick="showCampaignDetails('default1')">Chi tiết</button></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </section>
 </div>
 
@@ -131,11 +120,6 @@
                     <input type="text" id="campaignName" name="campaignName" required>
                 </div>
                 
-                <div class="form-group">
-                    <label for="campaignDescription">Mô tả</label>
-                    <textarea id="campaignDescription" name="campaignDescription" rows="3"></textarea>
-                </div>
-                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="startDate">Ngày bắt đầu *</label>
@@ -144,23 +128,6 @@
                     <div class="form-group">
                         <label for="endDate">Ngày kết thúc *</label>
                         <input type="date" id="endDate" name="endDate" required>
-                    </div>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="targetAmount">Số tiền mục tiêu</label>
-                        <input type="number" id="targetAmount" name="targetAmount" min="0" step="1000">
-                    </div>
-                    <div class="form-group">
-                        <label for="campaignType">Loại đóng góp *</label>
-                        <select id="campaignType" name="campaignType" required>
-                            <option value="">-- Chọn loại --</option>
-                            <option value="voluntary">Tự nguyện</option>
-                            <option value="mandatory">Bắt buộc</option>
-                            <option value="event">Sự kiện</option>
-                            <option value="charity">Từ thiện</option>
-                        </select>
                     </div>
                 </div>
             </form>
