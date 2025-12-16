@@ -55,6 +55,8 @@ let persons = [
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('nhankhau.js loaded and DOMContentLoaded fired');
+    
     // Sample data - sẽ được thay thế bằng API calls
 
     let filteredPersons = [...persons];
@@ -72,6 +74,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const viewPersonModal = document.getElementById('viewPersonModal');
     const personList = document.getElementById('personList');
     const personCount = document.getElementById('personCount');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const clearFiltersBtn = document.getElementById('clearFilters');
 
     // Initialize
     updatePersonList();
@@ -79,10 +83,22 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePagination();
 
     // Event listeners
-    searchInput.addEventListener('input', handleSearch);
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
     advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
-    addPersonBtn.addEventListener('click', showAddPersonForm);
-    exportBtn.addEventListener('click', exportPersons);
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyAdvancedFilters);
+    }
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearAdvancedFilters);
+    }
+    if (addPersonBtn) {
+        addPersonBtn.addEventListener('click', showAddPersonForm);
+    }
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportPersons);
+    }
     
     // Filter inputs
     document.getElementById('applyFilters').addEventListener('click', applyAdvancedFilters);
@@ -110,8 +126,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.style.display !== 'none';
-        advancedSearch.style.display = isVisible ? 'none' : 'block';
+        const isVisible = advancedSearch.classList.contains('show');
+        if (isVisible) {
+            advancedSearch.classList.remove('show');
+        } else {
+            advancedSearch.classList.add('show');
+        }
         advancedSearchBtn.innerHTML = isVisible ? 
             '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
             '<i class="fas fa-times"></i> Đóng tìm kiếm';
@@ -141,14 +161,16 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePagination();
     }
 
-    function clearFilters() {
+    function clearAdvancedFilters() {
         document.getElementById('filterFullName').value = '';
         document.getElementById('filterIdNumber').value = '';
         document.getElementById('filterHouseholdCode').value = '';
         document.getElementById('filterGender').value = '';
         document.getElementById('filterAgeFrom').value = '';
         document.getElementById('filterAgeTo').value = '';
-        searchInput.value = '';
+        if (searchInput) {
+            searchInput.value = '';
+        }
         filteredPersons = [...persons];
         currentPage = 1;
         updatePersonList();

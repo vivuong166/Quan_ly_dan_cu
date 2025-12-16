@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('sohokhau.js loaded and DOMContentLoaded fired');
+    
     // Sample data - sẽ được thay thế bằng API calls
     let households = [
         { 
@@ -38,19 +40,37 @@ document.addEventListener('DOMContentLoaded', function() {
     const personModal = document.getElementById('personModal');
     const householdList = document.getElementById('householdList');
     const householdCount = document.getElementById('householdCount');
+    const applyFiltersBtn = document.getElementById('applyFilters');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    
+    console.log('DOM Elements:', {
+        applyFiltersBtn: !!applyFiltersBtn,
+        clearFiltersBtn: !!clearFiltersBtn,
+        advancedSearch: !!advancedSearch
+    });
 
     // Initialize
     updateHouseholdList();
     updateHouseholdCount();
 
     // Event listeners
-    searchInput.addEventListener('input', handleSearch);
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
     advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
     addHouseholdBtn.addEventListener('click', showAddHouseholdForm);
-    
-    // Filter inputs
-    document.getElementById('applyFilters').addEventListener('click', applyAdvancedFilters);
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', applyAdvancedFilters);
+        console.log('applyFilters event listener added');
+    } else {
+        console.error('applyFilters button not found!');
+    }
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', clearAdvancedFilters);
+        console.log('clearFilters event listener added');
+    } else {
+        console.error('clearFilters button not found!');
+    }
 
     function handleSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -70,36 +90,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.style.display !== 'none';
-        advancedSearch.style.display = isVisible ? 'none' : 'block';
+        const isVisible = advancedSearch.classList.contains('show');
+        if (isVisible) {
+            advancedSearch.classList.remove('show');
+        } else {
+            advancedSearch.classList.add('show');
+        }
         advancedSearchBtn.innerHTML = isVisible ? 
             '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
             '<i class="fas fa-times"></i> Đóng tìm kiếm';
     }
 
     function applyAdvancedFilters() {
+        console.log('applyAdvancedFilters called');
         const codeFilter = document.getElementById('filterCode').value.toLowerCase();
         const nameFilter = document.getElementById('filterHeadName').value.toLowerCase();
         const addressFilter = document.getElementById('filterAddress').value.toLowerCase();
+        
+        console.log('Filters:', { codeFilter, nameFilter, addressFilter });
 
         filteredHouseholds = households.filter(household => {
             return (!codeFilter || household.code.toLowerCase().includes(codeFilter)) &&
                    (!nameFilter || household.head_name.toLowerCase().includes(nameFilter)) &&
                    (!addressFilter || household.address.toLowerCase().includes(addressFilter));
         });
+        
+        console.log('Filtered households:', filteredHouseholds.length);
 
         updateHouseholdList();
         updateHouseholdCount();
     }
 
-    function clearFilters() {
+    function clearAdvancedFilters() {
+        console.log('clearAdvancedFilters called');
         document.getElementById('filterCode').value = '';
         document.getElementById('filterHeadName').value = '';
         document.getElementById('filterAddress').value = '';
-        searchInput.value = '';
+        if (searchInput) {
+            searchInput.value = '';
+        }
         filteredHouseholds = [...households];
         updateHouseholdList();
         updateHouseholdCount();
+        console.log('Filters cleared, showing all households:', filteredHouseholds.length);
     }
 
     function updateHouseholdList() {

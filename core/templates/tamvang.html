@@ -38,7 +38,7 @@
         </form>
 
         <div class="list-panel">
-            <h3>Danh sách quá thời hạn tạm vắng</h3>
+            <h3>Bảng đang tạm vắng</h3>
             <div class="table-container">
                 <table class="table-basic">
                     <thead>
@@ -47,7 +47,8 @@
                             <th>Ngày sinh</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
-                            <th style="text-align: center;">Trạng thái</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="tvList">
@@ -57,14 +58,24 @@
                             <td>15/03/1985</td>
                             <td>01/10/2025</td>
                             <td>15/10/2025</td>
-                            <td style="text-align: center;"><input type="checkbox" checked></td>
+                            <td><span class="status-badge status-overdue">Đã kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                            </td>
                         </tr>
                         <tr data-id="2">
                             <td><strong>Trần Thị B</strong></td>
                             <td>22/08/1990</td>
                             <td>05/10/2025</td>
                             <td>12/10/2025</td>
-                            <td style="text-align: center;"><input type="checkbox"></td>
+                            <td><span class="status-badge status-active">Chưa kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

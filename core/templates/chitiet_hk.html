@@ -11,7 +11,11 @@
 <div class="page-container">
     <div class="page-header">
         <h1>Thông tin chi tiết hộ khẩu</h1>
-        <a href="{% url 'sohokhau' %}" class="btn-back">← Quay lại danh sách</a>
+        <div class="header-actions">
+            <a href="{% url 'sohokhau' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
     </div>
 
     <!-- Phần 1: Thông tin cơ bản -->

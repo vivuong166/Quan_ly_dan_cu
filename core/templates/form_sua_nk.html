@@ -4,7 +4,7 @@
 <div class="page-header">
     <h2 class="page-title">Sửa thông tin nhân khẩu</h2>
     <div class="header-actions">
-        <a href="{% url 'qlnk' %}" class="btn">
+        <a href="{% url 'nhankhau' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
@@ -17,8 +17,78 @@
             <form id="editPersonForm" method="post">
                 {% csrf_token %}
                 
-                <!-- Personal Information -->
+                <!-- Moving/Transfer Section - Moved to top -->
                 <div class="form-section">
+                    <h4><i class="fas fa-exchange-alt"></i> Nội dung thay đổi</h4>
+                    <div class="form-group">
+                        <label class="required">Chọn loại thao tác</label>
+                        <select id="moveType" name="move_type" class="form-input" onchange="handleMoveTypeChange()">
+                            <option value="">-- Chọn loại --</option>
+                            <option value="transfer">Chuyển đi</option>
+                            <option value="update">Cập nhật thông tin</option>
+                            <option value="past">Qua đời</option>
+                        </select>
+                    </div>
+
+                    <!-- Transfer Fields -->
+                    <div id="transferFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="required">Ghi chú</label>
+                                <input type="text" id="transferNote" name="transfer_note" class="form-input" 
+                                       placeholder="Ghi chú về việc chuyển đi">
+                            </div>
+                            <div class="form-group">
+                                <label class="required">Ngày chuyển đi</label>
+                                <input type="date" id="transferDate" name="transfer_date" class="form-input">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Nơi chuyển: Chọn nơi chuyển giữa hộ khẩu khác & khu vực khác</label>
+                            <select id="transferDestinationType" name="transfer_destination_type" class="form-input" onchange="handleDestinationTypeChange()">
+                                <option value="">-- Chọn nơi chuyển --</option>
+                                <option value="household">Hộ khẩu khác</option>
+                                <option value="area">Khu vực khác</option>
+                            </select>
+                        </div>
+
+                        <!-- Household selection -->
+                        <div id="householdSelection" style="display: none;">
+                            <div class="form-group">
+                                <label class="required">Chọn hộ khẩu mới</label>
+                                <select id="newHousehold" name="new_household" class="form-input">
+                                    <option value="">-- Chọn hộ khẩu --</option>
+                                    <option value="HK-001">HK-001 - Nguyễn Văn B (Số 12, Đường X)</option>
+                                    <option value="HK-002">HK-002 - Trần Thị C (Số 34, Ngõ Y)</option>
+                                    <option value="HK-003">HK-003 - Lê Văn D (Số 56, Phố Z)</option>
+                                </select>
+                                <input type="text" id="newHouseholdRelation" name="new_household_relation" 
+                                       class="form-input" placeholder="Quan hệ với chủ hộ mới" style="margin-top: 12px;">
+                            </div>
+                        </div>
+
+                        <!-- Area input -->
+                        <div id="areaInput" style="display: none;">
+                            <div class="form-group">
+                                <label class="required">Địa chỉ nơi chuyển đến</label>
+                                <input type="text" id="transferAddress" name="transfer_address" 
+                                       class="form-input" placeholder="Nhập địa chỉ khu vực chuyển đến">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Past Fields -->
+                    <div id="pastFields" style="display: none;">
+                        <div class="form-group">
+                            <label class="required">Ghi chú</label>
+                            <input type="text" id="pastNote" name="past_note" class="form-input" 
+                                   placeholder="Ghi chú về việc qua đời">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Personal Information -->
+                <div class="form-section" id="personalInfoSection" style="display: none;">
                     <h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -89,78 +159,8 @@
                     </div>
                 </div>
 
-                <!-- Moving/Transfer Section -->
-                <div class="form-section">
-                    <h4><i class="fas fa-exchange-alt"></i> Thông tin chuyển đi</h4>
-                    <div class="form-group">
-                        <label class="required">Chọn loại thao tác</label>
-                        <select id="moveType" name="move_type" class="form-input" onchange="handleMoveTypeChange()">
-                            <option value="">-- Chọn loại --</option>
-                            <option value="transfer">Chuyển đi</option>
-                            <option value="update">Cập nhật thông tin</option>
-                            <option value="past">Qua đời</option>
-                        </select>
-                    </div>
-
-                    <!-- Transfer Fields -->
-                    <div id="transferFields" style="display: none;">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="required">Ghi chú</label>
-                                <input type="text" id="transferNote" name="transfer_note" class="form-input" 
-                                       placeholder="Ghi chú về việc chuyển đi">
-                            </div>
-                            <div class="form-group">
-                                <label class="required">Ngày chuyển đi</label>
-                                <input type="date" id="transferDate" name="transfer_date" class="form-input">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="required">Nơi chuyển: Chọn nơi chuyển giữa hộ khẩu khác & khu vực khác</label>
-                            <select id="transferDestinationType" name="transfer_destination_type" class="form-input" onchange="handleDestinationTypeChange()">
-                                <option value="">-- Chọn nơi chuyển --</option>
-                                <option value="household">Hộ khẩu khác</option>
-                                <option value="area">Khu vực khác</option>
-                            </select>
-                        </div>
-
-                        <!-- Household selection -->
-                        <div id="householdSelection" style="display: none;">
-                            <div class="form-group">
-                                <label class="required">Chọn hộ khẩu mới</label>
-                                <select id="newHousehold" name="new_household" class="form-input">
-                                    <option value="">-- Chọn hộ khẩu --</option>
-                                    <option value="HK-001">HK-001 - Nguyễn Văn B (Số 12, Đường X)</option>
-                                    <option value="HK-002">HK-002 - Trần Thị C (Số 34, Ngõ Y)</option>
-                                    <option value="HK-003">HK-003 - Lê Văn D (Số 56, Phố Z)</option>
-                                </select>
-                                <input type="text" id="newHouseholdRelation" name="new_household_relation" 
-                                       class="form-input" placeholder="Quan hệ với chủ hộ mới" style="margin-top: 12px;">
-                            </div>
-                        </div>
-
-                        <!-- Area input -->
-                        <div id="areaInput" style="display: none;">
-                            <div class="form-group">
-                                <label class="required">Địa chỉ nơi chuyển đến</label>
-                                <input type="text" id="transferAddress" name="transfer_address" 
-                                       class="form-input" placeholder="Nhập địa chỉ khu vực chuyển đến">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Past Fields -->
-                    <div id="pastFields" style="display: none;">
-                        <div class="form-group">
-                            <label class="required">Ghi chú</label>
-                            <input type="text" id="pastNote" name="past_note" class="form-input" 
-                                   placeholder="Ghi chú về việc qua đời">
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Residence Registration -->
-                <div class="form-section">
+                <div class="form-section" id="residenceSection" style="display: none;">
                     <h4><i class="fas fa-map-marker-alt"></i> Thông tin đăng ký thường trú</h4>
                     <div class="form-row">
                         <div class="form-group">
@@ -176,7 +176,7 @@
                 </div>
 
                 <!-- Work Information -->
-                <div class="form-section">
+                <div class="form-section" id="workInfoSection" style="display: none;">
                     <h4><i class="fas fa-briefcase"></i> Thông tin nghề nghiệp</h4>
                     <div class="form-row">
                         <div class="form-group">
