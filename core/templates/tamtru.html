@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Quản lý tạm trú</h2>
+<div class="page-header">
+    <h2 class="page-title">Quản lý tạm trú</h2>
+    <div class="header-actions">
+        <a href="{% url 'qltv_tt' %}" class="btn">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
 
 <div class="tvtt-wrap">
     <!-- Tạm trú -->

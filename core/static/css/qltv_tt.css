@@ -13,7 +13,35 @@
 .tvtt-form { background:#fff; padding:12px; border-radius:8px; box-shadow:0 6px 18px rgba(20,30,43,0.04); border:1px solid #f1f5f9; margin-bottom:12px; }
 .tvtt-form .row { display:flex; gap:10px; margin-bottom:8px; align-items:center; }
 .tvtt-form .row label { width:160px; font-weight:600; color:#374151; font-size:14px; }
-.tvtt-form .row input { flex:1; padding:8px 10px; border-radius:6px; border:1px solid #e6e9ef; background:#fff; }
+.tvtt-form .row input,
+.tvtt-form .row select { 
+    flex:1; 
+    padding:8px 10px; 
+    border-radius:6px; 
+    border:1px solid #e6e9ef; 
+    background:#fff;
+    font-size:14px;
+    color:#1f2937;
+    transition: all 0.2s ease;
+}
+.tvtt-form .row input:focus,
+.tvtt-form .row select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+.tvtt-form .row select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23374151' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 12px;
+    padding-right: 32px;
+}
+.tvtt-form .row select:hover {
+    border-color: #94a3b8;
+}
 
 .list-panel { background:#fff; padding:12px; border-radius:8px; box-shadow:0 6px 18px rgba(20,30,43,0.04); border:1px solid #f1f5f9; }
 .list-panel h3 { margin:0 0 8px; font-size:15px; }

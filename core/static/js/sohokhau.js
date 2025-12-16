@@ -33,21 +33,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DOM elements
     const searchInput = document.getElementById('searchHousehold');
-    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
-    const advancedSearch = document.getElementById('advancedSearch');
     const addHouseholdBtn = document.getElementById('addHouseholdBtn');
     const householdModal = document.getElementById('householdModal');
     const personModal = document.getElementById('personModal');
     const householdList = document.getElementById('householdList');
     const householdCount = document.getElementById('householdCount');
-    const applyFiltersBtn = document.getElementById('applyFilters');
-    const clearFiltersBtn = document.getElementById('clearFilters');
-    
-    console.log('DOM Elements:', {
-        applyFiltersBtn: !!applyFiltersBtn,
-        clearFiltersBtn: !!clearFiltersBtn,
-        advancedSearch: !!advancedSearch
-    });
 
     // Initialize
     updateHouseholdList();
@@ -57,19 +47,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchInput) {
         searchInput.addEventListener('input', handleSearch);
     }
-    advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
-    addHouseholdBtn.addEventListener('click', showAddHouseholdForm);
-    if (applyFiltersBtn) {
-        applyFiltersBtn.addEventListener('click', applyAdvancedFilters);
-        console.log('applyFilters event listener added');
-    } else {
-        console.error('applyFilters button not found!');
-    }
-    if (clearFiltersBtn) {
-        clearFiltersBtn.addEventListener('click', clearAdvancedFilters);
-        console.log('clearFilters event listener added');
-    } else {
-        console.error('clearFilters button not found!');
+    if (addHouseholdBtn) {
+        addHouseholdBtn.addEventListener('click', showAddHouseholdForm);
     }
 
     function handleSearch() {
@@ -87,52 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         updateHouseholdList();
         updateHouseholdCount();
-    }
-
-    function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.classList.contains('show');
-        if (isVisible) {
-            advancedSearch.classList.remove('show');
-        } else {
-            advancedSearch.classList.add('show');
-        }
-        advancedSearchBtn.innerHTML = isVisible ? 
-            '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
-            '<i class="fas fa-times"></i> Đóng tìm kiếm';
-    }
-
-    function applyAdvancedFilters() {
-        console.log('applyAdvancedFilters called');
-        const codeFilter = document.getElementById('filterCode').value.toLowerCase();
-        const nameFilter = document.getElementById('filterHeadName').value.toLowerCase();
-        const addressFilter = document.getElementById('filterAddress').value.toLowerCase();
-        
-        console.log('Filters:', { codeFilter, nameFilter, addressFilter });
-
-        filteredHouseholds = households.filter(household => {
-            return (!codeFilter || household.code.toLowerCase().includes(codeFilter)) &&
-                   (!nameFilter || household.head_name.toLowerCase().includes(nameFilter)) &&
-                   (!addressFilter || household.address.toLowerCase().includes(addressFilter));
-        });
-        
-        console.log('Filtered households:', filteredHouseholds.length);
-
-        updateHouseholdList();
-        updateHouseholdCount();
-    }
-
-    function clearAdvancedFilters() {
-        console.log('clearAdvancedFilters called');
-        document.getElementById('filterCode').value = '';
-        document.getElementById('filterHeadName').value = '';
-        document.getElementById('filterAddress').value = '';
-        if (searchInput) {
-            searchInput.value = '';
-        }
-        filteredHouseholds = [...households];
-        updateHouseholdList();
-        updateHouseholdCount();
-        console.log('Filters cleared, showing all households:', filteredHouseholds.length);
     }
 
     function updateHouseholdList() {
@@ -187,28 +120,12 @@ document.addEventListener('DOMContentLoaded', function() {
         householdModal.style.display = 'flex';
     }
 
-    window.showAddPersonForm = function() {
-        personModal.style.display = 'flex';
-    }
-
-    window.showSplitHouseholdForm = function() {
-        const splitModal = document.getElementById('splitHouseholdModal');
-        document.getElementById('splitHouseholdForm').reset();
-        document.getElementById('splitDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('newDistrictName').value = 'Hà Đông';
-        splitModal.style.display = 'flex';
-    }
-
     window.closeHouseholdModal = function() {
         householdModal.style.display = 'none';
     }
 
     window.closePersonModal = function() {
         personModal.style.display = 'none';
-    }
-
-    window.closeSplitModal = function() {
-        document.getElementById('splitHouseholdModal').style.display = 'none';
     }
 
     // Legacy function for backward compatibility
@@ -323,29 +240,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.editHousehold = function(code) {
-        // Navigate to the household edit page
-        window.location.href = `/taohokhau/${code}/`;
-    }
-
-    window.exportHouseholds = function() {
-        // Simple CSV export
-        let csv = 'Mã hộ khẩu,Chủ hộ,Địa chỉ,Số nhân khẩu,Ngày tạo\n';
-        filteredHouseholds.forEach(household => {
-            csv += `${household.code},"${household.head_name}","${household.address}",${household.member_count},${household.created_at}\n`;
-        });
-
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', 'danh_sach_ho_khau.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function showSuccessMessage(message) {
         // Simple alert for now - có thể thay thế bằng toast notification
         alert(message);
     }
@@ -486,16 +380,6 @@ document.addEventListener('DOMContentLoaded', function() {
         changeHeadModal.style.display = 'flex';
     }
 
-    window.showChangeHeadModal = function() {
-        const changeHeadModal = document.getElementById('changeHeadModal');
-        
-        // Reset form
-        document.getElementById('changeHeadForm').reset();
-        document.getElementById('changeHeadDate').value = new Date().toISOString().split('T')[0];
-        
-        changeHeadModal.style.display = 'flex';
-    }
-
     window.closeChangeHeadModal = function() {
         const changeHeadModal = document.getElementById('changeHeadModal');
         changeHeadModal.style.display = 'none';
@@ -555,88 +439,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         `;
         document.getElementById('newHead').innerHTML = '<option value="">-- Chọn chủ hộ mới --</option>';
-    }
-
-    window.previewChangeHead = function() {
-        const householdCode = document.getElementById('changeHeadHousehold').value;
-        const newHeadId = document.getElementById('newHead').value;
-        const changeDate = document.getElementById('changeHeadDate').value;
-        const reason = document.getElementById('changeHeadReason').value;
-        const performer = document.getElementById('changeHeadPerformer').value;
-        const confirmCheck = document.getElementById('confirmChange').checked;
-
-        if (!householdCode || !newHeadId || !changeDate || !reason || !performer) {
-            alert('Vui lòng điền đầy đủ thông tin bắt buộc trước khi xem trước!');
-            return;
-        }
-
-        if (!confirmCheck) {
-            alert('Vui lòng xác nhận đã kiểm tra thông tin và giấy tờ!');
-            return;
-        }
-
-        // Get household and member info
-        const household = households.find(h => h.code === householdCode);
-        const members = householdMembers[householdCode] || [];
-        const currentHead = members.find(m => m.isHead);
-        const newHead = members.find(m => m.id == newHeadId);
-
-        const previewHTML = `
-            <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-                <h3 style="text-align: center; color: #1565c0; margin-bottom: 20px;">
-                    📋 XEM TRƯỚC THÔNG TIN THAY ĐỔI CHỦ HỘ
-                </h3>
-                
-                <div style="border: 2px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
-                    <h4 style="color: #333; margin-top: 0;">🏠 Thông tin hộ khẩu</h4>
-                    <p><strong>Mã hộ khẩu:</strong> ${householdCode}</p>
-                    <p><strong>Địa chỉ:</strong> ${household?.address || 'Chưa có thông tin'}</p>
-                </div>
-
-                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                    <div style="flex: 1; border: 2px solid #ffcdd2; border-radius: 8px; padding: 15px;">
-                        <h4 style="color: #d32f2f; margin-top: 0;">👤 Chủ hộ hiện tại</h4>
-                        <p><strong>Họ tên:</strong> ${currentHead?.name || 'Không xác định'}</p>
-                        <p><strong>Ngày sinh:</strong> ${currentHead?.dob || '--/--/----'}</p>
-                        <p><strong>CMND/CCCD:</strong> ${currentHead?.idNumber || 'Chưa có'}</p>
-                        <p><strong>Nghề nghiệp:</strong> ${currentHead?.occupation || 'Chưa có'}</p>
-                    </div>
-                    
-                    <div style="flex: 1; border: 2px solid #c8e6c9; border-radius: 8px; padding: 15px;">
-                        <h4 style="color: #388e3c; margin-top: 0;">👑 Chủ hộ mới</h4>
-                        <p><strong>Họ tên:</strong> ${newHead?.name || 'Không xác định'}</p>
-                        <p><strong>Ngày sinh:</strong> ${newHead?.dob || '--/--/----'}</p>
-                        <p><strong>CMND/CCCD:</strong> ${newHead?.idNumber || 'Chưa có'}</p>
-                        <p><strong>Quan hệ với chủ hộ cũ:</strong> ${newHead?.relation || 'Không xác định'}</p>
-                    </div>
-                </div>
-
-                <div style="border: 2px solid #e1f5fe; border-radius: 8px; padding: 15px;">
-                    <h4 style="color: #0277bd; margin-top: 0;">📝 Chi tiết thay đổi</h4>
-                    <p><strong>Ngày thay đổi:</strong> ${new Date(changeDate).toLocaleDateString('vi-VN')}</p>
-                    <p><strong>Lý do:</strong> ${document.querySelector('#changeHeadReason option:checked')?.text || reason}</p>
-                    <p><strong>Người thực hiện:</strong> ${performer}</p>
-                    <p><strong>Số quyết định:</strong> ${document.getElementById('changeHeadApproval').value || 'Không có'}</p>
-                    <p><strong>Ghi chú:</strong> ${document.getElementById('changeHeadNote').value || 'Không có ghi chú thêm'}</p>
-                </div>
-            </div>
-        `;
-
-        // Show preview in a new modal or alert
-        const previewModal = document.createElement('div');
-        previewModal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000;';
-        previewModal.innerHTML = `
-            <div style="background: white; max-width: 800px; max-height: 90vh; overflow-y: auto; border-radius: 12px; padding: 20px;">
-                ${previewHTML}
-                <div style="text-align: center; margin-top: 20px;">
-                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
-                            style="background: #1565c0; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">
-                        Đóng xem trước
-                    </button>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(previewModal);
     }
 
     window.saveChangeHead = function() {
@@ -800,25 +602,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 });
-
-// Global functions for household actions
-window.viewHousehold = function(householdCode) {
-    console.log('Xem hộ khẩu:', householdCode);
-    alert(`Xem chi tiết hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
-};
-
-window.editHousehold = function(householdCode) {
-    console.log('Sửa hộ khẩu:', householdCode);
-    alert(`Chỉnh sửa hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
-};
-
-window.splitHousehold = function(householdCode) {
-    console.log('Tách hộ khẩu:', householdCode);
-    if (confirm(`Bạn có chắc chắn muốn tách hộ khẩu ${householdCode}?\n\nThao tác này sẽ tạo ra một hộ khẩu mới từ các thành viên được chọn.`)) {
-        alert(`Tách hộ khẩu ${householdCode}\n\nChức năng này sẽ được triển khai sau.`);
-        // TODO: Implement split household logic
-        // - Show modal to select members to split
-        // - Create new household with selected members
-        // - Update original household
-    }
-};
