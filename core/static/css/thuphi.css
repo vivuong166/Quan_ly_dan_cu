@@ -80,6 +80,52 @@
     margin-top: 20px;
 }
 
+.list-panel {
+    margin-top: 20px;
+}
+
+.list-header {
+    margin-bottom: 15px;
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.filter-row label {
+    font-weight: 500;
+    color: #495057;
+    font-size: 14px;
+}
+
+.filter-row select {
+    padding: 8px 12px;
+    border-radius: 4px;
+    border: 1px solid #ced4da;
+    background: #fff;
+    font-size: 14px;
+    min-width: 150px;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    font-size: 12px;
+    background-color: #0b57d0;
+    color: white;
+    border: 1px solid #0b57d0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-action:hover {
+    opacity: 0.9;
+}
+
 .btn {
     padding: 10px 20px;
     border-radius: 4px;

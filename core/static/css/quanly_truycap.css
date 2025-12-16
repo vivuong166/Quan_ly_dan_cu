@@ -1,52 +1,184 @@
 /* --- Access Management (quanly_truycap) styles --- */
-.content-area h2 {
-    margin-bottom: 12px;
-    color: #0b57d0;
+
+/* Page Header */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 20px 0;
+    border-bottom: 2px solid #f1f3f4;
 }
 
-/* More specific title style for quanly_truycap page */
-.content-area h2.page-title {
-    color: #000; /* black title for Quản lý tài khoản */
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: #1f2937;
 }
 
-.quanly-panel {
-    background: #fff;
-    padding: 12px;
+/* Info Banner */
+.info-banner {
+    background: #f8fafc;
+    border-left: 4px solid #3b82f6;
+    padding: 16px 20px;
+    margin-bottom: 24px;
     border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(20,30,43,0.04);
-    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.permission-list {
+.info-banner i {
+    color: #3b82f6;
+    font-size: 20px;
+}
+
+.info-banner p {
+    margin: 0;
+    color: #374151;
+    font-size: 14px;
+}
+
+/* Dashboard Panels */
+.dashboard-panels {
+    margin-bottom: 24px;
+}
+
+.panel {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.panel-body {
+    padding: 20px;
+}
+
+/* Form Styling */
+.user-form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+}
+
+.required {
+    color: #ef4444;
+}
+
+/* Role Selection */
+.role-selection {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    margin: 8px 0 16px;
-}
-
-.perm-item {
-    display: flex;
     gap: 12px;
-    align-items: center;
-    padding: 10px;
+    margin-top: 8px;
+}
+
+.role-item {
+    background: white;
+    border: 2px solid #e5e7eb;
     border-radius: 8px;
+    padding: 12px;
+    transition: all 0.2s;
+}
+
+.role-item:hover {
+    border-color: #3b82f6;
     background: #f8fafc;
-    border: 1px solid #f1f5f9;
 }
 
-.perm-item input[type="checkbox"] {
-    transform: scale(1.05);
+.role-item label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    margin: 0;
 }
 
-.perm-badge {
-    display: inline-block;
-    background: #eef2ff;
-    color: #4f46e5;
-    padding: 4px 8px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    margin-right: 6px;
+.role-item input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.role-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.role-content strong {
+    font-size: 14px;
+    color: #1f2937;
+}
+
+.role-content small {
+    color: #6b7280;
+    font-size: 12px;
+}
+
+.role-leader {
+    border-left: 4px solid #1d0678;
+}
+
+.role-deputy {
+    border-left: 4px solid #1565c0;
+}
+
+.role-staff {
+    border-left: 4px solid #6893f7;
+}
+
+/* Table Styling */
+.table-container {
+    overflow-x: auto;
 }
 
 .table-basic {
@@ -54,28 +186,119 @@
     border-collapse: collapse;
 }
 
-.table-basic th {
+.table-basic thead {
     background: #f8fafc;
-    padding: 10px;
+}
+
+.table-basic th {
+    padding: 12px;
     text-align: left;
     font-weight: 600;
     color: #1f2937;
-    border-bottom: 1px solid #e6e9ef;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 14px;
 }
 
 .table-basic td {
-    padding: 10px;
+    padding: 14px 12px;
     border-bottom: 1px solid #f1f5f9;
-    color: #111827;
+    color: #374151;
+    font-size: 14px;
 }
 
-/* Action button styling inside panels */
-.panel .btn.primary {
-    padding: 10px 14px;
-    border-radius: 8px;
+.table-basic tbody tr:hover {
+    background: #f9fafb;
 }
 
-@media (max-width: 900px) {
-    .perm-item { flex-wrap: wrap; }
-    .panel-header h3 { font-size: 15px; }
+/* Badges */
+.badge {
+    background: #e5e7eb;
+    color: #1f2937;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.badge-admin {
+    background: #22c55e;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+/* Permission Badges */
+.perm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid;
+}
+
+.perm-badge i {
+    font-size: 10px;
+}
+
+.perm-qlnk {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-color: #bbdefb;
+}
+
+.perm-thuphi {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+.perm-tamtru {
+    background: #fff3e0;
+    color: #f57c00;
+    border-color: #ffe0b2;
+}
+
+.perm-thongke {
+    background: #f3e5f5;
+    color: #7b1fa2;
+    border-color: #e1bee7;
+}
+
+.no-perms {
+    color: #9ca3af;
+    font-style: italic;
+    font-size: 13px;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .user-form {
+        max-width: 100%;
+    }
 }
