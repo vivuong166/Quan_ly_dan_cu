@@ -10,10 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     
     function initializeForm() {
-        // Set default date to today
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('creationDate').value = today;
-        
         // Set default ethnicity
         document.getElementById('headEthnicity').value = 'Kinh';
         
@@ -32,18 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function setupEventListeners() {
-        // Creation reason change
-        document.getElementById('creationReason').addEventListener('change', function() {
-            const otherReasonGroup = document.getElementById('otherReasonGroup');
-            if (this.value === 'other') {
-                otherReasonGroup.style.display = 'block';
-                document.getElementById('otherReason').required = true;
-            } else {
-                otherReasonGroup.style.display = 'none';
-                document.getElementById('otherReason').required = false;
-            }
-        });
-        
         // ID number formatting
         document.getElementById('headIdNumber').addEventListener('input', function() {
             // Remove non-numeric characters
@@ -106,9 +90,17 @@ document.addEventListener('DOMContentLoaded', function() {
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
         const submitBtn = document.getElementById('submitBtn');
+        const formNavigation = document.querySelector('.form-navigation');
         
         // Previous button
         prevBtn.style.display = currentStep === 1 ? 'none' : 'flex';
+        
+        // Align buttons to the right when on first step
+        if (currentStep === 1) {
+            formNavigation.style.justifyContent = 'flex-end';
+        } else {
+            formNavigation.style.justifyContent = 'space-between';
+        }
         
         // Next/Submit buttons
         if (currentStep === totalSteps) {
@@ -227,9 +219,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = {
             // Basic information
             householdCode: document.getElementById('householdCode').value.trim(),
-            creationDate: document.getElementById('creationDate').value,
-            creationReason: document.getElementById('creationReason').value,
-            otherReason: document.getElementById('otherReason').value.trim(),
             
             // Address information
             houseNumber: document.getElementById('houseNumber').value.trim(),
@@ -250,8 +239,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headOccupation: document.getElementById('headOccupation').value.trim(),
             headWorkplace: document.getElementById('headWorkplace').value.trim(),
             headEthnicity: document.getElementById('headEthnicity').value,
-            headReligion: document.getElementById('headReligion').value,
-            headEducation: document.getElementById('headEducation').value
+            headReligion: document.getElementById('headReligion').value
         };
         
         // Build full address - automatically add fixed parts
@@ -316,9 +304,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     function generatePreview(formData) {
-        const creationReasonText = document.getElementById('creationReason').selectedOptions[0]?.text || '';
         const genderText = formData.headGender === 'M' ? 'Nam' : 'Nữ';
-        const educationText = document.getElementById('headEducation').selectedOptions[0]?.text || 'Chưa cập nhật';
         
         const previewHTML = `
             <div class="preview-section">
@@ -327,14 +313,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="preview-item">
                         <label>Mã hộ khẩu:</label>
                         <span>${formData.householdCode}</span>
-                    </div>
-                    <div class="preview-item">
-                        <label>Ngày lập sổ:</label>
-                        <span>${formData.creationDate}</span>
-                    </div>
-                    <div class="preview-item">
-                        <label>Lý do lập sổ:</label>
-                        <span>${creationReasonText}</span>
                     </div>
                 </div>
             </div>
@@ -377,10 +355,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="preview-item">
                         <label>Tôn giáo:</label>
                         <span>${formData.headReligion || 'Không'}</span>
-                    </div>
-                    <div class="preview-item">
-                        <label>Trình độ học vấn:</label>
-                        <span>${educationText}</span>
                     </div>
                 </div>
             </div>
