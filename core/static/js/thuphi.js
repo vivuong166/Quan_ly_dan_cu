@@ -103,7 +103,6 @@ document.addEventListener('DOMContentLoaded', function(){
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${record.id}</td>
                             <td>${record.chu}</td>
-                            <td>${record.members}</td>
                             <td>${record.year}</td>
                             <td>${formatVnd(total)}</td>
                             <td><span class="status ${record.paid ? 'paid' : 'unpaid'}">${record.paid ? 'Đã thu' : 'Chưa thu'}</span></td>
