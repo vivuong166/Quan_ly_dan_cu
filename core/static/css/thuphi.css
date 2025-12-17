@@ -167,7 +167,7 @@
 
 .fee-table th {
     background: #f8f9fa;
-    padding: 12px 15px;
+    padding: 14px 20px;
     text-align: left;
     font-weight: 500;
     color: #495057;
@@ -176,7 +176,7 @@
 }
 
 .fee-table td {
-    padding: 12px 15px;
+    padding: 14px 20px;
     border-bottom: 1px solid #dee2e6;
     font-size: 14px;
     color: #495057;
