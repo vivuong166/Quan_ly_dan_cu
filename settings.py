@@ -11,8 +11,11 @@ load_dotenv(dotenv_path="/Users/mac/Downloads/KTPM-Back-end-main-2/.env")
 raw_url = os.getenv("DATABASE_URL")
 if not raw_url:
     raise RuntimeError("DATABASE_URL not found in .env")
-
 parsed = urlparse(raw_url)
+options = dict(parse_qsl(parsed.query))
+
+# ÉP sslmode=require nếu chưa có
+options.setdefault("sslmode", "require")
 
 DATABASES = {
     "default": {
@@ -22,6 +25,6 @@ DATABASES = {
         "PASSWORD": parsed.password,
         "HOST": parsed.hostname,
         "PORT": parsed.port or 5432,
-        "OPTIONS": dict(parse_qsl(parsed.query)),
+        "OPTIONS": options,
     }
 }
