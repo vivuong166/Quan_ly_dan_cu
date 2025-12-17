@@ -1,25 +1,32 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Quản lý Tạm Vắng</h2>
+<div class="page-header">
+    <h2 class="page-title">Quản lý tạm vắng</h2>
+    <div class="header-actions">
+        <a href="{% url 'qltv_tt' %}" class="btn">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
 
 <div class="tvtt-wrap">
     <!-- Tạm vắng -->
     <section id="tab-tv" class="tvtt-panel active">
         <form id="formTv" class="tvtt-form">
             <div class="row">
-                <label>Chọn hộ khẩu / nhân khẩu</label>
-                <input id="tv_person" placeholder="Nhập số hộ khẩu / tên chủ hộ / nhân khẩu">
+                <label>Chọn nhân khẩu</label>
+                <input id="tv_person" placeholder="Nhập họ và tên / CMND/CCCD">
             </div>
             <div class="row">
-                <label>Ngày đi</label>
-                <input id="tv_ngay_di" type="date">
-                <label>Ngày dự kiến về</label>
-                <input id="tv_han" type="date">
+                <label>Ngày sinh</label>
+                <input id="tv_ngay_sinh" type="date">
             </div>
             <div class="row">
-                <label>Nơi đến</label>
-                <input id="tv_noi_den" placeholder="Nơi đến (tỉnh/quận/địa chỉ)">
+                <label>Ngày bắt đầu</label>
+                <input id="tv_ngay_bat_dau" type="date">
+                <label>Ngày kết thúc</label>
+                <input id="tv_ngay_ket_thuc" type="date">
             </div>
             <div class="row">
                 <label>Lý do</label>
@@ -27,18 +34,52 @@
             </div>
             <div class="form-actions">
                 <button type="button" id="addTv" class="btn primary">Thêm tạm vắng</button>
-                <button type="button" id="printTv" class="btn">In giấy tạm vắng</button>
             </div>
         </form>
 
         <div class="list-panel">
-            <h3>Danh sách đang tạm vắng</h3>
-            <input id="searchTv" class="search-small" placeholder="Tìm theo tên / hộ khẩu / nơi đến">
-            <ul id="tvList" class="list-plain">
-                <!-- mẫu tĩnh -->
-                <li data-id="1"><strong>HK-001</strong> — Nguyễn Văn A — 2025-10-01 → 2025-10-15 — Nơi: Hà Nội</li>
-                <li data-id="2"><strong>HK-002</strong> — Trần Thị B — 2025-10-05 → 2025-10-12 — Nơi: Hải Phòng</li>
-            </ul>
+            <h3>Bảng đang tạm vắng</h3>
+            <div class="table-container">
+                <table class="table-basic">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tvList">
+                        <!-- Dữ liệu mẫu -->
+                        <tr data-id="1">
+                            <td><strong>Nguyễn Văn A</strong></td>
+                            <td>15/03/1985</td>
+                            <td>01/10/2025</td>
+                            <td>15/10/2025</td>
+                            <td><span class="status-badge status-overdue">Đã kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="2">
+                            <td><strong>Trần Thị B</strong></td>
+                            <td>22/08/1990</td>
+                            <td>05/10/2025</td>
+                            <td>12/10/2025</td>
+                            <td><span class="status-badge status-active">Chưa kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 </div>
@@ -46,4 +87,5 @@
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
+<link rel="stylesheet" href="{% static 'css/nhankhau.css' %}">
 {% endblock %}

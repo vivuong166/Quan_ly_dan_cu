@@ -2,31 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form elements
     const addPersonForm = document.getElementById('addPersonForm');
     const successMessage = document.getElementById('successMessage');
-    const previewModal = document.getElementById('previewModal');
-    const isHeadCheckbox = document.getElementById('personIsHead');
-    const relationSelect = document.getElementById('personRelation');
-
-    // Auto-update relation when checkbox changes
-    isHeadCheckbox.addEventListener('change', function() {
-        if (this.checked) {
-            relationSelect.value = 'Chủ hộ';
-            relationSelect.disabled = true;
-        } else {
-            if (relationSelect.value === 'Chủ hộ') {
-                relationSelect.value = '';
-            }
-            relationSelect.disabled = false;
-        }
-    });
-
-    // Update checkbox when relation changes to "Chủ hộ"
-    relationSelect.addEventListener('change', function() {
-        if (this.value === 'Chủ hộ') {
-            isHeadCheckbox.checked = true;
-        } else {
-            isHeadCheckbox.checked = false;
-        }
-    });
 
     // Form validation
     addPersonForm.addEventListener('submit', function(e) {
@@ -125,59 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Preview data function
-    window.previewData = function() {
-        if (!validateForm()) {
-            return;
-        }
-
-        // Populate preview modal
-        const household = document.getElementById('personHousehold');
-        const householdText = household.options[household.selectedIndex].text;
-        document.getElementById('previewHousehold').textContent = householdText;
-        
-        const isHead = document.getElementById('personIsHead').checked;
-        document.getElementById('previewRole').textContent = isHead ? 'Chủ hộ' : 'Thành viên';
-        
-        document.getElementById('previewFullName').textContent = document.getElementById('personFullName').value;
-        document.getElementById('previewAlias').textContent = document.getElementById('personAlias').value || '-';
-        
-        const dob = document.getElementById('personDob').value;
-        const dobFormatted = new Date(dob).toLocaleDateString('vi-VN');
-        const age = calculateAge(dob);
-        document.getElementById('previewDob').textContent = `${dobFormatted} (${age} tuổi)`;
-        
-        const gender = document.getElementById('personGender').value;
-        const genderText = gender === 'M' ? 'Nam' : gender === 'F' ? 'Nữ' : 'Khác';
-        document.getElementById('previewGender').textContent = genderText;
-        
-        document.getElementById('previewRelation').textContent = document.getElementById('personRelation').value;
-        document.getElementById('previewIdNumber').textContent = document.getElementById('personIdNumber').value || '-';
-        document.getElementById('previewOccupation').textContent = document.getElementById('personOccupation').value || '-';
-        document.getElementById('previewWorkplace').textContent = document.getElementById('personWorkplace').value || '-';
-        
-        const notes = document.getElementById('personNotes').value;
-        if (notes.trim()) {
-            document.getElementById('previewNotes').textContent = notes;
-            document.getElementById('notesSection').style.display = 'block';
-        } else {
-            document.getElementById('notesSection').style.display = 'none';
-        }
-
-        previewModal.style.display = 'flex';
-    }
-
-    // Close preview modal
-    window.closePreviewModal = function() {
-        previewModal.style.display = 'none';
-    }
-
-    // Submit from preview
-    window.submitFromPreview = function() {
-        closePreviewModal();
-        submitForm();
-    }
-
     // Utility functions
     function calculateAge(dateString) {
         const birthDate = new Date(dateString);
@@ -251,13 +173,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
-
-    // Close modal when clicking outside
-    window.onclick = function(event) {
-        if (event.target === previewModal) {
-            closePreviewModal();
-        }
-    }
 });
 
 // Add CSS for error states

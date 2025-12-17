@@ -1,0 +1,186 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Chi tiết hộ khẩu{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chitiet_hk.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <div class="page-header">
+        <h1>Thông tin chi tiết hộ khẩu</h1>
+        <div class="header-actions">
+            <a href="{% url 'sohokhau' %}" class="btn">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </a>
+        </div>
+    </div>
+
+    <!-- Phần 1: Thông tin cơ bản -->
+    <section class="info-section">
+        <h2>Thông tin cơ bản</h2>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Mã hộ khẩu:</span>
+                <span class="info-value" id="householdCode">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Địa chỉ:</span>
+                <span class="info-value" id="householdAddress">-</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Họ và tên chủ hộ:</span>
+                <span class="info-value" id="householdHead">-</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Phần 2: Danh sách nhân khẩu -->
+    <section class="table-section">
+        <h2>Danh sách nhân khẩu</h2>
+        <div class="table-container">
+            <table id="membersTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày tháng năm sinh</th>
+                        <th>Quan hệ với chủ hộ</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="membersTableBody">
+                    <tr>
+                        <td colspan="5" class="no-data">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Phần 3: Danh sách thay đổi nhân khẩu -->
+    <section class="table-section">
+        <h2>Danh sách thay đổi nhân khẩu</h2>
+        <div class="table-container">
+            <table id="personChangesTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Ngày thay đổi</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày tháng năm sinh</th>
+                        <th>Dạng thay đổi</th>
+                    </tr>
+                </thead>
+                <tbody id="personChangesTableBody">
+                    <tr>
+                        <td colspan="5" class="no-data">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Phần 4: Danh sách thay đổi hộ khẩu -->
+    <section class="table-section">
+        <h2>Danh sách thay đổi hộ khẩu</h2>
+        <div class="table-container">
+            <table id="householdChangesTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Ngày thay đổi</th>
+                        <th>Trường thay đổi</th>
+                        <th>Nội dung thay đổi</th>
+                    </tr>
+                </thead>
+                <tbody id="householdChangesTableBody">
+                    <tr>
+                        <td colspan="4" class="no-data">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Phần 5: Danh sách tạm trú -->
+    <section class="table-section">
+        <h2>Danh sách đang tạm trú</h2>
+        <div class="table-container">
+            <table id="temporaryResidentsTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Họ và tên</th>
+                        <th>Ngày tháng năm sinh</th>
+                        <th>Thời gian bắt đầu</th>
+                        <th>Thời gian kết thúc</th>
+                    </tr>
+                </thead>
+                <tbody id="temporaryResidentsTableBody">
+                    <tr>
+                        <td colspan="5" class="no-data">Không có dữ liệu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+<!-- Popup thông tin nhân khẩu -->
+<div id="personInfoPopup" class="popup-overlay">
+    <div class="popup-content">
+        <div class="popup-header">
+            <h3>Thông tin nhân khẩu</h3>
+            <button class="popup-close" onclick="closePersonPopup()">&times;</button>
+        </div>
+        <div class="popup-body">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Họ và tên:</span>
+                    <span class="info-value" id="popupName">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Ngày sinh:</span>
+                    <span class="info-value" id="popupBirthDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Giới tính:</span>
+                    <span class="info-value" id="popupGender">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">CCCD/CMND:</span>
+                    <span class="info-value" id="popupIdCard">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Số điện thoại:</span>
+                    <span class="info-value" id="popupPhone">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Quan hệ với chủ hộ:</span>
+                    <span class="info-value" id="popupRelationship">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nghề nghiệp:</span>
+                    <span class="info-value" id="popupOccupation">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Nơi làm việc:</span>
+                    <span class="info-value" id="popupWorkplace">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Trạng thái:</span>
+                    <span class="info-value" id="popupStatus">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- <script>
+    const HOUSEHOLD_ID = {{ household_id|default:0 }};
+</script> -->
+<script src="{% static 'js/chitiet_hk.js' %}"></script>
+{% endblock %}

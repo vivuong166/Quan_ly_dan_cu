@@ -1,59 +1,63 @@
+// Sample data - declare globally for access from window functions
+let persons = [
+    { 
+        id: 1,
+        full_name: 'Nguyễn Văn A', 
+        alias: 'A',
+        dob: '1985-03-15',
+        gender: 'M',
+        relation_to_head: 'Chủ hộ',
+        id_number: '012345678',
+        occupation: 'Kỹ sư',
+        household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
+        is_head: true,
+        notes: 'Chủ hộ gia đình'
+    },
+    { 
+        id: 2,
+        full_name: 'Trần Thị B', 
+        alias: 'B',
+        dob: '1990-08-22',
+        gender: 'F',
+        relation_to_head: 'Chủ hộ',
+        id_number: '098765432',
+        occupation: 'Giáo viên',
+        household: { code: 'HK-002', address: 'Số 34, Ngõ Y, La Khê' },
+        is_head: true,
+        notes: ''
+    },
+    { 
+        id: 3,
+        full_name: 'Lê Văn C', 
+        alias: 'C',
+        dob: '2010-12-10',
+        gender: 'M',
+        relation_to_head: 'Con',
+        id_number: '',
+        occupation: 'Học sinh',
+        household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
+        is_head: false,
+        notes: 'Con của Nguyễn Văn A'
+    },
+    { 
+        id: 4,
+        full_name: 'Phạm Thị D', 
+        alias: 'D',
+        dob: '1988-05-30',
+        gender: 'F',
+        relation_to_head: 'Vợ/Chồng',
+        id_number: '111222333',
+        occupation: 'Y tá',
+        household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
+        is_head: false,
+        notes: 'Vợ của Nguyễn Văn A'
+    }
+];
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('nhankhau.js loaded and DOMContentLoaded fired');
+    
     // Sample data - sẽ được thay thế bằng API calls
-    let persons = [
-        { 
-            id: 1,
-            full_name: 'Nguyễn Văn A', 
-            alias: 'A',
-            dob: '1985-03-15',
-            gender: 'M',
-            relation_to_head: 'Chủ hộ',
-            id_number: '012345678',
-            occupation: 'Kỹ sư',
-            household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
-            is_head: true,
-            notes: 'Chủ hộ gia đình'
-        },
-        { 
-            id: 2,
-            full_name: 'Trần Thị B', 
-            alias: 'B',
-            dob: '1990-08-22',
-            gender: 'F',
-            relation_to_head: 'Chủ hộ',
-            id_number: '098765432',
-            occupation: 'Giáo viên',
-            household: { code: 'HK-002', address: 'Số 34, Ngõ Y, La Khê' },
-            is_head: true,
-            notes: ''
-        },
-        { 
-            id: 3,
-            full_name: 'Lê Văn C', 
-            alias: 'C',
-            dob: '2010-12-10',
-            gender: 'M',
-            relation_to_head: 'Con',
-            id_number: '',
-            occupation: 'Học sinh',
-            household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
-            is_head: false,
-            notes: 'Con của Nguyễn Văn A'
-        },
-        { 
-            id: 4,
-            full_name: 'Phạm Thị D', 
-            alias: 'D',
-            dob: '1988-05-30',
-            gender: 'F',
-            relation_to_head: 'Vợ/Chồng',
-            id_number: '111222333',
-            occupation: 'Y tá',
-            household: { code: 'HK-001', address: 'Số 12, Đường X, La Khê' },
-            is_head: false,
-            notes: 'Vợ của Nguyễn Văn A'
-        }
-    ];
 
     let filteredPersons = [...persons];
     let currentPage = 1;
@@ -62,8 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DOM elements
     const searchInput = document.getElementById('searchPerson');
-    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
-    const advancedSearch = document.getElementById('advancedSearch');
     const addPersonBtn = document.getElementById('addPersonBtn');
     const exportBtn = document.getElementById('exportBtn');
     const personModal = document.getElementById('personModal');
@@ -77,14 +79,15 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePagination();
 
     // Event listeners
-    searchInput.addEventListener('input', handleSearch);
-    advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
-    addPersonBtn.addEventListener('click', showAddPersonForm);
-    exportBtn.addEventListener('click', exportPersons);
-    
-    // Filter inputs
-    document.getElementById('applyFilters').addEventListener('click', applyAdvancedFilters);
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+    if (addPersonBtn) {
+        addPersonBtn.addEventListener('click', showAddPersonForm);
+    }
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportPersons);
+    }
 
     function handleSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -101,53 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.style.display !== 'none';
-        advancedSearch.style.display = isVisible ? 'none' : 'block';
-        advancedSearchBtn.innerHTML = isVisible ? 
-            '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
-            '<i class="fas fa-times"></i> Đóng tìm kiếm';
-    }
-
-    function applyAdvancedFilters() {
-        const nameFilter = document.getElementById('filterFullName').value.toLowerCase();
-        const idFilter = document.getElementById('filterIdNumber').value.toLowerCase();
-        const householdFilter = document.getElementById('filterHouseholdCode').value.toLowerCase();
-        const genderFilter = document.getElementById('filterGender').value;
-        const ageFromFilter = parseInt(document.getElementById('filterAgeFrom').value) || 0;
-        const ageToFilter = parseInt(document.getElementById('filterAgeTo').value) || 999;
-
-        filteredPersons = persons.filter(person => {
-            const age = calculateAge(person.dob);
-            
-            return (!nameFilter || person.full_name.toLowerCase().includes(nameFilter)) &&
-                   (!idFilter || person.id_number.toLowerCase().includes(idFilter)) &&
-                   (!householdFilter || person.household.code.toLowerCase().includes(householdFilter)) &&
-                   (!genderFilter || person.gender === genderFilter) &&
-                   (age >= ageFromFilter && age <= ageToFilter);
-        });
-
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function clearFilters() {
-        document.getElementById('filterFullName').value = '';
-        document.getElementById('filterIdNumber').value = '';
-        document.getElementById('filterHouseholdCode').value = '';
-        document.getElementById('filterGender').value = '';
-        document.getElementById('filterAgeFrom').value = '';
-        document.getElementById('filterAgeTo').value = '';
-        searchInput.value = '';
-        filteredPersons = [...persons];
         currentPage = 1;
         updatePersonList();
         updateStatistics();
@@ -175,9 +131,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     <button class="btn-sm" onclick="viewPerson(${person.id})">
                         <i class="fas fa-eye"></i> Xem
                     </button>
-                    <button class="btn-sm" onclick="editPerson(${person.id})">
+                    <a href="/qlhk_nk/nhankhau/suank/${person.id}/" class="btn-sm">
                         <i class="fas fa-edit"></i> Sửa
-                    </button>
+                    </a>
                 </td>
             `;
             personList.appendChild(row);
@@ -237,11 +193,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('personAlias').value = person.alias || '';
             document.getElementById('personDob').value = person.dob;
             document.getElementById('personGender').value = person.gender;
+            document.getElementById('personBirthPlace').value = person.birth_place || '';
+            document.getElementById('personHometown').value = person.hometown || '';
             document.getElementById('personRelation').value = person.relation_to_head || '';
             document.getElementById('personIdNumber').value = person.id_number || '';
+            document.getElementById('personIdIssueDate').value = person.id_issue_date || '';
+            document.getElementById('personIdIssuePlace').value = person.id_issue_place || '';
+            document.getElementById('personResidenceRegDate').value = person.residence_reg_date || '';
+            document.getElementById('personPreviousResidence').value = person.previous_residence || '';
             document.getElementById('personOccupation').value = person.occupation || '';
-            document.getElementById('personIsHead').checked = person.is_head || false;
-            document.getElementById('personNotes').value = person.notes || '';
             
             personModal.style.display = 'flex';
         }
@@ -301,11 +261,16 @@ document.addEventListener('DOMContentLoaded', function() {
             alias: document.getElementById('personAlias').value,
             dob: dob,
             gender: gender,
+            birth_place: document.getElementById('personBirthPlace').value,
+            hometown: document.getElementById('personHometown').value,
             relation_to_head: document.getElementById('personRelation').value,
             id_number: document.getElementById('personIdNumber').value,
+            id_issue_date: document.getElementById('personIdIssueDate').value,
+            id_issue_place: document.getElementById('personIdIssuePlace').value,
+            residence_reg_date: document.getElementById('personResidenceRegDate').value,
+            previous_residence: document.getElementById('personPreviousResidence').value,
             occupation: document.getElementById('personOccupation').value,
-            is_head: document.getElementById('personIsHead').checked,
-            notes: document.getElementById('personNotes').value
+            is_head: false
         };
 
         if (currentEditingId) {
@@ -403,14 +368,70 @@ document.addEventListener('DOMContentLoaded', function() {
             closeViewModal();
         }
     }
-
-    // Auto-update relation when checkbox changes
-    document.getElementById('personIsHead').addEventListener('change', function() {
-        const relationSelect = document.getElementById('personRelation');
-        if (this.checked) {
-            relationSelect.value = 'Chủ hộ';
-        } else if (relationSelect.value === 'Chủ hộ') {
-            relationSelect.value = '';
-        }
-    });
 });
+
+// Global functions for person actions
+window.viewPerson = function(personId) {
+    // Find person in the list
+    const person = persons.find(p => p.id === personId);
+    
+    if (!person) {
+        alert('Không tìm thấy thông tin nhân khẩu');
+        return;
+    }
+    
+    // Calculate age
+    const today = new Date();
+    const birthDate = new Date(person.dob);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+    }
+    
+    // Fill in the modal with person details
+    document.getElementById('viewFullName').textContent = person.full_name || '-';
+    document.getElementById('viewAlias').textContent = person.alias || '-';
+    document.getElementById('viewDob').textContent = formatDate(person.dob) || '-';
+    document.getElementById('viewAge').textContent = age + ' tuổi';
+    document.getElementById('viewGender').textContent = person.gender === 'M' ? 'Nam' : person.gender === 'F' ? 'Nữ' : 'Khác';
+    document.getElementById('viewIdNumber').textContent = person.id_number || '-';
+    document.getElementById('viewHouseholdCode').textContent = person.household?.code || '-';
+    document.getElementById('viewRelation').textContent = person.relation_to_head || '-';
+    document.getElementById('viewAddress').textContent = person.household?.address || '-';
+    document.getElementById('viewOccupation').textContent = person.occupation || '-';
+    
+    // Store current person ID for edit function
+    window.currentViewingPersonId = personId;
+    
+    // Show the modal
+    const modal = document.getElementById('viewPersonModal');
+    modal.style.display = 'flex';
+};
+
+window.editPerson = function(personId) {
+    console.log('Edit person:', personId);
+    alert(`Chỉnh sửa nhân khẩu ID: ${personId}\n\nChức năng này sẽ được triển khai sau.`);
+};
+
+window.closeViewModal = function() {
+    const modal = document.getElementById('viewPersonModal');
+    modal.style.display = 'none';
+};
+
+window.editFromView = function() {
+    if (window.currentViewingPersonId) {
+        closeViewModal();
+        editPerson(window.currentViewingPersonId);
+    }
+};
+
+// Helper function to format date
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+}

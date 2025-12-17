@@ -1,16 +1,120 @@
+// Global households data
+const householdsData = [
+    { id: 'HK-001', chu: 'Nguyễn Văn A', members: 4, fees: [{ year: 2025, paid: true }] },
+    { id: 'HK-002', chu: 'Trần Thị B', members: 3, fees: [] },
+    { id: 'HK-003', chu: 'Lê Văn C', members: 5, fees: [] },
+    { id: 'HK-004', chu: 'Phạm Thị D', members: 2, fees: [] },
+    { id: 'HK-005', chu: 'Hoàng Văn E', members: 6, fees: [] }
+];
+
 document.addEventListener('DOMContentLoaded', function(){
-    const households = [
-        { id: 'HK-001', chu: 'Nguyễn Văn A', members: 4 },
-        { id: 'HK-002', chu: 'Trần Thị B', members: 3 },
-        { id: 'HK-003', chu: 'Lê Văn C', members: 5 },
-        { id: 'HK-004', chu: 'Phạm Thị D', members: 2 },
-        { id: 'HK-005', chu: 'Hoàng Văn E', members: 6 }
-    ];
-    const unit = 6000; // 6.000đ / người / tháng
+    const households = householdsData;
+    const unit = 6000; // 6.000đ / người / năm
 
     const feeList = document.getElementById('feeList');
 
     function formatVnd(n){ return n.toLocaleString('vi-VN') + 'đ'; }
+    
+    // Populate year dropdowns
+    function populateYearDropdowns() {
+        const currentYear = new Date().getFullYear();
+        const feeYearSelect = document.getElementById('feeYear');
+        const filterYearSelect = document.getElementById('filterYear');
+        
+        if (feeYearSelect) {
+            // Add years from current-1 back to 2020
+            for (let year = currentYear - 1; year >= 2020; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                feeYearSelect.appendChild(option);
+            }
+        }
+        
+        if (filterYearSelect) {
+            // Add years for filter (including current year)
+            for (let year = currentYear; year >= 2020; year--) {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                filterYearSelect.appendChild(option);
+            }
+            
+            // Auto-select the most recent year with data
+            const latestYear = getLatestFeeYear();
+            if (latestYear) {
+                filterYearSelect.value = latestYear;
+                filterFeeList(latestYear);
+            }
+        }
+    }
+    
+    // Get the latest year with fee data
+    function getLatestFeeYear() {
+        let maxYear = 0;
+        households.forEach(h => {
+            if (h.fees && h.fees.length > 0) {
+                h.fees.forEach(f => {
+                    if (f.year > maxYear) maxYear = f.year;
+                });
+            }
+        });
+        return maxYear || null;
+    }
+    
+    // Filter fee list by year
+    function filterFeeList(year) {
+        renderFeeList(year);
+    }
+    
+    // Render fee list with sorting (unpaid first)
+    function renderFeeList(filterYear = '') {
+        if (!feeList) return;
+        
+        feeList.innerHTML = '';
+        
+        // Collect all fee records
+        let feeRecords = [];
+        households.forEach(h => {
+            if (h.fees && h.fees.length > 0) {
+                h.fees.forEach(f => {
+                    if (!filterYear || f.year == filterYear) {
+                        feeRecords.push({
+                            id: h.id,
+                            chu: h.chu,
+                            members: h.members,
+                            year: f.year,
+                            paid: f.paid
+                        });
+                    }
+                });
+            }
+        });
+        
+        // Sort: unpaid first, then paid
+        feeRecords.sort((a, b) => {
+            if (a.paid === b.paid) return b.year - a.year; // Same status: newer year first
+            return a.paid ? 1 : -1; // Unpaid first
+        });
+        
+        // Render rows
+        feeRecords.forEach(record => {
+            const total = record.members * unit;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${record.id}</td>
+                            <td>${record.chu}</td>
+                            <td>${record.members}</td>
+                            <td>${record.year}</td>
+                            <td>${formatVnd(total)}</td>
+                            <td><span class="status ${record.paid ? 'paid' : 'unpaid'}">${record.paid ? 'Đã thu' : 'Chưa thu'}</span></td>
+                            <td><button class="btn-action" onclick="handleFeeAction(this, '${record.id}', ${record.year})">${record.paid ? 'Hoàn tác' : 'Thu phí'}</button></td>`;
+            feeList.appendChild(tr);
+        });
+    }
+    
+    // Initialize page
+    populateYearDropdowns();
+    renderFeeList();
     
     // Initialize household dropdown
     function initializeHouseholdDropdown() {
@@ -23,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function(){
         }
         
         // Add households from data
-        households.forEach(h => {
+        householdsData.forEach(h => {
             const option = document.createElement('option');
             option.value = h.id;
             option.textContent = `${h.id} - ${h.chu} (${h.members} người)`;
@@ -50,63 +154,58 @@ document.addEventListener('DOMContentLoaded', function(){
     const addFeeBtn = document.getElementById('addFee');
     if (addFeeBtn) {
         addFeeBtn.addEventListener('click', function(){
-            if (!confirm('Tạo phiếu thu cho tháng này cho tất cả hộ gia đình?')) return;
+            const yearSelect = document.getElementById('feeYear');
+            const selectedYear = yearSelect ? parseInt(yearSelect.value) : null;
             
-            const currentMonth = new Date().toLocaleDateString('vi-VN',{year:'numeric', month:'2-digit'});
+            if (!selectedYear) {
+                alert('Vui lòng chọn năm lập phiếu thu!');
+                return;
+            }
+            
+            // Check if year already exists for any household
+            const yearExists = households.some(h => 
+                h.fees && h.fees.some(f => f.year === selectedYear)
+            );
+            
+            if (yearExists) {
+                alert(`Đã có phiếu thu cho năm ${selectedYear}. Vui lòng chọn năm khác!`);
+                return;
+            }
+            
+            if (!confirm(`Tạo phiếu thu cho năm ${selectedYear} cho tất cả hộ gia đình?`)) return;
             
             households.forEach(h => {
-                const total = h.members * unit;
-                if (!feeList) return;
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${h.id}</td>
-                                <td>${h.chu}</td>
-                                <td>${h.members}</td>
-                                <td>${currentMonth}</td>
-                                <td>${formatVnd(total)}</td>
-                                <td><span class="status unpaid clickable" onclick="toggleStatus(this)">Chưa thu</span></td>`;
-                feeList.prepend(tr);
+                if (!h.fees) h.fees = [];
+                h.fees.push({ year: selectedYear, paid: false });
             });
             
-            alert('Đã tạo phiếu thu cho tất cả hộ gia đình!');
+            // Reset year selector
+            yearSelect.value = '';
+            
+            // Re-render list and update filter
+            renderFeeList();
+            
+            // Update filter dropdown and auto-select new year
+            const filterYear = document.getElementById('filterYear');
+            if (filterYear) {
+                filterYear.value = selectedYear;
+                filterFeeList(selectedYear);
+            }
+            
+            alert(`Đã tạo phiếu thu cho năm ${selectedYear} cho tất cả hộ gia đình!`);
         });
     }
-
-    // Print functionality
-    const printFeeBtn = document.getElementById('printFee');
-    if (printFeeBtn) {
-        printFeeBtn.addEventListener('click', function(){
-            const panel = document.querySelector('#tab-fee .table-container');
-            if (!panel) return;
-            const win = window.open('', '_blank');
-            win.document.write(`
-                <html>
-                    <head>
-                        <title>Danh sách phiếu thu</title>
-                        <style>
-                            body { font-family: Arial, sans-serif; margin: 20px; }
-                            h3 { color: #333; text-align: center; }
-                            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                            th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
-                            th { background-color: #f5f5f5; font-weight: bold; }
-                            .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; }
-                            .paid { background: #dcfce7; color: #166534; }
-                            .unpaid { background: #fef2f2; color: #dc2626; }
-                        </style>
-                    </head>
-                    <body>
-                        <h3>Danh sách phiếu thu phí vệ sinh</h3>
-                        ${panel.outerHTML}
-                    </body>
-                </html>
-            `);
-            win.print();
-            win.close();
+    
+    // Filter year change handler
+    const filterYearSelect = document.getElementById('filterYear');
+    if (filterYearSelect) {
+        filterYearSelect.addEventListener('change', function() {
+            filterFeeList(this.value);
         });
     }
 
     // Donation functionality placeholder
     const addDonationBtn = document.getElementById('addDonation');
-    const printDonationBtn = document.getElementById('printDonation');
     
     if (addDonationBtn) {
         addDonationBtn.addEventListener('click', function(){
@@ -138,9 +237,6 @@ document.addEventListener('DOMContentLoaded', function(){
             
             const formattedAmount = parseInt(donationAmount).toLocaleString('vi-VN') + 'đ';
             
-            // Update donation statistics
-            updateDonationStatistics(donationType, parseInt(donationAmount));
-            
             alert(`Đã ghi nhận đóng góp:\n` +
                   `- Đợt: ${campaignName}\n` +
                   `- Hộ gia đình: ${householdInfo}\n` +
@@ -152,43 +248,40 @@ document.addEventListener('DOMContentLoaded', function(){
             document.getElementById('donationAmount').value = '';
         });
     }
-    
-    if (printDonationBtn) {
-        printDonationBtn.addEventListener('click', function(){
-            alert('Chức năng in biên nhận đang được phát triển!');
-        });
-    }
 });
 
-// Global function for status toggling
-function toggleStatus(statusElement) {
-    const isPaid = statusElement.classList.contains('paid');
+// Global function for fee action (Thu phí/Hoàn tác)
+function handleFeeAction(btn, householdId, year) {
+    const household = householdsData.find(h => h.id === householdId);
+    if (!household) return;
     
-    if (isPaid) {
-        // Change from "Đã thu" to "Chưa thu"
-        statusElement.classList.remove('paid');
-        statusElement.classList.add('unpaid');
-        statusElement.textContent = 'Chưa thu';
+    const feeRecord = household.fees.find(f => f.year === year);
+    if (!feeRecord) return;
+    
+    // Toggle paid status
+    feeRecord.paid = !feeRecord.paid;
+    
+    // Update UI
+    const row = btn.closest('tr');
+    const statusCell = row.querySelector('.status');
+    
+    if (feeRecord.paid) {
+        statusCell.classList.remove('unpaid');
+        statusCell.classList.add('paid');
+        statusCell.textContent = 'Đã thu';
+        btn.textContent = 'Hoàn tác';
     } else {
-        // Change from "Chưa thu" to "Đã thu"
-        statusElement.classList.remove('unpaid');
-        statusElement.classList.add('paid');
-        statusElement.textContent = 'Đã thu';
+        statusCell.classList.remove('paid');
+        statusCell.classList.add('unpaid');
+        statusCell.textContent = 'Chưa thu';
+        btn.textContent = 'Thu phí';
     }
     
     // Visual feedback
-    statusElement.style.transform = 'scale(1.1)';
+    statusCell.style.transform = 'scale(1.1)';
     setTimeout(() => {
-        statusElement.style.transform = 'scale(1)';
+        statusCell.style.transform = 'scale(1)';
     }, 150);
-    
-    // Optional: Show notification
-    const status = statusElement.textContent;
-    const row = statusElement.closest('tr');
-    const houseId = row.cells[0].textContent;
-    const chuHo = row.cells[1].textContent;
-    
-    console.log(`Cập nhật trạng thái: ${houseId} (${chuHo}) - ${status}`);
 }
 
 // Modal functions
@@ -202,7 +295,6 @@ function showCreateCampaignModal() {
         
         document.getElementById('startDate').value = today;
         document.getElementById('endDate').value = nextWeek;
-        document.getElementById('campaignStatus').value = 'planned';
     }
 }
 
@@ -255,7 +347,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Validate required fields
             if (!campaignData.campaignName || !campaignData.startDate || 
-                !campaignData.endDate || !campaignData.campaignType) {
+                !campaignData.endDate) {
                 alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
                 return;
             }
@@ -272,8 +364,15 @@ document.addEventListener('DOMContentLoaded', function() {
             // Process the campaign creation
             console.log('Tạo đợt đóng góp:', campaignData);
             
-            // Add to the donation list (mock)
-            addCampaignToList(campaignData);
+            // Add campaign to dropdown
+            const donationTypeSelect = document.getElementById('donationType');
+            if (donationTypeSelect) {
+                const campaignId = campaignData.campaignName.toLowerCase().replace(/\s+/g, '_');
+                const option = document.createElement('option');
+                option.value = campaignId;
+                option.textContent = campaignData.campaignName;
+                donationTypeSelect.appendChild(option);
+            }
             
             alert('Tạo đợt đóng góp thành công!');
             closeCreateCampaignModal();
@@ -281,103 +380,3 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function addCampaignToList(campaignData) {
-    const donationList = document.getElementById('donationList');
-    if (!donationList) return;
-    
-    const tr = document.createElement('tr');
-    const targetAmount = campaignData.targetAmount ? 
-        parseInt(campaignData.targetAmount).toLocaleString('vi-VN') + 'đ' : 
-        'Không giới hạn';
-    
-    // Set data attribute for tracking
-    const campaignId = campaignData.campaignName.toLowerCase().replace(/\s+/g, '_');
-    tr.setAttribute('data-campaign-id', campaignId);
-    
-    tr.innerHTML = `
-        <td>${campaignData.campaignName}</td>
-        <td>0 hộ</td>
-        <td>0đ / ${targetAmount}</td>
-        <td><button class="btn-sm" onclick="showCampaignDetails('${campaignId}')">Chi tiết</button></td>
-    `;
-    
-    // Insert at the beginning of the list
-    donationList.insertBefore(tr, donationList.firstChild);
-    
-    // Add to dropdown selection
-    const donationTypeSelect = document.getElementById('donationType');
-    if (donationTypeSelect) {
-        const option = document.createElement('option');
-        option.value = campaignId;
-        option.textContent = campaignData.campaignName;
-        donationTypeSelect.appendChild(option);
-    }
-}
-
-// Function to update donation statistics in the table
-function updateDonationStatistics(campaignId, amount) {
-    const donationList = document.getElementById('donationList');
-    if (!donationList) return;
-    
-    // Find the row for this campaign by data-campaign-id or by matching name
-    let campaignRow = null;
-    const rows = donationList.getElementsByTagName('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        
-        // First check by data attribute
-        if (row.getAttribute('data-campaign-id') === campaignId) {
-            campaignRow = row;
-            break;
-        }
-        
-        // Fallback: check by campaign name matching
-        const campaignCell = row.cells[0];
-        if (campaignCell) {
-            const campaignOption = document.querySelector(`#donationType option[value="${campaignId}"]`);
-            const campaignName = campaignOption ? campaignOption.textContent : '';
-            
-            if (campaignCell.textContent === campaignName) {
-                campaignRow = row;
-                // Set data attribute for future updates
-                row.setAttribute('data-campaign-id', campaignId);
-                break;
-            }
-        }
-    }
-    
-    if (campaignRow) {
-        // Update existing campaign
-        const participantsCell = campaignRow.cells[1];
-        const amountCell = campaignRow.cells[2];
-        
-        // Extract current numbers
-        const currentParticipants = parseInt(participantsCell.textContent.replace(/\D/g, '')) || 0;
-        const currentAmountText = amountCell.textContent.split('/')[0].trim();
-        const currentAmount = parseInt(currentAmountText.replace(/\D/g, '')) || 0;
-        
-        // Update with new values
-        const newParticipants = currentParticipants + 1;
-        const newAmount = currentAmount + amount;
-        
-        participantsCell.textContent = `${newParticipants} hộ`;
-        
-        // Keep target amount if it exists
-        const targetPart = amountCell.textContent.includes('/') ? 
-            ' / ' + amountCell.textContent.split('/')[1].trim() : '';
-        
-        amountCell.textContent = newAmount.toLocaleString('vi-VN') + 'đ' + targetPart;
-        
-        // Visual feedback
-        campaignRow.style.backgroundColor = '#e8f5e8';
-        setTimeout(() => {
-            campaignRow.style.backgroundColor = '';
-        }, 2000);
-    }
-}
-
-// Function to show campaign details (placeholder)
-function showCampaignDetails(campaignId) {
-    alert(`Chi tiết đợt đóng góp: ${campaignId}\n\nChức năng đang được phát triển!`);
-}

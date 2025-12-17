@@ -7,15 +7,12 @@
         <a href="{% url 'qlnk' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
-        <a href="{% url 'nhankhau' %}" class="btn">
-            <i class="fas fa-list"></i> Danh sách nhân khẩu
-        </a>
     </div>
 </div>
 
 <!-- Form Panel -->
 <div class="dashboard-panels">
-    <div class="panel" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto;">
+    <div class="panel">
         <!-- <div class="panel-header">
             <h3><i class="fas fa-user-plus"></i> Thông tin nhân khẩu</h3>
         </div> -->
@@ -26,24 +23,15 @@
                 <!-- Household Selection -->
                 <div class="form-section">
                     <h4><i class="fas fa-home"></i> Thông tin hộ khẩu</h4>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Chọn hộ khẩu *</label>
-                            <select id="personHousehold" name="household" class="form-input" required>
-                                <option value="">-- Chọn hộ khẩu --</option>
-                                <option value="HK-001">HK-001 - Nguyễn Văn A (Số 12, Đường X)</option>
-                                <option value="HK-002">HK-002 - Trần Thị B (Số 34, Ngõ Y)</option>
-                                <option value="HK-003">HK-003 - Lê Văn C (Số 56, Phố Z)</option>
-                            </select>
-                            <small class="help-text">Chọn hộ khẩu mà nhân khẩu này thuộc về</small>
-                        </div>
-                        <div class="form-group">
-                            <label class="checkbox-inline">
-                                <input type="checkbox" id="personIsHead" name="is_head"> 
-                                <span>Là chủ hộ</span>
-                            </label>
-                            <small class="help-text">Đánh dấu nếu người này là chủ hộ gia đình</small>
-                        </div>
+                    <div class="form-group">
+                        <label class="required">Chọn hộ khẩu</label>
+                        <select id="personHousehold" name="household" class="form-input" required>
+                            <option value="">-- Chọn hộ khẩu --</option>
+                            <option value="HK-001">HK-001 - Nguyễn Văn A (Số 12, Đường X)</option>
+                            <option value="HK-002">HK-002 - Trần Thị B (Số 34, Ngõ Y)</option>
+                            <option value="HK-003">HK-003 - Lê Văn C (Số 56, Phố Z)</option>
+                        </select>
+                        <small class="help-text">Chọn hộ khẩu mà nhân khẩu này thuộc về</small>
                     </div>
                 </div>
 
@@ -52,24 +40,24 @@
                     <h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Họ và tên *</label>
+                            <label class="required">Họ và tên</label>
                             <input type="text" id="personFullName" name="full_name" class="form-input" 
                                    placeholder="Nhập họ và tên đầy đủ" required>
                         </div>
                         <div class="form-group">
-                            <label>Tên thường gọi</label>
+                            <label>Bí danh</label>
                             <input type="text" id="personAlias" name="alias" class="form-input" 
-                                   placeholder="Tên thường gọi (không bắt buộc)">
+                                   placeholder="Tên gọi khác (không bắt buộc)">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Ngày sinh *</label>
+                            <label class="required">Ngày sinh</label>
                             <input type="date" id="personDob" name="dob" class="form-input" required>
                         </div>
                         <div class="form-group">
-                            <label>Giới tính *</label>
+                            <label class="required">Giới tính</label>
                             <select id="personGender" name="gender" class="form-input" required>
                                 <option value="">-- Chọn giới tính --</option>
                                 <option value="M">Nam</option>
@@ -81,24 +69,56 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Quan hệ với chủ hộ *</label>
-                            <select id="personRelation" name="relation_to_head" class="form-input" required>
-                                <option value="">-- Chọn quan hệ --</option>
-                                <option value="Chủ hộ">Chủ hộ</option>
-                                <option value="Vợ/Chồng">Vợ/Chồng</option>
-                                <option value="Con">Con</option>
-                                <option value="Cha/Mẹ">Cha/Mẹ</option>
-                                <option value="Anh/Chị/Em">Anh/Chị/Em</option>
-                                <option value="Ông/Bà">Ông/Bà</option>
-                                <option value="Cháu">Cháu</option>
-                                <option value="Khác">Khác</option>
-                            </select>
+                            <label>Nơi sinh</label>
+                            <input type="text" id="personBirthPlace" name="birth_place" class="form-input" 
+                                   placeholder="Bệnh viện, Phường/Xã, Quận/Huyện, Tỉnh/TP...">
+                        </div>
+                        <div class="form-group">
+                            <label>Quê quán</label>
+                            <input type="text" id="personHometown" name="hometown" class="form-input" 
+                                   placeholder="Phường/Xã, Quận/Huyện, Tỉnh/TP...">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="required">Quan hệ với chủ hộ</label>
+                            <input type="text" id="personRelation" name="relation_to_head" class="form-input" 
+                                   placeholder="Vợ/Chồng, Con, Cha/Mẹ, Anh/Chị/Em..." required>
                         </div>
                         <div class="form-group">
                             <label>Số CMND/CCCD</label>
                             <input type="text" id="personIdNumber" name="id_number" class="form-input" 
                                    placeholder="Nhập số căn cước công dân">
                             <small class="help-text">Có thể để trống cho trẻ em chưa có giấy tờ</small>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày cấp CMND/CCCD</label>
+                            <input type="date" id="personIdIssueDate" name="id_issue_date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Nơi cấp CMND/CCCD</label>
+                            <input type="text" id="personIdIssuePlace" name="id_issue_place" class="form-input" 
+                                   placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Residence Registration -->
+                <div class="form-section">
+                    <h4><i class="fas fa-map-marker-alt"></i> Thông tin đăng ký thường trú</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Ngày đăng ký thường trú</label>
+                            <input type="date" id="personResidenceRegDate" name="residence_reg_date" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Địa chỉ nơi thường trú trước khi chuyển đến</label>
+                            <input type="text" id="personPreviousResidence" name="previous_residence" class="form-input" 
+                                   placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
                         </div>
                     </div>
                 </div>
@@ -120,23 +140,10 @@
                     </div>
                 </div>
 
-                <!-- Additional Information -->
-                <div class="form-section">
-                    <h4><i class="fas fa-info-circle"></i> Thông tin bổ sung</h4>
-                    <div class="form-group">
-                        <label>Ghi chú</label>
-                        <textarea id="personNotes" name="notes" class="form-input" rows="4" 
-                                  placeholder="Thông tin bổ sung (học vấn, tình trạng sức khỏe, ...)"></textarea>
-                    </div>
-                </div>
-
                 <!-- Form Actions -->
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="resetForm()">
                         <i class="fas fa-undo"></i> Làm mới
-                    </button>
-                    <button type="button" class="btn" onclick="previewData()">
-                        <i class="fas fa-eye"></i> Xem trước
                     </button>
                     <button type="submit" class="btn primary-1">
                         <i class="fas fa-save"></i> Lưu nhân khẩu
@@ -151,72 +158,6 @@
 <div id="successMessage" class="alert alert-success" style="display: none;">
     <i class="fas fa-check-circle"></i>
     <span>Thêm nhân khẩu thành công!</span>
-</div>
-
-<!-- Preview Modal -->
-<div id="previewModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Xem trước thông tin nhân khẩu</h3>
-            <span class="close" onclick="closePreviewModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <div class="preview-content">
-                <div class="preview-section">
-                    <h4>Thông tin hộ khẩu</h4>
-                    <div class="preview-item">
-                        <strong>Hộ khẩu:</strong> <span id="previewHousehold"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Vai trò:</strong> <span id="previewRole"></span>
-                    </div>
-                </div>
-                
-                <div class="preview-section">
-                    <h4>Thông tin cá nhân</h4>
-                    <div class="preview-item">
-                        <strong>Họ và tên:</strong> <span id="previewFullName"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Tên thường gọi:</strong> <span id="previewAlias"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Ngày sinh:</strong> <span id="previewDob"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Giới tính:</strong> <span id="previewGender"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Quan hệ:</strong> <span id="previewRelation"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>CMND/CCCD:</strong> <span id="previewIdNumber"></span>
-                    </div>
-                </div>
-                
-                <div class="preview-section">
-                    <h4>Thông tin nghề nghiệp</h4>
-                    <div class="preview-item">
-                        <strong>Nghề nghiệp:</strong> <span id="previewOccupation"></span>
-                    </div>
-                    <div class="preview-item">
-                        <strong>Nơi làm việc:</strong> <span id="previewWorkplace"></span>
-                    </div>
-                </div>
-                
-                <div class="preview-section" id="notesSection" style="display: none;">
-                    <h4>Ghi chú</h4>
-                    <div class="preview-item">
-                        <span id="previewNotes"></span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" onclick="closePreviewModal()">Đóng</button>
-            <button class="btn primary" onclick="submitFromPreview()">Xác nhận và lưu</button>
-        </div>
-    </div>
 </div>
 
 <script src="{% static 'js/themnk.js' %}"></script>

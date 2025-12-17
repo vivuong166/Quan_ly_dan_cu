@@ -10,7 +10,6 @@ from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-
 class HouseholdViewSet(viewsets.ModelViewSet):
     queryset = Household.objects.all().order_by('code')
     serializer_class = HouseholdSerializer
@@ -33,7 +32,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Response(list(qs))
 
 def home(request):
-    return render(request, "home.html")
+    role = request.session.get("user_role", "CAN_BO")
+    return render(request, "home.html", {"role": role})
 
 
 from django.shortcuts import render
@@ -47,7 +47,6 @@ from .models import Household, Person
 from django.shortcuts import render
 from django.db.models import Q
 from .models import Household
-
 
 from django.shortcuts import render
 from django.db.models import Q
@@ -178,7 +177,6 @@ def qltv_tt(request):
 
         return HttpResponseRedirect(reverse("qltv_tt"))
 
-
     # ------------------------------
     # 2) Xử lý tìm kiếm danh sách tạm vắng → GET
     # ------------------------------
@@ -254,11 +252,9 @@ def tamtru(request):
     # View riêng cho tạm trú - logic tương tự
     return render(request, "tamtru.html")
 
-
 def thuphi(request):
 
     return render(request, "thuphi.html")
-
 
 def thongke_baocao(request):
 
@@ -295,9 +291,7 @@ def quanly_truycap(request):
 
     return render(request, "quanly_truycap.html")
 
-
 from django.db.models import Q
-
 
 from django.shortcuts import render
 from django.db.models import Q
@@ -324,6 +318,18 @@ def nhankhau(request):
 
 def themnk(request):
     return render(request, "themnk.html")
+
+def suank(request, person_id):
+    return render(request, "form_sua_nk.html", {"person_id": person_id})
+
+def suahk(request, household_id):
+    return render(request, "form_sua_hk.html", {"household_id": household_id})
+
+def chitiet_hk(request, household_id):
+    return render(request, "chitiet_hk.html", {"household_id": household_id})
+
+def tachhk(request, household_id):
+    return render(request, "form_tach_hk.html", {"household_id": household_id})
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import User
@@ -486,7 +492,6 @@ def taohokhau(request, household_id=None):
 
     return render(request, 'taohokhau.html', context)
 
-
 def biendong(request):
     """View cho trang cập nhật biến động nhân khẩu"""
     if request.method == 'POST':
@@ -543,3 +548,6 @@ def biendong(request):
     return render(request, 'biendong.html')
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
+
+def page_not_found(request):
+    return render(request, "404.html")

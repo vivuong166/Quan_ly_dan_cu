@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Sửa thông tin hộ khẩu</h2>
+    <div class="header-actions">
+        <a href="{% url 'sohokhau' %}" class="btn">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+<!-- Form Panel -->
+<div class="dashboard-panels">
+    <div class="panel">
+        <div class="panel-body">
+            <form id="editHouseholdForm" method="post">
+                {% csrf_token %}
+                
+                <!-- Edit Type Selection -->
+                <div class="form-section">
+                    <h4><i class="fas fa-edit"></i> Chọn loại thay đổi</h4>
+                    <div class="form-group">
+                        <label class="required">Chọn 1 trong 2 cái để thay đổi</label>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="edit_type" value="address" onchange="handleEditTypeChange()">
+                                <span class="radio-label">Thay đổi địa chỉ</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="edit_type" value="head" onchange="handleEditTypeChange()">
+                                <span class="radio-label">Thay đổi chủ hộ</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Address Change Section -->
+                <div id="addressSection" class="form-section" style="display: none;">
+                    <h4><i class="fas fa-map-marker-alt"></i> Thay đổi địa chỉ thường trú</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="required">Số nhà</label>
+                            <input type="text" id="houseNumber" name="house_number" class="form-input" 
+                                   placeholder="Số 12, 34A, 56/78...">
+                        </div>
+                        <div class="form-group">
+                            <label class="required">Tên đường / ngõ / phố</label>
+                            <input type="text" id="streetName" name="street_name" class="form-input" 
+                                   placeholder="Đường Lạc Long Quân, Ngõ 123...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Head Change Section -->
+                <div id="headSection" class="form-section" style="display: none;">
+                    <h4><i class="fas fa-users"></i> Chọn chủ hộ mới</h4>
+                    <p class="section-description">Danh sách toàn bộ nhân khẩu trong hộ (bao gồm cả tạm vắng)</p>
+                    
+                    <!-- Household Members Table -->
+                    <div class="table-container" style="margin-bottom: 24px;">
+                        <table class="table-members">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px;">Chọn</th>
+                                    <th>Họ và tên</th>
+                                    <th>Chủ hộ</th>
+                                    <th>Quan hệ với chủ hộ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersList">
+                                <!-- Sample data - will be populated by JS -->
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="new_head" value="1" id="member1" onchange="handleHeadSelection(1)">
+                                    </td>
+                                    <td>
+                                        <label for="member1" style="cursor: pointer; margin: 0;">
+                                            <strong>Nguyễn Văn A</strong>
+                                        </label>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">Chủ hộ hiện tại</span>
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-input" value="Chủ hộ" placeholder="Nhập quan hệ...">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="new_head" value="2" id="member2" onchange="handleHeadSelection(2)">
+                                    </td>
+                                    <td>
+                                        <label for="member2" style="cursor: pointer; margin: 0;">
+                                            <strong>Phạm Thị B</strong>
+                                        </label>
+                                    </td>
+                                    <td>-</td>
+                                    <td>
+                                        <input type="text" class="form-input" value="Vợ/Chồng" placeholder="Nhập quan hệ...">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="radio" name="new_head" value="3" id="member3" onchange="handleHeadSelection(3)">
+                                    </td>
+                                    <td>
+                                        <label for="member3" style="cursor: pointer; margin: 0;">
+                                            <strong>Lê Văn C</strong>
+                                        </label>
+                                    </td>
+                                    <td>-</td>
+                                    <td>
+                                        <input type="text" class="form-input" value="Con" placeholder="Nhập quan hệ...">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- New Head Relationship Input -->
+                    <div id="relationshipSection" style="display: none;">
+                        <div class="form-group">
+                            <label class="required">Ghi chú các quan hệ với chủ hộ mới</label>
+                            <div class="relationship-inputs" id="relationshipInputs">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Household Info (Always visible) -->
+                <div class="form-section info-section">
+                    <h4><i class="fas fa-info-circle"></i> Thông tin hộ khẩu hiện tại</h4>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Mã hộ khẩu:</label>
+                            <span id="currentCode">HK-001</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Chủ hộ hiện tại:</label>
+                            <span id="currentHead">Nguyễn Văn A</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Địa chỉ hiện tại:</label>
+                            <span id="currentAddress">Số 12, Đường X, La Khê</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                    <button type="submit" class="btn primary-1">
+                        <i class="fas fa-save"></i> Cập nhật
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Success Message -->
+<div id="successMessage" class="alert alert-success" style="display: none;">
+    <i class="fas fa-check-circle"></i>
+    <span>Cập nhật hộ khẩu thành công!</span>
+</div>
+
+<!-- Pass household_id to JavaScript -->
+<!-- <script>
+    const HOUSEHOLD_ID = {{ household_id|default:0 }};
+</script> -->
+<script src="{% static 'js/form_sua_hk.js' %}"></script>
+<link rel="stylesheet" href="{% static 'css/form_sua_hk.css' %}">
+{% endblock %}
