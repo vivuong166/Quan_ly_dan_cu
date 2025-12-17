@@ -336,18 +336,11 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 def login_view(request):
     if request.method == 'POST':
-        email = request.POST.get('email')
+        user = request.POST.get('email')
         password = request.POST.get('password')
 
-        # Tìm user bằng email
-        try:
-            user_obj = User.objects.get(email=email)
-        except User.DoesNotExist:
-            messages.error(request, "Email không tồn tại!")
-            return render(request, 'login.html')
-
         # Authenticate bằng username
-        user = authenticate(request, username=user_obj.username, password=password)
+        user = authenticate(request, username=user, password=password)
 
         if user is not None:
             login(request, user)
