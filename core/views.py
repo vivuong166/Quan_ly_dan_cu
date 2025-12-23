@@ -205,7 +205,7 @@ def qltv_tt(request):
     return render(request, "qltv_tt.html")
 
 
-
+@csrf_exempt
 def tamtru(request):
     if request.method == "POST":
         TemporaryResidence.objects.create(
