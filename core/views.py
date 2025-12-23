@@ -169,7 +169,7 @@ def nhankhau(request):
     })
 
 
-@login_required
+@csrf_exempt
 def themnk(request):
     if request.method == "POST":
         Person.objects.create(
