@@ -1,546 +1,311 @@
-from rest_framework import viewsets, filters
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from django.db.models.functions import TruncMonth
-from django.db.models import Sum
-from .models import Household, Person, Payment,UserRole
-from .serializers import HouseholdSerializer, PersonSerializer, PaymentSerializer
-from django.http import JsonResponse, HttpResponse
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
-import json
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.db.models import Q, Sum
 
-class HouseholdViewSet(viewsets.ModelViewSet):
-    queryset = Household.objects.all().order_by('code')
-    serializer_class = HouseholdSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['code','head_name','address']
+from .models import (
+    Household,
+    Person,
+    HygieneFee,
+    TemporaryResidence,
+    TemporaryAbsence,
+    ContributionCampaign,
+    Contribution,
+    UserRole,
+)
 
-class PersonViewSet(viewsets.ModelViewSet):
-    queryset = Person.objects.select_related('household').all()
-    serializer_class = PersonSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['full_name','id_number']
+# ==================================================
+# AUTH
+# ==================================================
 
-class PaymentViewSet(viewsets.ModelViewSet):
-    queryset = Payment.objects.all().order_by('-created_at')
-    serializer_class = PaymentSerializer
-
-    @action(detail=False, methods=['get'])
-    def summary_by_month(self, request):
-        qs = Payment.objects.filter(status='PAID').annotate(month=TruncMonth('created_at')).values('month').annotate(total=Sum('amount')).order_by('month')
-        return Response(list(qs))
-
-def home(request):
-    role = request.session.get("user_role", "CAN_BO")
-    return render(request, "home.html", {"role": role})
-
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household, Person
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household, Person  # Person là model nhân khẩu
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household, Person
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household, Person
-
-def qlnk(request):
-    # ===== 1. Lấy từ khóa tìm kiếm =====
-    search_query_hk = request.GET.get('searchHoKhau', '').strip()
-    search_query_nk = request.GET.get('search_nk', '').strip()
-
-    # ====================================
-    # 2. TÌM KIẾM HỘ KHẨU
-    # ====================================
-    households = Household.objects.all()
-    if search_query_hk:
-        households = households.filter(
-            Q(code__icontains=search_query_hk) |
-            Q(head_name__icontains=search_query_hk) |
-            Q(address__icontains=search_query_hk)
-        )
-    households = households.order_by('code')
-
-    household_list = [
-        {
-            'id': h.id,
-            'code': h.code,
-            'head_name': h.head_name,
-            'address': h.address,
-            'person_count': h.members.count() if hasattr(h, 'members') else 0,
-        }
-        for h in households
-    ]
-
-    # ====================================
-    # 3. TÌM KIẾM NHÂN KHẨU
-    # ====================================
-    persons = Person.objects.select_related('household').all()
-    if search_query_nk:
-        persons = persons.filter(
-            Q(full_name__icontains=search_query_nk) |
-            Q(id_number__icontains=search_query_nk) |
-            Q(dob__icontains=search_query_nk)
-        )
-    persons = persons.order_by('full_name')
-
-    person_list = [
-        {
-            'id': p.id,
-            'full_name': p.full_name,
-            # 'dob': p.dob,
-            'dob': p.dob.strftime('%Y-%m-%d') if p.dob else '',
-            'id_number': p.id_number,
-            'gender': p.get_gender_display(),
-            'household_code': p.household.code if p.household else '',
-            'is_head': p.is_head,
-            'relation_to_head': p.relation_to_head,
-        }
-        for p in persons
-    ]
-
-    # ====================================
-    # 4. TRẢ DỮ LIỆU SANG TEMPLATE
-    # ====================================
-    context = {
-        'households': household_list,
-        'household_count': len(household_list),
-        'searchHoKhau': search_query_hk,
-        'persons': person_list,
-        'person_count': len(person_list),
-        'search_query_nk': search_query_nk,
-        
-        'households_json': json.dumps(household_list, ensure_ascii=False),
-        'persons_json': json.dumps(person_list, ensure_ascii=False)
-    }
-    return render(request, 'qlnk.html', context)
-
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.db.models import Q
-from .models import Household, Person, TemporaryRecord
-from datetime import datetime
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def qltv_tt(request):
-
-    # ------------------------------
-    # 1) Nếu người dùng nhấn "Thêm tạm vắng" → POST
-    # ------------------------------
+def login_view(request):
     if request.method == "POST":
-        household_input = request.POST.get("household", "").strip()   # nhập mã hộ khẩu / tên chủ hộ / nhân khẩu
-        from_date = request.POST.get("from_date", "")
-        to_date = request.POST.get("to_date", "")
-        destination = request.POST.get("destination", "")
-        reason = request.POST.get("reason", "")
+        email = request.POST.get("email")
+        password = request.POST.get("password")
 
-        # Tìm hộ khẩu theo code hoặc tên chủ hộ
-        household = Household.objects.filter(
-            Q(code__iexact=household_input) |
-            Q(head_name__icontains=household_input)
-        ).first()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, "Email không tồn tại")
+            return redirect("login")
 
-        if household is None:
-            return render(request, "qltv_tt.html", {
-                "error": "Không tìm thấy hộ khẩu",
-                "records": TemporaryRecord.objects.filter(rec_type="TEMP_OUT")
-            })
-
-        # Tạo bản ghi tạm vắng
-        TemporaryRecord.objects.create(
-            household=household,
-            person=None,                      # frontend không cho chọn nhân khẩu → để None
-            rec_type="TEMP_OUT",
-            from_date=datetime.strptime(from_date, "%Y-%m-%d"),
-            to_date=datetime.strptime(to_date, "%Y-%m-%d") if to_date else None,
-            destination=destination,
-            reason=reason
+        user = authenticate(
+            request,
+            username=user.username,
+            password=password
         )
 
-        return HttpResponseRedirect(reverse("qltv_tt"))
+        if user is None:
+            messages.error(request, "Sai mật khẩu")
+            return redirect("login")
 
-    # ------------------------------
-    # 2) Xử lý tìm kiếm danh sách tạm vắng → GET
-    # ------------------------------
-    search = request.GET.get("search", "").strip()
-
-    records = TemporaryRecord.objects.filter(rec_type="TEMP_OUT").order_by("-from_date")
-
-    if search:
-        records = records.filter(
-            Q(household__code__icontains=search) |
-            Q(household__head_name__icontains=search) |
-            Q(destination__icontains=search)
+        # ĐẢM BẢO USER LUÔN CÓ ROLE
+        role_obj, created = UserRole.objects.get_or_create(
+            user=user,
+            defaults={"role": "CAN_BO"}
         )
 
-    # ------------------------------
-    # 3) Trả dữ liệu cho template
-    # ------------------------------
-    print(records);
-    print(search);
-    return render(request, "qltv_tt.html", {
-        "records": records,
-        "search": search
+        print(role_obj)#hiển thị chức vụ
+        return redirect("home")
+        login(request, user)
+
+        # có thể dùng role_obj.role để phân quyền
+        return redirect("home")
+
+    return render(request, "login.html")
+
+
+@login_required
+def home(request):
+    return render(request, "home.html", {
+        "role": request.session.get("user_role", "CAN_BO")
     })
 
-def tamvang(request):
-    # View riêng cho tạm vắng - giữ nguyên logic như qltv_tt
+
+# ==================================================
+# QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
+# ==================================================
+@login_required
+def qlnk(request):
+    search_hk = request.GET.get("searchHoKhau", "").strip()
+    search_nk = request.GET.get("searchNhanKhau", "").strip()
+
+    households = Household.objects.all()
+    if search_hk:
+        households = households.filter(
+            Q(ma_ho_khau__icontains=search_hk) |
+            Q(duong_pho__icontains=search_hk) |
+            Q(phuong__icontains=search_hk) |
+            Q(quan__icontains=search_hk)
+        )
+
+    persons = Person.objects.all()
+    if search_nk:
+        persons = persons.filter(
+            Q(ho_ten__icontains=search_nk) |
+            Q(cccd__icontains=search_nk)
+        )
+
+    return render(request, "qlnk.html", {
+        "households": households,
+        "persons": persons,
+    })
+
+
+# ================= HỘ KHẨU =================
+@login_required
+def sohokhau(request):
+    return render(request, "sohokhau.html", {
+        "households": Household.objects.all()
+    })
+
+
+@login_required
+def taohokhau(request, household_id=None):
     if request.method == "POST":
-        household_input = request.POST.get("household", "").strip()
-        from_date = request.POST.get("from_date", "")
-        to_date = request.POST.get("to_date", "")
-        destination = request.POST.get("destination", "")
-        reason = request.POST.get("reason", "")
+        ma_ho_khau = request.POST.get("ma_ho_khau")
 
-        household = Household.objects.filter(
-            Q(code__iexact=household_input) |
-            Q(head_name__icontains=household_input)
-        ).first()
+        if Household.objects.filter(ma_ho_khau=ma_ho_khau).exists():
+            messages.error(request, "Mã hộ khẩu đã tồn tại")
+            return redirect("taohokhau")
 
-        if household is None:
-            return render(request, "tamvang.html", {
-                "error": "Không tìm thấy hộ khẩu",
-                "records": TemporaryRecord.objects.filter(rec_type="TEMP_OUT")
-            })
-
-        TemporaryRecord.objects.create(
-            household=household,
-            person=None,
-            rec_type="TEMP_OUT",
-            from_date=datetime.strptime(from_date, "%Y-%m-%d"),
-            to_date=datetime.strptime(to_date, "%Y-%m-%d") if to_date else None,
-            destination=destination,
-            reason=reason
+        Household.objects.create(
+            ma_ho_khau=ma_ho_khau,
+            so_nha=request.POST.get("so_nha"),
+            duong_pho=request.POST.get("duong_pho"),
+            phuong=request.POST.get("phuong"),
+            quan=request.POST.get("quan"),
         )
+        messages.success(request, "Tạo hộ khẩu thành công")
+        return redirect("sohokhau")
 
-        return HttpResponseRedirect(reverse("tamvang"))
+    return render(request, "taohokhau.html")
 
-    search = request.GET.get("search", "").strip()
-    records = TemporaryRecord.objects.filter(rec_type="TEMP_OUT").order_by("-from_date")
 
-    if search:
-        records = records.filter(
-            Q(household__code__icontains=search) |
-            Q(household__head_name__icontains=search) |
-            Q(destination__icontains=search)
+@login_required
+def suahk(request, household_id):
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+
+    if request.method == "POST":
+        household.so_nha = request.POST.get("so_nha")
+        household.duong_pho = request.POST.get("duong_pho")
+        household.phuong = request.POST.get("phuong")
+        household.quan = request.POST.get("quan")
+        household.save()
+
+        messages.success(request, "Cập nhật hộ khẩu thành công")
+        return redirect("sohokhau")
+
+    return render(request, "suahk.html", {"household": household})
+
+
+@login_required
+def chitiet_hk(request, household_id):
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    persons = Person.objects.filter(ma_ho_khau=household_id)
+
+    return render(request, "chitiet_hk.html", {
+        "household": household,
+        "persons": persons,
+    })
+
+
+@login_required
+def tachhk(request, household_id):
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    return render(request, "tachhk.html", {"household": household})
+
+
+# ================= NHÂN KHẨU =================
+@login_required
+def nhankhau(request):
+    return render(request, "nhankhau.html", {
+        "persons": Person.objects.all()
+    })
+
+
+@login_required
+def themnk(request):
+    if request.method == "POST":
+        Person.objects.create(
+            ho_ten=request.POST.get("ho_ten"),
+            cccd=request.POST.get("cccd"),
+            ma_ho_khau=request.POST.get("ma_ho_khau"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
+            gioi_tinh=request.POST.get("gioi_tinh"),
         )
+        messages.success(request, "Thêm nhân khẩu thành công")
+        return redirect("nhankhau")
+
+    return render(request, "themnk.html")
+
+
+@login_required
+def suank(request, person_id):
+    person = get_object_or_404(Person, id=person_id)
+
+    if request.method == "POST":
+        person.ho_ten = request.POST.get("ho_ten")
+        person.cccd = request.POST.get("cccd")
+        person.save()
+        messages.success(request, "Cập nhật nhân khẩu thành công")
+        return redirect("nhankhau")
+
+    return render(request, "suank.html", {"person": person})
+
+
+# ==================================================
+# TẠM TRÚ – TẠM VẮNG
+# ==================================================
+@login_required
+def qltv_tt(request):
+    return render(request, "qltv_tt.html")
+
+
+@login_required
+def tamtru(request):
+    if request.method == "POST":
+        TemporaryResidence.objects.create(
+            ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
+            ho_ten=request.POST.get("ho_ten"),
+            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
+            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
+            ly_do=request.POST.get("ly_do"),
+        )
+        messages.success(request, "Đăng ký tạm trú thành công")
+        return redirect("tamtru")
+
+    return render(request, "tamtru.html", {
+        "records": TemporaryResidence.objects.all()
+    })
+
+
+@login_required
+def tamvang(request):
+    if request.method == "POST":
+        TemporaryAbsence.objects.create(
+            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
+            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
+            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
+            ly_do=request.POST.get("ly_do"),
+        )
+        messages.success(request, "Đăng ký tạm vắng thành công")
+        return redirect("tamvang")
 
     return render(request, "tamvang.html", {
-        "records": records,
-        "search": search
+        "records": TemporaryAbsence.objects.all()
     })
 
-def tamtru(request):
-    # View riêng cho tạm trú - logic tương tự
-    return render(request, "tamtru.html")
 
+# ==================================================
+# BIẾN ĐỘNG NHÂN KHẨU
+# ==================================================
+@login_required
+def biendong(request):
+    return render(request, "biendong.html")
+
+
+@login_required
+def formdoichuho(request):
+    return render(request, "formdoichuho.html")
+
+
+# ==================================================
+# THU PHÍ – THỐNG KÊ
+# ==================================================
+@login_required
 def thuphi(request):
+    fees = HygieneFee.objects.all()
+    total_paid = fees.filter(
+        trang_thai="Đã nộp"
+    ).aggregate(total=Sum("so_tien"))["total"] or 0
 
-    return render(request, "thuphi.html")
+    return render(request, "thuphi.html", {
+        "fees": fees,
+        "total_paid": total_paid
+    })
 
+
+@login_required
 def thongke_baocao(request):
-
     return render(request, "thongke_baocao.html")
 
+
+# ==================================================
+# QUẢN LÝ TRUY CẬP
+# ==================================================
+@login_required
 def quanly_truycap(request):
     if request.method == "POST":
         username = request.POST.get("username")
-        email = request.POST.get("email")          # <-- Lấy email
+        email = request.POST.get("email")
         password = request.POST.get("password")
-        is_staff = "is_staff" in request.POST
 
-        # Kiểm tra username trùng
         if User.objects.filter(username=username).exists():
-            messages.error(request, "Tên đăng nhập đã tồn tại!")
+            messages.error(request, "Username đã tồn tại")
             return redirect("quanly_truycap")
 
-        # Kiểm tra email trùng
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email đã được sử dụng!")
-            return redirect("quanly_truycap")
-
-        # Tạo user
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
-        user.is_staff = is_staff
-        user.save()
 
-        messages.success(request, "Tạo tài khoản FULL QUYỀN thành công!")
+        UserRole.objects.get_or_create(
+            user=user,
+            defaults={"role": "CAN_BO"}
+        )
+
+        messages.success(request, "Tạo tài khoản thành công")
         return redirect("quanly_truycap")
 
     return render(request, "quanly_truycap.html")
 
-from django.db.models import Q
 
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household
-
-from django.shortcuts import render
-from django.db.models import Q
-from .models import Household
-
-# views.py
-from django.shortcuts import render
-from .models import Household
-
-from django.shortcuts import render
-from .models import Household, Person
-from django.db.models import Q
-
-def sohokhau(request):
-    return render(request, 'sohokhau.html')
-
-def nhankhau(request):
-
-    return render(request, "nhankhau.html")
-
-def themnk(request):
-    return render(request, "themnk.html")
-
-def suank(request, person_id):
-    return render(request, "form_sua_nk.html", {"person_id": person_id})
-
-def suahk(request, household_id):
-    return render(request, "form_sua_hk.html", {"household_id": household_id})
-
-def chitiet_hk(request, household_id):
-    return render(request, "chitiet_hk.html", {"household_id": household_id})
-
-def tachhk(request, household_id):
-    return render(request, "form_tach_hk.html", {"household_id": household_id})
-
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.models import User
-from django.contrib import messages
-def login_view(request):
-    if request.method == 'POST':
-        user = request.POST.get('email')
-        password = request.POST.get('password')
-
-        # Authenticate bằng username
-        user = authenticate(request, username=user, password=password)
-
-        if user is not None:
-            login(request, user)
-
-            # ===== LẤY ROLE NGƯỜI DÙNG =====
-            try:
-                role = user.role.role
-            except UserRole.DoesNotExist:
-                role = "CAN_BO"    # nếu chưa có role thì gán mặc định
-
-            # Lưu role vào session
-            print(role);
-            request.session['user_role'] = role
-
-            return redirect('home')
-        else:
-            messages.error(request, "Mật khẩu không chính xác!")
-
-    return render(request, 'login.html')
-def taohokhau(request, household_id=None):
-    """View cho trang tạo/cập nhật hộ khẩu"""
-
-    if request.method == 'POST':
-        try:
-            # Parse JSON từ request
-            data = json.loads(request.body)
-
-            # Extract form data
-            household_code = data.get('householdCode', '').strip()
-            creation_date = data.get('creationDate')
-            creation_reason = data.get('creationReason')
-
-            # Address information
-            house_number = data.get('houseNumber', '').strip()
-            street_name = data.get('streetName', '').strip()
-            ward_name = data.get('wardName')
-            district_name = data.get('districtName')
-            province_name = data.get('provinceName')
-            full_address = data.get('fullAddress', '')
-
-            # Head of household information
-            head_full_name = data.get('headFullName', '').strip()
-            head_alias = data.get('headAlias', '').strip()
-            head_dob = data.get('headDob')
-            head_gender = data.get('headGender')
-            head_id_number = data.get('headIdNumber', '').strip()
-            head_occupation = data.get('headOccupation', '').strip()
-            head_ethnicity = data.get('headEthnicity', 'Kinh')
-            head_religion = data.get('headReligion', '')
-            head_education = data.get('headEducation', '')
-
-            # Other information
-            household_notes = data.get('householdNotes', '').strip()
-
-            # Auto-generate household code if blank
-            if not household_code:
-                from datetime import datetime
-                import random
-                year = datetime.now().year
-                random_num = random.randint(100, 999)
-                household_code = f"HK-{year}{random_num}"
-
-            # === EDIT MODE ===
-            if household_id:
-                try:
-                    household = Household.objects.get(code=household_id)
-                    household.code = household_code
-                    household.head_name = head_full_name
-                    household.address = full_address
-                    household.save()
-
-                    return JsonResponse({
-                        'status': 'success',
-                        'message': 'Cập nhật hộ khẩu thành công!',
-                        'household_code': household_code
-                    })
-                except Household.DoesNotExist:
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'Không tìm thấy hộ khẩu cần cập nhật!'
-                    })
-
-            # === CREATE MODE ===
-            else:
-                if Household.objects.filter(code=household_code).exists():
-                    return JsonResponse({
-                        'status': 'error',
-                        'message': 'Mã hộ khẩu đã tồn tại!'
-                    })
-
-                # Create household
-                household = Household.objects.create(
-                    code=household_code,
-                    head_name=head_full_name,
-                    address=full_address,
-                    created_at=creation_date
-                )
-
-                # Create head of household (Person)
-                Person.objects.create(
-                    household=household,
-                    full_name=head_full_name,
-                    alias=head_alias,
-                    dob=head_dob,
-                    gender=head_gender,
-                    id_number=head_id_number,
-                    occupation=head_occupation,
-
-                    # NEW FIELDS (CHUẨN)
-                    relation_to_head='Chủ hộ',
-                    is_head=True
-                )
-
-                return JsonResponse({
-                    'status': 'success',
-                    'message': 'Tạo hộ khẩu thành công!',
-                    'household_code': household_code
-                })
-
-        except json.JSONDecodeError:
-            return JsonResponse({'status': 'error', 'message': 'Dữ liệu không hợp lệ!'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': f'Có lỗi xảy ra: {str(e)}'})
-
-    # === GET request ===
-    context = {}
-    if household_id:
-        try:
-            household = Household.objects.get(code=household_id)
-            head_person = Person.objects.filter(household=household, is_head=True).first()
-
-            context = {
-                'is_edit': True,
-                'household': household,
-                'head_person': head_person
-            }
-
-        except Household.DoesNotExist:
-            from django.contrib import messages
-            messages.error(request, 'Không tìm thấy hộ khẩu!')
-            return redirect('sohokhau')
-
-    return render(request, 'taohokhau.html', context)
-
-def biendong(request):
-    """View cho trang cập nhật biến động nhân khẩu"""
-    if request.method == 'POST':
-        # Xử lý form submission
-        try:
-            # Lấy dữ liệu từ form
-            nhankhau_id = request.POST.get('nhankhau_id')
-            change_type = request.POST.get('change_type')
-            
-            # Xử lý theo loại biến động
-            if change_type == 'chuyen_di':
-                # Xử lý chuyển đi
-                new_address = request.POST.get('new_address')
-                move_date = request.POST.get('move_date')
-                move_reason = request.POST.get('move_reason')
-                move_note = request.POST.get('move_note', '')
-                
-                # Lưu vào database (implement later)
-                # BiendongRecord.objects.create(...)
-                
-            elif change_type == 'qua_doi':
-                # Xử lý qua đời
-                death_date = request.POST.get('death_date')
-                death_place = request.POST.get('death_place', '')
-                death_cause = request.POST.get('death_cause')
-                death_certificate = request.POST.get('death_certificate', '')
-                death_note = request.POST.get('death_note', '')
-                
-                # Lưu vào database (implement later)
-                
-            elif change_type == 'doi_chu':
-                # Xử lý đổi chủ hộ
-                new_head = request.POST.get('new_head')
-                change_date = request.POST.get('change_date')
-                change_reason = request.POST.get('change_reason')
-                approval_doc = request.POST.get('approval_doc', '')
-                change_note = request.POST.get('change_note', '')
-                
-                # Lưu vào database (implement later)
-            
-            # Trả về JSON response cho AJAX
-            return JsonResponse({
-                'status': 'success',
-                'message': 'Cập nhật biến động thành công!'
-            })
-            
-        except Exception as e:
-            return JsonResponse({
-                'status': 'error',
-                'message': f'Có lỗi xảy ra: {str(e)}'
-            })
-    
-    # GET request - hiển thị form
-    return render(request, 'biendong.html')
-def formdoichuho(request):
-    return render(request, "formdoichuho.html")
-
+# ==================================================
+# ERROR
+# ==================================================
 def page_not_found(request):
-    return render(request, "404.html")
+    return render(request, "404.html", status=404)
