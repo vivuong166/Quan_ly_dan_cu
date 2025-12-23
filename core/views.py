@@ -223,7 +223,7 @@ def tamtru(request):
     })
 
 
-
+@csrf_exempt
 def tamvang(request):
     if request.method == "POST":
         TemporaryAbsence.objects.create(
@@ -243,12 +243,12 @@ def tamvang(request):
 # ==================================================
 # BIẾN ĐỘNG NHÂN KHẨU
 # ==================================================
-
+@csrf_exempt
 def biendong(request):
     return render(request, "biendong.html")
 
 
-
+@csrf_exempt
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
 
