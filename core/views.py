@@ -25,36 +25,41 @@ def login_view(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
 
+        # 1. kiểm tra email tồn tại
         try:
-            user = User.objects.get(email=email)
+            user_obj = User.objects.get(email=email)
         except User.DoesNotExist:
             messages.error(request, "Email không tồn tại")
             return redirect("login")
 
+        # 2. xác thực mật khẩu
         user = authenticate(
             request,
-            username=user.username,
+            username=user_obj.username,
             password=password
         )
+        print(user.id)
 
         if user is None:
             messages.error(request, "Sai mật khẩu")
             return redirect("login")
 
-        # ĐẢM BẢO USER LUÔN CÓ ROLE
+        # 3. đảm bảo user có role
         role_obj, created = UserRole.objects.get_or_create(
-            user=user,
-            defaults={"role": "CAN_BO"}
+            id=user.id,
         )
 
-        print(role_obj)#hiển thị chức vụ
-        return redirect("home")
+        # 4. login + lưu session
         login(request, user)
+        request.session["user_role"] = role_obj.role
 
-        # có thể dùng role_obj.role để phân quyền
+        # debug (có thể xoá)
+        print("ROLE:", role_obj.role)
+
         return redirect("home")
 
     return render(request, "login.html")
+
 
 
 @login_required
