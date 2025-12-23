@@ -147,7 +147,6 @@ def suahk(request, household_id):
 def chitiet_hk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
-
     return render(request, "chitiet_hk.html", {
         "household": household,
         "persons": persons,
