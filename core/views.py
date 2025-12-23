@@ -4,6 +4,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import (
     Household,
@@ -17,9 +18,8 @@ from .models import (
 )
 
 # ==================================================
-# AUTH
+# AUTH (KHÔNG ĐỔI)
 # ==================================================
-
 def login_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -59,8 +59,6 @@ def login_view(request):
         return redirect("home")
 
     return render(request, "login.html")
-
-
 
 @login_required
 def home(request):
@@ -107,7 +105,7 @@ def sohokhau(request):
     })
 
 
-@login_required
+@csrf_exempt
 def taohokhau(request, household_id=None):
     if request.method == "POST":
         ma_ho_khau = request.POST.get("ma_ho_khau")
@@ -189,7 +187,7 @@ def themnk(request):
 
 @login_required
 def suank(request, person_id):
-    person = get_object_or_404(Person, id=person_id)
+    person = get_object_or_404(Person, ma_nhan_khau=person_id)
 
     if request.method == "POST":
         person.ho_ten = request.POST.get("ho_ten")
