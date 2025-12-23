@@ -60,7 +60,7 @@ def login_view(request):
 
     return render(request, "login.html")
 
-@login_required
+
 def home(request):
     return render(request, "home.html", {
         "role": request.session.get("user_role", "CAN_BO")
@@ -70,7 +70,7 @@ def home(request):
 # ==================================================
 # QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
 # ==================================================
-@login_required
+
 def qlnk(request):
     search_hk = request.GET.get("searchHoKhau", "").strip()
     search_nk = request.GET.get("searchNhanKhau", "").strip()
@@ -98,7 +98,7 @@ def qlnk(request):
 
 
 # ================= HỘ KHẨU =================
-@login_required
+
 def sohokhau(request):
     return render(request, "sohokhau.html", {
         "households": Household.objects.all()
@@ -127,7 +127,7 @@ def taohokhau(request, household_id=None):
     return render(request, "taohokhau.html")
 
 
-@login_required
+@csrf_exempt
 def suahk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
 
@@ -144,32 +144,30 @@ def suahk(request, household_id):
     return render(request, "suahk.html", {"household": household})
 
 
-@login_required
 def chitiet_hk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
-
     return render(request, "chitiet_hk.html", {
         "household": household,
         "persons": persons,
     })
 
 
-@login_required
+
 def tachhk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
     return render(request, "tachhk.html", {"household": household})
 
 
 # ================= NHÂN KHẨU =================
-@login_required
+
 def nhankhau(request):
     return render(request, "nhankhau.html", {
         "persons": Person.objects.all()
     })
 
 
-@login_required
+@csrf_exempt
 def themnk(request):
     if request.method == "POST":
         Person.objects.create(
@@ -185,7 +183,7 @@ def themnk(request):
     return render(request, "themnk.html")
 
 
-@login_required
+@csrf_exempt
 def suank(request, person_id):
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
 
@@ -202,12 +200,12 @@ def suank(request, person_id):
 # ==================================================
 # TẠM TRÚ – TẠM VẮNG
 # ==================================================
-@login_required
+
 def qltv_tt(request):
     return render(request, "qltv_tt.html")
 
 
-@login_required
+@csrf_exempt
 def tamtru(request):
     if request.method == "POST":
         TemporaryResidence.objects.create(
@@ -225,7 +223,7 @@ def tamtru(request):
     })
 
 
-@login_required
+@csrf_exempt
 def tamvang(request):
     if request.method == "POST":
         TemporaryAbsence.objects.create(
@@ -245,12 +243,12 @@ def tamvang(request):
 # ==================================================
 # BIẾN ĐỘNG NHÂN KHẨU
 # ==================================================
-@login_required
+@csrf_exempt
 def biendong(request):
     return render(request, "biendong.html")
 
 
-@login_required
+@csrf_exempt
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
 
@@ -258,7 +256,7 @@ def formdoichuho(request):
 # ==================================================
 # THU PHÍ – THỐNG KÊ
 # ==================================================
-@login_required
+
 def thuphi(request):
     fees = HygieneFee.objects.all()
     total_paid = fees.filter(
@@ -271,15 +269,14 @@ def thuphi(request):
     })
 
 
-@login_required
+
 def thongke_baocao(request):
     return render(request, "thongke_baocao.html")
 
 
 # ==================================================
 # QUẢN LÝ TRUY CẬP
-# ==================================================
-@login_required
+
 def quanly_truycap(request):
     if request.method == "POST":
         username = request.POST.get("username")
