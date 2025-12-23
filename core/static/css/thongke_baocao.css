@@ -47,10 +47,10 @@
 }
 
 .tab-btn.active {
-    background: white;
-    color: #1f2937;
+    background: #dbeafe;
+    color: #1e40af;
     font-weight: 600;
-    border-bottom: 2px solid white;
+    border-bottom: 2px solid #3b82f6;
     margin-bottom: -2px;
 }
 
@@ -123,7 +123,7 @@
     border-bottom: 1px solid #e5e7eb;
     font-size: 16px;
     font-weight: 600;
-    color: #1f2937;
+    color: #1e40af;
 }
 
 .excel-table {
@@ -167,6 +167,7 @@
     background: #f3f4f6 !important;
     font-weight: 600;
     color: #1f2937;
+    font-family: Arial, sans-serif;
 }
 
 .total-row:hover td {
