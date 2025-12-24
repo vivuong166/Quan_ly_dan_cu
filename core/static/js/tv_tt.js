@@ -22,11 +22,10 @@ document.addEventListener('DOMContentLoaded', function(){
     if(addTvBtn){
         addTvBtn.addEventListener('click', function(){
             const person = document.getElementById('tv_person').value.trim() || '—';
-            const ngayDi = document.getElementById('tv_ngay_di').value || '—';
-            const han = document.getElementById('tv_han').value || '—';
-            const noiDen = document.getElementById('tv_noi_den').value.trim() || '—';
+            const ngayDi = document.getElementById('tv_ngay_bat_dau').value || '—';
+            const han = document.getElementById('tv_ngay_ket_thuc').value || '—';
             const lyDo = document.getElementById('tv_ly_do').value.trim() || '';
-            const html = `<strong>${person}</strong> — ${ngayDi} → ${han} — Nơi: ${noiDen} ${lyDo? '— ' + lyDo : ''}`;
+            const html = `<strong>${person}</strong> — ${ngayDi} → ${han} — ${lyDo? '— ' + lyDo : ''}`;
             appendList(document.getElementById('tvList'), html);
             // clear minimal
             document.getElementById('formTv').reset();
