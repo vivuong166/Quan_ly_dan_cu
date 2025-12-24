@@ -21,6 +21,7 @@ from .models import (
 # ==================================================
 # AUTH (KHÔNG ĐỔI)
 # ==================================================
+@csrf_exempt
 def login_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -61,7 +62,7 @@ def login_view(request):
 
     return render(request, "login.html")
 
-
+@login_required
 def home(request):
     return render(request, "home.html", {
         "role": request.session.get("user_role", "CAN_BO")
@@ -71,27 +72,10 @@ def home(request):
 # ==================================================
 # QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
 # ==================================================
-
+# không search trả mã hộ khẩu
 def qlnk(request):
-    search_hk = request.GET.get("searchHoKhau", "").strip()
-    search_nk = request.GET.get("searchNhanKhau", "").strip()
-
     households = Household.objects.all()
-    if search_hk:
-        households = households.filter(
-            Q(ma_ho_khau__icontains=search_hk) |
-            Q(duong_pho__icontains=search_hk) |
-            Q(phuong__icontains=search_hk) |
-            Q(quan__icontains=search_hk)
-        )
-
     persons = Person.objects.all()
-    if search_nk:
-        persons = persons.filter(
-            Q(ho_ten__icontains=search_nk) |
-            Q(cccd__icontains=search_nk)
-        )
-
     return render(request, "qlnk.html", {
         "households": households,
         "persons": persons,
@@ -105,7 +89,7 @@ def sohokhau(request):
         "households": Household.objects.all()
     })
 
-
+#CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
 @csrf_exempt
 def taohokhau(request, household_id=None):
     if request.method == "POST":
@@ -119,9 +103,34 @@ def taohokhau(request, household_id=None):
             ma_ho_khau=ma_ho_khau,
             so_nha=request.POST.get("so_nha"),
             duong_pho=request.POST.get("duong_pho"),
-            phuong=request.POST.get("phuong"),
-            quan=request.POST.get("quan"),
+            phuong="La Khê",
+            quan="Hà Đông"
         )
+        Person.objects.create(
+            ma_ho_khau=ma_ho_khau,
+
+            ho_ten=request.POST.get("ho_ten"),
+            bi_danh=request.POST.get("bi_danh"),
+
+            ngay_sinh=request.POST.get("ngay_sinh") or None,
+            gioi_tinh=request.POST.get("gioi_tinh"),
+            noi_sinh=request.POST.get("noi_sinh"),
+            nguyen_quan=request.POST.get("nguyen_quan"),
+            dan_toc=request.POST.get("dan_toc"),
+            nghe_nghiep=request.POST.get("nghe_nghiep"),
+            noi_lam_viec=request.POST.get("noi_lam_viec"),
+
+            cccd=request.POST.get("cccd"),
+            ngay_cap_cccd=request.POST.get("ngay_cap_cccd") or None,
+            noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+
+            ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru") or None,
+            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+
+            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
+            trang_thai=request.POST.get("trang_thai", "Thường trú"),
+        )
+
         messages.success(request, "Tạo hộ khẩu thành công")
         return redirect("sohokhau")
 
@@ -170,6 +179,8 @@ def nhankhau(request):
 
 @csrf_exempt
 def themnk(request):
+    #thêm lại đầy đủ thông tin trong bảng nhân khẩu
+
     if request.method == "POST":
         Person.objects.create(
             ho_ten=request.POST.get("ho_ten"),
@@ -208,6 +219,12 @@ def qltv_tt(request):
 
 @csrf_exempt
 def tamtru(request):
+    Person.objects.all()
+    #tất cả các dữ liệu đều ở trong bảng tạm trú
+    TemporaryResidence.objects.all()
+    #kiểm tra nếu trong bảng tạm trú có rồi thì k cho tạm trú nữa
+    Household.objects.all()
+    #trả về bảng hộ khẩu
     if request.method == "POST":
         TemporaryResidence.objects.create(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
@@ -226,13 +243,18 @@ def tamtru(request):
 
 @csrf_exempt
 def tamvang(request):
+    Person.objects.all()
+    TemporaryAbsence.objects.all()
+    # nếu die trong bảng tạm vắng rồi thì bỏ qua, k cho chọn danh sách cuối cùng
+    #check trạng thái "thường trú" thì hiển thị , lọc trạng thái thường trú
     if request.method == "POST":
         TemporaryAbsence.objects.create(
-            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
             ly_do=request.POST.get("ly_do"),
         )
+        #check là có thằng nhân khẩu cccd như thế k, nếu accept -> oke nếu k thì nhót
         messages.success(request, "Đăng ký tạm vắng thành công")
         return redirect("tamvang")
 
@@ -310,3 +332,4 @@ def quanly_truycap(request):
 # ==================================================
 def page_not_found(request):
     return render(request, "404.html", status=404)
+
