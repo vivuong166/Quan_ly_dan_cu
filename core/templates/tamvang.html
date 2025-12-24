@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% load static %} {% block content %}
 <div class="page-header">
-    <h2 class="page-title">Quản lý Tạm Vắng</h2>
+    <h2 class="page-title">Quản lý tạm vắng</h2>
     <div class="header-actions">
         <a href="{% url 'qltv_tt' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
@@ -43,61 +43,51 @@
       </div>
     </form>
 
-    <div class="list-panel">
-      <h3>Bảng đang tạm vắng</h3>
-      <div class="table-container">
-        <table class="table-basic">
-          <thead>
-            <tr>
-              <th>Họ và tên</th>
-              <th>Ngày sinh</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody id="tvList">
-            <!-- Dữ liệu mẫu -->
-            <tr data-id="1">
-              <td><strong>Nguyễn Văn A</strong></td>
-              <td>15/03/1985</td>
-              <td>01/10/2025</td>
-              <td>15/10/2025</td>
-              <td>
-                <span class="status-badge status-overdue">Đã kết thúc</span>
-              </td>
-              <td>
-                <button
-                  class="btn-sm btn-action"
-                  onclick="toggleStatus(1, false)"
-                >
-                  <i class="fas fa-undo"></i> Hoàn tác
-                </button>
-              </td>
-            </tr>
-            <tr data-id="2">
-              <td><strong>Trần Thị B</strong></td>
-              <td>22/08/1990</td>
-              <td>05/10/2025</td>
-              <td>12/10/2025</td>
-              <td>
-                <span class="status-badge status-active">Chưa kết thúc</span>
-              </td>
-              <td>
-                <button
-                  class="btn-sm btn-action"
-                  onclick="toggleStatus(2, true)"
-                >
-                  <i class="fas fa-check"></i> Kết thúc
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
+        <div class="list-panel">
+            <h3>Bảng đang tạm vắng</h3>
+            <div class="table-container">
+                <table class="table-basic">
+                    <thead>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Ngày sinh</th>
+                            <th>Ngày bắt đầu</th>
+                            <th>Ngày kết thúc</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tvList">
+                        <!-- Dữ liệu mẫu -->
+                        <tr data-id="1">
+                            <td><strong>Nguyễn Văn A</strong></td>
+                            <td>15/03/1985</td>
+                            <td>01/10/2025</td>
+                            <td>15/10/2025</td>
+                            <td><span class="status-badge status-overdue">Đã kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                            </td>
+                        </tr>
+                        <tr data-id="2">
+                            <td><strong>Trần Thị B</strong></td>
+                            <td>22/08/1990</td>
+                            <td>05/10/2025</td>
+                            <td>12/10/2025</td>
+                            <td><span class="status-badge status-active">Chưa kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 </div>
 
 <!-- external JS -->

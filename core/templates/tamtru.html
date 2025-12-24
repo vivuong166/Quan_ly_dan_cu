@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Quản lý Tạm Trú</h2>
+<div class="page-header">
+    <h2 class="page-title">Quản lý tạm trú</h2>
+    <div class="header-actions">
+        <a href="{% url 'qltv_tt' %}" class="btn">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </a>
+    </div>
+</div>
 
 <div class="tvtt-wrap">
     <!-- Tạm trú -->
@@ -21,7 +28,12 @@
             </div>
             <div class="row">
                 <label>Hộ khẩu tạm trú</label>
-                <input id="tt_dia_chi" placeholder="Địa chỉ, chủ nhà">
+                <select id="tt_ma_hk">
+                    <option value="">-- Chọn mã hộ khẩu --</option>
+                    <option value="HK-001">HK-001 - Nguyễn Văn A</option>
+                    <option value="HK-002">HK-002 - Trần Thị B</option>
+                    <option value="HK-003">HK-003 - Lê Văn C</option>
+                </select>
             </div>
             <div class="row">
                 <label>Ngày đến</label>
@@ -35,16 +47,18 @@
         </form>
 
         <div class="list-panel">
-            <h3>Danh sách quá thời hạn tạm trú</h3>
+            <h3>Bảng đang tạm trú</h3>
             <div class="table-container">
                 <table class="table-basic">
                     <thead>
                         <tr>
                             <th>Họ và tên</th>
                             <th>Ngày sinh</th>
+                            <th>Hộ khẩu tạm trú</th>
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
-                            <th style="text-align: center;">Trạng thái hoàn thành</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="ttList">
@@ -52,16 +66,28 @@
                         <tr data-id="1">
                             <td><strong>Nguyễn Văn C</strong></td>
                             <td>12/05/2001</td>
+                            <td>HK-001</td>
                             <td>01/11/2025</td>
                             <td>15/11/2025</td>
-                            <td style="text-align: center;"><input type="checkbox" checked></td>
+                            <td><span class="status-badge status-completed">Đã kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus(1)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                            </td>
                         </tr>
                         <tr data-id="2">
                             <td><strong>Lê Thị D</strong></td>
                             <td>08/09/1995</td>
+                            <td>HK-002</td>
                             <td>10/11/2025</td>
                             <td>20/11/2025</td>
-                            <td style="text-align: center;"><input type="checkbox"></td>
+                            <td><span class="status-badge status-active">Chưa kết thúc</span></td>
+                            <td>
+                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus(2)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

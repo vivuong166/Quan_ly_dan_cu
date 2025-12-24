@@ -55,6 +55,8 @@ let persons = [
 ];
 
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('nhankhau.js loaded and DOMContentLoaded fired');
+    
     // Sample data - sẽ được thay thế bằng API calls
 
     let filteredPersons = [...persons];
@@ -64,8 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // DOM elements
     const searchInput = document.getElementById('searchPerson');
-    const advancedSearchBtn = document.getElementById('advancedSearchBtn');
-    const advancedSearch = document.getElementById('advancedSearch');
     const addPersonBtn = document.getElementById('addPersonBtn');
     const exportBtn = document.getElementById('exportBtn');
     const personModal = document.getElementById('personModal');
@@ -79,14 +79,15 @@ document.addEventListener('DOMContentLoaded', function() {
     updatePagination();
 
     // Event listeners
-    searchInput.addEventListener('input', handleSearch);
-    advancedSearchBtn.addEventListener('click', toggleAdvancedSearch);
-    addPersonBtn.addEventListener('click', showAddPersonForm);
-    exportBtn.addEventListener('click', exportPersons);
-    
-    // Filter inputs
-    document.getElementById('applyFilters').addEventListener('click', applyAdvancedFilters);
-    document.getElementById('clearFilters').addEventListener('click', clearFilters);
+    if (searchInput) {
+        searchInput.addEventListener('input', handleSearch);
+    }
+    if (addPersonBtn) {
+        addPersonBtn.addEventListener('click', showAddPersonForm);
+    }
+    if (exportBtn) {
+        exportBtn.addEventListener('click', exportPersons);
+    }
 
     function handleSearch() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -103,53 +104,6 @@ document.addEventListener('DOMContentLoaded', function() {
             );
         }
         
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function toggleAdvancedSearch() {
-        const isVisible = advancedSearch.style.display !== 'none';
-        advancedSearch.style.display = isVisible ? 'none' : 'block';
-        advancedSearchBtn.innerHTML = isVisible ? 
-            '<i class="fas fa-filter"></i> Tìm kiếm nâng cao' : 
-            '<i class="fas fa-times"></i> Đóng tìm kiếm';
-    }
-
-    function applyAdvancedFilters() {
-        const nameFilter = document.getElementById('filterFullName').value.toLowerCase();
-        const idFilter = document.getElementById('filterIdNumber').value.toLowerCase();
-        const householdFilter = document.getElementById('filterHouseholdCode').value.toLowerCase();
-        const genderFilter = document.getElementById('filterGender').value;
-        const ageFromFilter = parseInt(document.getElementById('filterAgeFrom').value) || 0;
-        const ageToFilter = parseInt(document.getElementById('filterAgeTo').value) || 999;
-
-        filteredPersons = persons.filter(person => {
-            const age = calculateAge(person.dob);
-            
-            return (!nameFilter || person.full_name.toLowerCase().includes(nameFilter)) &&
-                   (!idFilter || person.id_number.toLowerCase().includes(idFilter)) &&
-                   (!householdFilter || person.household.code.toLowerCase().includes(householdFilter)) &&
-                   (!genderFilter || person.gender === genderFilter) &&
-                   (age >= ageFromFilter && age <= ageToFilter);
-        });
-
-        currentPage = 1;
-        updatePersonList();
-        updateStatistics();
-        updatePagination();
-    }
-
-    function clearFilters() {
-        document.getElementById('filterFullName').value = '';
-        document.getElementById('filterIdNumber').value = '';
-        document.getElementById('filterHouseholdCode').value = '';
-        document.getElementById('filterGender').value = '';
-        document.getElementById('filterAgeFrom').value = '';
-        document.getElementById('filterAgeTo').value = '';
-        searchInput.value = '';
-        filteredPersons = [...persons];
         currentPage = 1;
         updatePersonList();
         updateStatistics();

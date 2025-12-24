@@ -1,542 +1,439 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-<h2>Thống Kê - Báo Cáo</h2>
+<div class="page-header">
+    <h2 class="page-title">Thống kê - báo cáo</h2>
+</div>
 
-<div class="report-controls">
-    <div class="filter-row">
-        <label>Khoảng thời gian
-            <input type="month" id="fromMonth">
-            <span>→</span>
-            <input type="month" id="toMonth">
-        </label>
+<!-- Tabs Navigation -->
+<div class="tabs-container">
+    <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="nhankhau">Nhân khẩu</button>
+        <button class="tab-btn" data-tab="tamtru">Tạm trú</button>
+        <button class="tab-btn" data-tab="tamvang">Tạm vắng</button>
+        <button class="tab-btn" data-tab="donggop">Đóng góp</button>
+    </div>
 
-        <label>Loại báo cáo
-            <select id="reportType">
-                <option value="all">Tổng quan</option>
-                <option value="nhankhau">Nhân khẩu</option>
-                <option value="tamvang">Tạm vắng</option>
-                <option value="tamtru">Tạm trú</option>
-                <option value="thuphi">Thu phí</option>
-                <option value="donggop">Đóng góp</option>
-            </select>
-        </label>
+    <!-- Tab Nhân khẩu -->
+    <div class="tab-content active" id="tab-nhankhau">
+        <div class="report-controls">
+            <div class="filter-row">
+                <label>Tháng thống kê
+                    <input type="month" id="monthFilter">
+                </label>
+                <button id="applyBtn" class="btn primary">Áp dụng</button>
+            </div>
+        </div>
 
-        <label>Chi tiết đợt đóng góp
-            <select id="donationCampaign">
-                <option value="thuongbinh">Ủng hộ ngày thương binh-liệt sỹ 27/07</option>
-                <option value="treem">Quỹ từ thiện trẻ em</option>
-                <option value="khuivui">Xây dựng khu vui chơi trẻ em</option>
-                <option value="nguoingheo">Ủng hộ người nghèo cuối năm</option>
-            </select>
-        </label>
+        <div class="reports-container">
+            <div class="report-section">
+                <h3>Thống kê tổng quan nhân khẩu</h3>
+                <div class="excel-table">
+                    <table id="populationOverviewTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Chỉ tiêu</th>
+                                <th>Tổng số</th>
+                                <th>Nam</th>
+                                <th>Nữ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Mầm non</td>
+                                <td>42</td>
+                                <td>22</td>
+                                <td>20</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Cấp 1</td>
+                                <td>38</td>
+                                <td>20</td>
+                                <td>18</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Cấp 2</td>
+                                <td>32</td>
+                                <td>16</td>
+                                <td>16</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Cấp 3</td>
+                                <td>23</td>
+                                <td>12</td>
+                                <td>11</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>Độ tuổi lao động</td>
+                                <td>277</td>
+                                <td>140</td>
+                                <td>137</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>Nghỉ hưu</td>
+                                <td>78</td>
+                                <td>35</td>
+                                <td>43</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Tổng cộng khu vực</strong></td>
+                                <td><strong>490</strong></td>
+                                <td><strong>245</strong></td>
+                                <td><strong>245</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <div class="actions">
-            <button id="applyBtn" class="btn">Áp dụng</button>
-            <button id="exportExcel" class="btn primary">Xuất Excel</button>
-            <button id="printReport" class="btn">In báo cáo</button>
+    <!-- Tab Tạm trú -->
+    <div class="tab-content" id="tab-tamtru">
+        <div class="reports-container">
+            <div class="report-section">
+                <h3>Danh sách đang tạm trú</h3>
+                <div class="excel-table">
+                    <table id="temporaryResidenceTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hộ khẩu</th>
+                                <th>Họ tên</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>HK-089</td>
+                                <td>Nguyễn Thị Hoa</td>
+                                <td>01/08/2025</td>
+                                <td>01/02/2026</td>
+                                <td>Công tác dài hạn</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>HK-125</td>
+                                <td>Trần Văn Bình</td>
+                                <td>15/09/2025</td>
+                                <td>15/03/2026</td>
+                                <td>Chuyển công tác</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>HK-134</td>
+                                <td>Lê Thị Mai</td>
+                                <td>10/10/2025</td>
+                                <td>10/01/2026</td>
+                                <td>Thuê nhà tạm</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
+                                <td><strong>3 người</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>Danh sách tạm trú quá hạn</h3>
+                <div class="excel-table">
+                    <table id="overdueResidenceTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hộ khẩu</th>
+                                <th>Họ tên</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>HK-142</td>
+                                <td>Phạm Minh Tuấn</td>
+                                <td>20/05/2025</td>
+                                <td>20/11/2025</td>
+                                <td>Học tập</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>HK-151</td>
+                                <td>Hoàng Thị Lan</td>
+                                <td>05/03/2025</td>
+                                <td>05/12/2025</td>
+                                <td>Chăm sóc người thân</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
+                                <td><strong>2 người</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Tạm vắng -->
+    <div class="tab-content" id="tab-tamvang">
+        <div class="reports-container">
+            <div class="report-section">
+                <h3>Danh sách đang tạm vắng</h3>
+                <div class="excel-table">
+                    <table id="temporaryAbsentTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hộ khẩu</th>
+                                <th>Họ tên</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>HK-015</td>
+                                <td>Nguyễn Văn Hùng</td>
+                                <td>15/09/2025</td>
+                                <td>15/12/2025</td>
+                                <td>Công tác</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>HK-028</td>
+                                <td>Trần Thị Mai</td>
+                                <td>01/10/2025</td>
+                                <td>01/02/2026</td>
+                                <td>Học tập</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>HK-042</td>
+                                <td>Lê Minh Tuấn</td>
+                                <td>20/11/2025</td>
+                                <td>20/01/2026</td>
+                                <td>Thăm người thân</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người tạm vắng</strong></td>
+                                <td><strong>3 người</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>Danh sách tạm vắng quá hạn</h3>
+                <div class="excel-table">
+                    <table id="overdueAbsentTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hộ khẩu</th>
+                                <th>Họ tên</th>
+                                <th>Từ ngày</th>
+                                <th>Đến ngày</th>
+                                <th>Lý do</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>HK-067</td>
+                                <td>Phạm Văn Đức</td>
+                                <td>05/05/2025</td>
+                                <td>05/11/2025</td>
+                                <td>Làm việc</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
+                                <td><strong>1 người</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Đóng góp -->
+    <div class="tab-content" id="tab-donggop">
+        <div class="reports-container">
+            <div class="report-section">
+                <h3>Tổng hợp tất cả đợt đóng góp</h3>
+                <div class="excel-table">
+                    <table id="donationSummaryTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên đợt đóng góp</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th>Hộ đã tham gia</th>
+                                <th>Hộ chưa tham gia</th>
+                                <th>Tỷ lệ tham gia (%)</th>
+                                <th>Tổng tiền thu được</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Ủng hộ ngày thương binh-liệt sỹ 27/07</td>
+                                <td>01/07/2025</td>
+                                <td>31/07/2025</td>
+                                <td>115</td>
+                                <td>5</td>
+                                <td>95.8%</td>
+                                <td>12.500.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>Quỹ từ thiện trẻ em</td>
+                                <td>01/09/2025</td>
+                                <td>30/09/2025</td>
+                                <td>98</td>
+                                <td>22</td>
+                                <td>81.7%</td>
+                                <td>8.750.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>Xây dựng khu vui chơi trẻ em</td>
+                                <td>01/10/2025</td>
+                                <td>31/10/2025</td>
+                                <td>87</td>
+                                <td>33</td>
+                                <td>72.5%</td>
+                                <td>22.300.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>Ủng hộ người nghèo cuối năm</td>
+                                <td>01/11/2025</td>
+                                <td>30/11/2025</td>
+                                <td>105</td>
+                                <td>15</td>
+                                <td>87.5%</td>
+                                <td>15.750.000đ</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>Chi tiết đóng góp từng hộ</h3>
+                <div class="filter-row">
+                    <label style="margin-left: 15px; margin-right: 10px;">Chọn đợt đóng góp</label>
+                    <select id="donationCampaign">
+                        <option value="thuongbinh">Ủng hộ ngày thương binh-liệt sỹ 27/07</option>
+                        <option value="treem">Quỹ từ thiện trẻ em</option>
+                        <option value="khuivui">Xây dựng khu vui chơi trẻ em</option>
+                        <option value="nguoingheo">Ủng hộ người nghèo cuối năm</option>
+                    </select>
+                </div>
+                <div class="excel-table">
+                    <table id="donationDetailTable">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số hộ khẩu</th>
+                                <th>Chủ hộ</th>
+                                <th>Số tiền đóng góp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>HK-001</td>
+                                <td>Nguyễn Văn A</td>
+                                <td>200.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>HK-002</td>
+                                <td>Trần Thị B</td>
+                                <td>150.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>HK-003</td>
+                                <td>Lê Văn C</td>
+                                <td>100.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>4</td>
+                                <td>HK-004</td>
+                                <td>Phạm Thị D</td>
+                                <td>300.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>5</td>
+                                <td>HK-005</td>
+                                <td>Hoàng Văn E</td>
+                                <td>250.000đ</td>
+                            </tr>
+                            <tr>
+                                <td>6</td>
+                                <td>HK-007</td>
+                                <td>Đặng Văn G</td>
+                                <td>180.000đ</td>
+                            </tr>
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Tổng số hộ đã nộp: 6 hộ</strong></td>
+                                <td colspan="2"><strong>Tổng tiền: 1.180.000đ</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="report-section">
+                <h3>Tra cứu đóng góp theo hộ khẩu</h3>
+                <div class="filter-row">
+                    <label style="margin-left: 15px; margin-right: 10px;">Nhập</label>
+                    <input type="text" id="householdSearch" placeholder="VD: HK-001 hoặc Nguyễn Văn A" style="width: 227px;">
+                    <button id="searchHouseholdBtn" class="btn primary">Tìm kiếm</button>
+                </div>
+                <div class="excel-table">
+                    <table id="householdDonationTable">
+                        <thead>
+                            <tr>
+                                <th>Mã hộ khẩu</th>
+                                <th>Tên chủ hộ</th>
+                                <th>Đợt đóng góp</th>
+                                <th>Số tiền đóng góp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="no-data">Nhập thông tin để tra cứu</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="reports-container">
-    <!-- Bảng thống kê tổng quan nhân khẩu -->
-    <div class="report-section">
-        <h3>👥 Thống kê tổng quan nhân khẩu</h3>
-        <div class="excel-table">
-            <table id="populationOverviewTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Chỉ tiêu</th>
-                        <th>Tổng số</th>
-                        <th>Nam</th>
-                        <th>Nữ</th>
-                        <th>Trẻ em (< 18)</th>
-                        <th>Người lớn (≥ 18)</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Tổng nhân khẩu thường trú</td>
-                        <td>485</td>
-                        <td>245</td>
-                        <td>240</td>
-                        <td>95</td>
-                        <td>390</td>
-                        <td>Cư trú ổn định</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Nhân khẩu tạm vắng</td>
-                        <td>4</td>
-                        <td>3</td>
-                        <td>1</td>
-                        <td>0</td>
-                        <td>4</td>
-                        <td>Đi công tác, học tập</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Nhân khẩu tạm trú</td>
-                        <td>5</td>
-                        <td>2</td>
-                        <td>3</td>
-                        <td>1</td>
-                        <td>4</td>
-                        <td>Tạm trú có thời hạn</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Trẻ em dưới 6 tuổi</td>
-                        <td>42</td>
-                        <td>22</td>
-                        <td>20</td>
-                        <td>42</td>
-                        <td>0</td>
-                        <td>Tuổi mầm non</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>Trẻ em từ 6-17 tuổi</td>
-                        <td>53</td>
-                        <td>27</td>
-                        <td>26</td>
-                        <td>53</td>
-                        <td>0</td>
-                        <td>Tuổi học phổ thông</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>Người cao tuổi (≥ 60)</td>
-                        <td>78</td>
-                        <td>35</td>
-                        <td>43</td>
-                        <td>0</td>
-                        <td>78</td>
-                        <td>Cần chăm sóc đặc biệt</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>Người khuyết tật</td>
-                        <td>12</td>
-                        <td>7</td>
-                        <td>5</td>
-                        <td>3</td>
-                        <td>9</td>
-                        <td>Cần hỗ trợ xã hội</td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>Hộ nghèo</td>
-                        <td>15</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>-</td>
-                        <td>Theo tiêu chí 2025</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="2"><strong>TỔNG CỘNG KHU VỰC</strong></td>
-                        <td><strong>490</strong></td>
-                        <td><strong>247</strong></td>
-                        <td><strong>243</strong></td>
-                        <td><strong>96</strong></td>
-                        <td><strong>394</strong></td>
-                        <td><strong>Cập nhật: 11/2025</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bảng thống kê tạm vắng -->
-    <div class="report-section">
-        <h3>✈️ Thống kê nhân khẩu tạm vắng</h3>
-        <div class="excel-table">
-            <table id="temporaryAbsentTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Số hộ khẩu</th>
-                        <th>Họ tên</th>
-                        <th>Nơi tạm vắng</th>
-                        <th>Từ ngày</th>
-                        <th>Đến ngày</th>
-                        <th>Lý do</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>HK-015</td>
-                        <td>Nguyễn Văn Hùng</td>
-                        <td>TP. Hồ Chí Minh</td>
-                        <td>15/09/2025</td>
-                        <td>15/12/2025</td>
-                        <td>Công tác</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>HK-028</td>
-                        <td>Trần Thị Mai</td>
-                        <td>Đà Nẵng</td>
-                        <td>01/10/2025</td>
-                        <td>01/02/2026</td>
-                        <td>Học tập</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>HK-042</td>
-                        <td>Lê Minh Tuấn</td>
-                        <td>Hải Phòng</td>
-                        <td>20/11/2025</td>
-                        <td>20/01/2026</td>
-                        <td>Thăm người thân</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>HK-067</td>
-                        <td>Phạm Văn Đức</td>
-                        <td>Cần Thơ</td>
-                        <td>05/11/2025</td>
-                        <td>05/03/2026</td>
-                        <td>Làm việc</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="6"><strong>TỔNG SỐ NGƯỜI TẠM VẮNG</strong></td>
-                        <td><strong>4 người</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bảng thống kê tạm trú -->
-    <div class="report-section">
-        <h3>🏠 Thống kê nhân khẩu tạm trú</h3>
-        <div class="excel-table">
-            <table id="temporaryResidenceTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Số hộ khẩu</th>
-                        <th>Họ tên</th>
-                        <th>Nơi đến từ</th>
-                        <th>Từ ngày</th>
-                        <th>Đến ngày</th>
-                        <th>Lý do</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>HK-089</td>
-                        <td>Nguyễn Thị Hoa</td>
-                        <td>Hà Nội</td>
-                        <td>01/08/2025</td>
-                        <td>01/02/2026</td>
-                        <td>Công tác dài hạn</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>HK-125</td>
-                        <td>Trần Văn Bình</td>
-                        <td>TP. Hồ Chí Minh</td>
-                        <td>15/09/2025</td>
-                        <td>15/03/2026</td>
-                        <td>Chuyển công tác</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>HK-134</td>
-                        <td>Lê Thị Mai</td>
-                        <td>Đà Nẵng</td>
-                        <td>10/10/2025</td>
-                        <td>10/01/2026</td>
-                        <td>Thuê nhà tạm</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>HK-142</td>
-                        <td>Phạm Minh Tuấn</td>
-                        <td>Hải Phòng</td>
-                        <td>20/11/2025</td>
-                        <td>20/05/2026</td>
-                        <td>Học tập</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>HK-151</td>
-                        <td>Hoàng Thị Lan</td>
-                        <td>Cần Thơ</td>
-                        <td>05/11/2025</td>
-                        <td>Chưa xác định</td>
-                        <td>Chăm sóc người thân</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="6"><strong>TỔNG SỐ NGƯỜI TẠM TRÚ</strong></td>
-                        <td><strong>5 người</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bảng thu phí theo tháng -->
-    <div class="report-section">
-        <h3>💰 Thu phí vệ sinh theo tháng</h3>
-        <div class="excel-table">
-            <table id="feeTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tháng/Năm</th>
-                        <th>Số hộ đã thu</th>
-                        <th>Tổng số hộ</th>
-                        <th>Tỷ lệ thu (%)</th>
-                        <th>Số tiền thu được</th>
-                        <th>Số tiền cần thu</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>10/2025</td>
-                        <td>85</td>
-                        <td>120</td>
-                        <td>70.8%</td>
-                        <td>2.040.000đ</td>
-                        <td>2.880.000đ</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>09/2025</td>
-                        <td>110</td>
-                        <td>120</td>
-                        <td>91.7%</td>
-                        <td>2.640.000đ</td>
-                        <td>2.880.000đ</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>08/2025</td>
-                        <td>118</td>
-                        <td>120</td>
-                        <td>98.3%</td>
-                        <td>2.832.000đ</td>
-                        <td>2.880.000đ</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>07/2025</td>
-                        <td>120</td>
-                        <td>120</td>
-                        <td>100%</td>
-                        <td>2.880.000đ</td>
-                        <td>2.880.000đ</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="2"><strong>TỔNG 4 THÁNG</strong></td>
-                        <td><strong>433</strong></td>
-                        <td><strong>480</strong></td>
-                        <td><strong>90.2%</strong></td>
-                        <td><strong>10.392.000đ</strong></td>
-                        <td><strong>11.520.000đ</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bảng tổng hợp tất cả đợt đóng góp -->
-    <div class="report-section">
-        <h3>🤝 Tổng hợp tất cả đợt đóng góp</h3>
-        <div class="excel-table">
-            <table id="donationSummaryTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Tên đợt đóng góp</th>
-                        <th>Thời gian</th>
-                        <th>Tổng hộ khu vực</th>
-                        <th>Hộ đã tham gia</th>
-                        <th>Hộ chưa tham gia</th>
-                        <th>Tỷ lệ tham gia (%)</th>
-                        <th>Tổng tiền thu được</th>
-                        <th>Mục tiêu</th>
-                        <th>Tỷ lệ đạt (%)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Ủng hộ ngày thương binh-liệt sỹ 27/07</td>
-                        <td>07/2025</td>
-                        <td>120</td>
-                        <td>115</td>
-                        <td>5</td>
-                        <td>95.8%</td>
-                        <td>12.500.000đ</td>
-                        <td>10.000.000đ</td>
-                        <td>125%</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Quỹ từ thiện trẻ em</td>
-                        <td>09/2025</td>
-                        <td>120</td>
-                        <td>98</td>
-                        <td>22</td>
-                        <td>81.7%</td>
-                        <td>8.750.000đ</td>
-                        <td>15.000.000đ</td>
-                        <td>58.3%</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>Xây dựng khu vui chơi trẻ em</td>
-                        <td>10/2025</td>
-                        <td>120</td>
-                        <td>87</td>
-                        <td>33</td>
-                        <td>72.5%</td>
-                        <td>22.300.000đ</td>
-                        <td>30.000.000đ</td>
-                        <td>74.3%</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>Ủng hộ người nghèo cuối năm</td>
-                        <td>11/2025</td>
-                        <td>120</td>
-                        <td>105</td>
-                        <td>15</td>
-                        <td>87.5%</td>
-                        <td>15.750.000đ</td>
-                        <td>20.000.000đ</td>
-                        <td>78.8%</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="3"><strong>TỔNG CỘNG 4 ĐỢT</strong></td>
-                        <td><strong>480</strong></td>
-                        <td><strong>405</strong></td>
-                        <td><strong>75</strong></td>
-                        <td><strong>84.4%</strong></td>
-                        <td><strong>59.300.000đ</strong></td>
-                        <td><strong>75.000.000đ</strong></td>
-                        <td><strong>79.1%</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Bảng chi tiết đóng góp của từng hộ theo đợt -->
-    <div class="report-section">
-        <h3>📋 Chi tiết đóng góp từng hộ - Đợt: Ủng hộ ngày thương binh-liệt sỹ 27/07</h3>
-        <div class="excel-table">
-            <table id="donationDetailTable">
-                <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Số hộ khẩu</th>
-                        <th>Chủ hộ</th>
-                        <th>Số thành viên</th>
-                        <th>Ngày đóng góp</th>
-                        <th>Số tiền đóng góp</th>
-                        <th>Người thu</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>HK-001</td>
-                        <td>Nguyễn Văn A</td>
-                        <td>4</td>
-                        <td>15/07/2025</td>
-                        <td>200.000đ</td>
-                        <td>Trần Thị C</td>
-                        <td>Đóng góp đầy đủ</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>HK-002</td>
-                        <td>Trần Thị B</td>
-                        <td>3</td>
-                        <td>16/07/2025</td>
-                        <td>150.000đ</td>
-                        <td>Trần Thị C</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td>HK-003</td>
-                        <td>Lê Văn C</td>
-                        <td>5</td>
-                        <td>17/07/2025</td>
-                        <td>100.000đ</td>
-                        <td>Nguyễn Văn D</td>
-                        <td>Gia đình khó khăn</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td>HK-004</td>
-                        <td>Phạm Thị D</td>
-                        <td>2</td>
-                        <td>18/07/2025</td>
-                        <td>300.000đ</td>
-                        <td>Trần Thị C</td>
-                        <td>Đóng góp tích cực</td>
-                    </tr>
-                    <tr>
-                        <td>5</td>
-                        <td>HK-005</td>
-                        <td>Hoàng Văn E</td>
-                        <td>6</td>
-                        <td>20/07/2025</td>
-                        <td>250.000đ</td>
-                        <td>Nguyễn Văn D</td>
-                        <td>-</td>
-                    </tr>
-                    <tr>
-                        <td>6</td>
-                        <td>HK-006</td>
-                        <td>Vũ Thị F</td>
-                        <td>4</td>
-                        <td>-</td>
-                        <td class="unpaid">Chưa đóng</td>
-                        <td>-</td>
-                        <td class="unpaid">Cần liên hệ lại</td>
-                    </tr>
-                    <tr>
-                        <td>7</td>
-                        <td>HK-007</td>
-                        <td>Đặng Văn G</td>
-                        <td>3</td>
-                        <td>22/07/2025</td>
-                        <td>180.000đ</td>
-                        <td>Trần Thị C</td>
-                        <td>-</td>
-                    </tr>
-                    <tr class="total-row">
-                        <td colspan="5"><strong>TỔNG ĐỢT NÀY</strong></td>
-                        <td><strong>1.180.000đ</strong></td>
-                        <td><strong>6/7 hộ</strong></td>
-                        <td><strong>Tỷ lệ: 85.7%</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-</div>
-
-<!-- SheetJS for Excel export -->
-<script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 <script src="{% static 'js/thongke_baocao.js' %}" defer></script>
 <link rel="stylesheet" href="{% static 'css/thongke_baocao.css' %}">
 {% endblock %}

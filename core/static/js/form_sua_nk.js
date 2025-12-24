@@ -86,11 +86,21 @@ function handleMoveTypeChange() {
     const transferFields = document.getElementById('transferFields');
     const pastFields = document.getElementById('pastFields');
     
+    // Get form sections
+    const personalInfoSection = document.getElementById('personalInfoSection');
+    const residenceSection = document.getElementById('residenceSection');
+    const workInfoSection = document.getElementById('workInfoSection');
+    
     // Hide all conditional fields
     transferFields.style.display = 'none';
     pastFields.style.display = 'none';
     document.getElementById('householdSelection').style.display = 'none';
     document.getElementById('areaInput').style.display = 'none';
+    
+    // Hide all form sections by default
+    personalInfoSection.style.display = 'none';
+    residenceSection.style.display = 'none';
+    workInfoSection.style.display = 'none';
     
     // Clear required attributes
     clearRequiredFields();
@@ -101,9 +111,11 @@ function handleMoveTypeChange() {
         setTransferFieldsRequired(true);
     } else if (moveType === 'past') {
         pastFields.style.display = 'block';
-        document.getElementById('pastNote').required = true;
     } else if (moveType === 'update') {
-        // Just update info, no additional fields needed
+        // Show all form sections for updating info
+        personalInfoSection.style.display = 'block';
+        residenceSection.style.display = 'block';
+        workInfoSection.style.display = 'block';
     }
 }
 
@@ -133,7 +145,6 @@ function handleDestinationTypeChange() {
 
 // Set transfer fields as required
 function setTransferFieldsRequired(isRequired) {
-    document.getElementById('transferNote').required = isRequired;
     document.getElementById('transferDate').required = isRequired;
     document.getElementById('transferDestinationType').required = isRequired;
 }
@@ -141,15 +152,11 @@ function setTransferFieldsRequired(isRequired) {
 // Clear all conditional required fields
 function clearRequiredFields() {
     // Transfer fields
-    document.getElementById('transferNote').required = false;
     document.getElementById('transferDate').required = false;
     document.getElementById('transferDestinationType').required = false;
     document.getElementById('newHousehold').required = false;
     document.getElementById('newHouseholdRelation').required = false;
     document.getElementById('transferAddress').required = false;
-    
-    // Past fields
-    document.getElementById('pastNote').required = false;
 }
 
 // Form submission

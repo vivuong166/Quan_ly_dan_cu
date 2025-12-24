@@ -5,7 +5,6 @@
     <h2 class="page-title">
         <span id="pageTitle">{% if is_edit %}Cập nhật hộ khẩu{% else %}Tạo hộ khẩu mới{% endif %}</span>
     </h2>
-    <br>
     <div class="header-actions">
         <a href="{% url 'sohokhau' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
@@ -41,41 +40,16 @@
             </div>
             
             <div class="form-section">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="householdCode" class="required">Mã hộ khẩu</label>
-                        <input type="text" id="householdCode" class="form-input" 
-                               placeholder="HK-XXX" required pattern="HK-[0-9]{3}">
-                        <small class="form-help">Nhập theo định dạng HK-XXX (VD: HK-001, HK-123)</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="creationDate" class="required">Ngày lập sổ</label>
-                        <input type="date" id="creationDate" class="form-input" required>
-                    </div>
-                </div>
-                
                 <div class="form-group">
-                    <label for="creationReason" class="required">Lý do lập sổ</label>
-                    <select id="creationReason" class="form-input" required>
-                        <option value="">-- Chọn lý do lập sổ --</option>
-                        <option value="new_household">Thành lập hộ mới</option>
-                        <option value="split_household">Tách hộ từ hộ khác</option>
-                        <option value="merge_household">Nhập hộ từ nơi khác</option>
-                        <option value="relocation">Chuyển đến từ địa phương khác</option>
-                        <option value="marriage">Kết hôn lập gia đình</option>
-                        <option value="other">Lý do khác</option>
-                    </select>
-                </div>
-                
-                <div class="form-group" id="otherReasonGroup" style="display: none;">
-                    <label for="otherReason">Ghi rõ lý do khác</label>
-                    <textarea id="otherReason" class="form-input" rows="3" 
-                              placeholder="Mô tả cụ thể lý do lập sổ hộ khẩu..."></textarea>
+                    <label for="householdCode" class="required">Mã hộ khẩu</label>
+                    <input type="text" id="householdCode" class="form-input" 
+                           placeholder="HK-XXX" required pattern="HK-[0-9]{3}">
+                    <small class="form-help">Nhập theo định dạng HK-XXX (VD: HK-001, HK-123)</small>
                 </div>
                 
                 <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
                 
-                <h4 style="margin-bottom: 16px; color: #1f2937;">Địa chễ thường trú</h4>
+                <h4 style="margin-bottom: 16px; color: #1f2937;">Địa chỉ thường trú</h4>
                 
                 <div class="form-row">
                     <div class="form-group">
@@ -84,7 +58,7 @@
                                placeholder="Số 12, 34A, 56/78..." required>
                     </div>
                     <div class="form-group">
-                        <label for="streetName" class="required">Tên đường/ngõ/phố</label>
+                        <label for="streetName" class="required">Tên đường / ngõ / phố</label>
                         <input type="text" id="streetName" class="form-input" 
                                placeholder="Đường Lạc Long Quân, Ngõ 123..." required>
                     </div>
@@ -143,9 +117,9 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="headIdNumber" class="required">Số CMND/CCCD</label>
+                        <label for="headIdNumber">Số CMND/CCCD</label>
                         <input type="text" id="headIdNumber" class="form-input" 
-                               placeholder="001234567890" required 
+                               placeholder="001234567890"
                                pattern="[0-9]{9,12}" maxlength="12">
                         <small class="form-help">Nhập 9-12 số của CMND hoặc CCCD</small>
                     </div>
@@ -234,23 +208,6 @@
                             <option value="Khác">Khác</option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="headEducation">Trình độ học vấn</label>
-                    <select id="headEducation" class="form-input">
-                        <option value="">-- Chọn trình độ học vấn --</option>
-                        <option value="Mầm non">Mầm non</option>
-                        <option value="Tiểu học">Tiểu học</option>
-                        <option value="Trung học cơ sở">Trung học cơ sở</option>
-                        <option value="Trung học phổ thông">Trung học phổ thông</option>
-                        <option value="Trung cấp">Trung cấp</option>
-                        <option value="Cao đẳng">Cao đẳng</option>
-                        <option value="Đại học">Đại học</option>
-                        <option value="Thạc sĩ">Thạc sĩ</option>
-                        <option value="Tiến sĩ">Tiến sĩ</option>
-                        <option value="Khác">Khác</option>
-                    </select>
                 </div>
             </div>
         </div>
