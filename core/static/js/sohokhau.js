@@ -1,604 +1,124 @@
+/**
+ * sohokhau.js - Phiên bản hoàn thiện kết nối dữ liệu thực Django
+ */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('sohokhau.js loaded and DOMContentLoaded fired');
+    console.log('sohokhau.js loaded - Real Data Mode');
+
+    // 1. DOM Elements
+    const searchInput = document.getElementById('searchHousehold'); // ID này phải khớp với ô input tìm kiếm
+    const householdList = document.getElementById('householdList'); // <tbody>
+    const householdCount = document.getElementById('householdCount'); // Badge đếm
     
-    // Sample data - sẽ được thay thế bằng API calls
-    let households = [
-        { 
-            id: 'HK-001', 
-            code: 'HK-001',
-            head_name: 'Nguyễn Văn A', 
-            address: 'Số 12, Đường X, La Khê',
-            member_count: 4,
-            created_at: '2025-01-15'
-        },
-        { 
-            id: 'HK-002', 
-            code: 'HK-002',
-            head_name: 'Trần Thị B', 
-            address: 'Số 34, Ngõ Y, La Khê',
-            member_count: 3,
-            created_at: '2025-01-20'
-        },
-        { 
-            id: 'HK-003', 
-            code: 'HK-003',
-            head_name: 'Lê Văn C', 
-            address: 'Số 56, Phố Z, La Khê',
-            member_count: 5,
-            created_at: '2025-02-01'
-        }
-    ];
-
-    let filteredHouseholds = [...households];
-
-    // DOM elements
-    const searchInput = document.getElementById('searchHousehold');
-    const addHouseholdBtn = document.getElementById('addHouseholdBtn');
+    // Các Modal
     const householdModal = document.getElementById('householdModal');
     const personModal = document.getElementById('personModal');
-    const householdList = document.getElementById('householdList');
-    const householdCount = document.getElementById('householdCount');
+    const changeHeadModal = document.getElementById('changeHeadModal');
 
-    // Initialize
-    updateHouseholdList();
-    updateHouseholdCount();
+    // 2. Logic Tìm kiếm nhanh trên bảng (Duyệt qua các <tr> có sẵn)
+    if (searchInput && householdList) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const rows = householdList.querySelectorAll('tr');
+            let visibleCount = 0;
 
-    // Event listeners
-    if (searchInput) {
-        searchInput.addEventListener('input', handleSearch);
-    }
-    if (addHouseholdBtn) {
-        addHouseholdBtn.addEventListener('click', showAddHouseholdForm);
-    }
-
-    function handleSearch() {
-        const searchTerm = searchInput.value.toLowerCase().trim();
-        
-        if (searchTerm === '') {
-            filteredHouseholds = [...households];
-        } else {
-            filteredHouseholds = households.filter(household =>
-                household.code.toLowerCase().includes(searchTerm) ||
-                household.head_name.toLowerCase().includes(searchTerm) ||
-                household.address.toLowerCase().includes(searchTerm)
-            );
-        }
-        
-        updateHouseholdList();
-        updateHouseholdCount();
-    }
-
-    function updateHouseholdList() {
-        householdList.innerHTML = '';
-        
-        filteredHouseholds.forEach((household, index) => {
-            const householdId = index + 1; // Use index + 1 as ID
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td><strong>${household.code}</strong></td>
-                <td>${household.head_name}</td>
-                <td>${household.address}</td>
-                <td>
-                    <a href="/qlhk_nk/hokhau/chitiet/${householdId}/" class="btn-sm">
-                        <i class="fas fa-eye"></i> Xem
-                    </a>
-                    <a href="/qlhk_nk/hokhau/suahk/${householdId}/" class="btn-sm">
-                        <i class="fas fa-edit"></i> Sửa
-                    </a>
-                    <a href="/qlhk_nk/hokhau/tachhk/${householdId}/" class="btn-sm">
-                        <i class="fas fa-code-branch"></i> Tách hộ
-                    </a>
-                </td>
-            `;
-            householdList.appendChild(row);
-        });
-
-        if (filteredHouseholds.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td colspan="4" style="text-align: center; color: #6b7280; padding: 20px;">
-                    <i class="fas fa-search"></i> Không tìm thấy hộ khẩu nào
-                </td>
-            `;
-            householdList.appendChild(row);
-        }
-    }
-
-    function updateHouseholdCount() {
-        householdCount.textContent = filteredHouseholds.length;
-    }
-
-    // Modal functions
-    window.showAddHouseholdForm = function() {
-        document.getElementById('modalTitle').textContent = 'Tạo hộ khẩu mới';
-        document.getElementById('householdForm').reset();
-        // Set default values
-        document.getElementById('creationDate').value = new Date().toISOString().split('T')[0];
-        document.getElementById('districtName').value = 'Hà Đông';
-        document.getElementById('provinceName').value = 'Hà Nội';
-        document.getElementById('headEthnicity').value = 'Kinh';
-        householdModal.style.display = 'flex';
-    }
-
-    window.closeHouseholdModal = function() {
-        householdModal.style.display = 'none';
-    }
-
-    window.closePersonModal = function() {
-        personModal.style.display = 'none';
-    }
-
-    // Legacy function for backward compatibility
-    window.closeModal = function() {
-        closeHouseholdModal();
-    }
-
-    window.saveHousehold = function() {
-        // Get form data
-        let code = document.getElementById('householdCode').value.trim();
-        const creationDate = document.getElementById('creationDate').value;
-        const creationReason = document.getElementById('creationReason').value;
-        const houseNumber = document.getElementById('houseNumber').value.trim();
-        const streetName = document.getElementById('streetName').value.trim();
-        const wardName = document.getElementById('wardName').value;
-        const headFullName = document.getElementById('headFullName').value.trim();
-        const headDob = document.getElementById('headDob').value;
-        const headGender = document.getElementById('headGender').value;
-        const headIdNumber = document.getElementById('headIdNumber').value.trim();
-
-        // Validation
-        if (!creationDate || !creationReason || !houseNumber || !streetName || 
-            !wardName || !headFullName || !headDob || !headGender || !headIdNumber) {
-            alert('Vui lòng điền đầy đủ thông tin bắt buộc (*)!');
-            return;
-        }
-
-        // Auto-generate code if empty
-        if (!code) {
-            const nextNumber = households.length + 1;
-            code = `HK-${nextNumber.toString().padStart(3, '0')}`;
-            document.getElementById('householdCode').value = code;
-        }
-
-        // Check if code already exists (for new households)
-        if (document.getElementById('modalTitle').textContent === 'Tạo hộ khẩu mới' &&
-            households.find(h => h.code === code)) {
-            alert('Mã hộ khẩu đã tồn tại!');
-            return;
-        }
-
-        // Build full address
-        const fullAddress = `${houseNumber}, ${streetName}, ${wardName}`;
-
-        // Create or update household
-        const householdData = {
-            id: code,
-            code: code,
-            head_name: headFullName,
-            address: fullAddress,
-            member_count: 1, // Chủ hộ
-            created_at: creationDate,
-            creation_reason: creationReason,
-            head_dob: headDob,
-            head_gender: headGender,
-            head_id_number: headIdNumber,
-            head_occupation: document.getElementById('headOccupation').value,
-            head_ethnicity: document.getElementById('headEthnicity').value,
-            head_religion: document.getElementById('headReligion').value,
-            head_education: document.getElementById('headEducation').value,
-            notes: document.getElementById('householdNotes').value
-        };
-
-        if (document.getElementById('modalTitle').textContent === 'Tạo hộ khẩu mới') {
-            households.push(householdData);
-            showSuccessMessage('Tạo hộ khẩu thành công!');
-        } else {
-            // Update existing household
-            const index = households.findIndex(h => h.code === code);
-            if (index !== -1) {
-                households[index] = { ...households[index], ...householdData };
-                showSuccessMessage('Cập nhật hộ khẩu thành công!');
-            }
-        }
-
-        filteredHouseholds = [...households];
-        updateHouseholdList();
-        updateHouseholdCount();
-        closeHouseholdModal();
-    }
-
-    window.savePerson = function() {
-        const householdId = document.getElementById('personHousehold').value;
-        const fullName = document.getElementById('personFullName').value;
-        const dob = document.getElementById('personDob').value;
-        const gender = document.getElementById('personGender').value;
-
-        if (!householdId || !fullName || !dob || !gender) {
-            alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-            return;
-        }
-
-        // Update member count
-        const household = households.find(h => h.code === householdId);
-        if (household) {
-            household.member_count++;
-        }
-
-        filteredHouseholds = [...households];
-        updateHouseholdList();
-        closePersonModal();
-
-        // Show success message
-        showSuccessMessage('Thêm nhân khẩu thành công!');
-    }
-
-    window.viewHousehold = function(code) {
-        const household = households.find(h => h.code === code);
-        if (household) {
-            alert(`Xem chi tiết hộ khẩu: ${household.code}\nChủ hộ: ${household.head_name}\nĐịa chỉ: ${household.address}\nSố nhân khẩu: ${household.member_count}`);
-        }
-    }
-
-    window.editHousehold = function(code) {
-        // Simple alert for now - có thể thay thế bằng toast notification
-        alert(message);
-    }
-
-    // Sample household members data with detailed information
-    const householdMembers = {
-        'HK-001': [
-            { 
-                id: 1, 
-                name: 'Nguyễn Văn A', 
-                relation: 'Chủ hộ', 
-                isHead: true,
-                dob: '15/03/1985',
-                idNumber: '012345678901',
-                occupation: 'Kỹ sư xây dựng'
-            },
-            { 
-                id: 2, 
-                name: 'Trần Thị Lan', 
-                relation: 'Vợ/Chồng', 
-                isHead: false,
-                dob: '22/07/1988',
-                idNumber: '012345678902',
-                occupation: 'Y tá'
-            },
-            { 
-                id: 3, 
-                name: 'Nguyễn Văn Nam', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '10/12/2010',
-                idNumber: '',
-                occupation: 'Học sinh'
-            },
-            { 
-                id: 4, 
-                name: 'Nguyễn Thị Hoa', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '15/05/2015',
-                idNumber: '',
-                occupation: 'Học sinh'
-            }
-        ],
-        'HK-002': [
-            { 
-                id: 5, 
-                name: 'Trần Thị B', 
-                relation: 'Chủ hộ', 
-                isHead: true,
-                dob: '08/11/1975',
-                idNumber: '012345678903',
-                occupation: 'Giáo viên'
-            },
-            { 
-                id: 6, 
-                name: 'Lê Văn Minh', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '03/09/2005',
-                idNumber: '',
-                occupation: 'Học sinh'
-            },
-            { 
-                id: 7, 
-                name: 'Trần Thị Mai', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '12/04/2008',
-                idNumber: '',
-                occupation: 'Học sinh'
-            }
-        ],
-        'HK-003': [
-            { 
-                id: 8, 
-                name: 'Lê Văn C', 
-                relation: 'Chủ hộ', 
-                isHead: true,
-                dob: '25/01/1980',
-                idNumber: '012345678904',
-                occupation: 'Nhân viên văn phòng'
-            },
-            { 
-                id: 9, 
-                name: 'Phạm Thị Dung', 
-                relation: 'Vợ/Chồng', 
-                isHead: false,
-                dob: '14/06/1983',
-                idNumber: '012345678905',
-                occupation: 'Kế toán'
-            },
-            { 
-                id: 10, 
-                name: 'Lê Văn Tuấn', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '20/08/2007',
-                idNumber: '',
-                occupation: 'Học sinh'
-            },
-            { 
-                id: 11, 
-                name: 'Lê Thị Linh', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '18/03/2012',
-                idNumber: '',
-                occupation: 'Học sinh'
-            },
-            { 
-                id: 12, 
-                name: 'Lê Văn Đức', 
-                relation: 'Con', 
-                isHead: false,
-                dob: '05/11/2016',
-                idNumber: '',
-                occupation: 'Mầm non'
-            }
-        ]
-    };
-
-    // Change household head functions
-    window.changeHouseholdHead = function(code) {
-        const changeHeadModal = document.getElementById('changeHeadModal');
-        const householdSelect = document.getElementById('changeHeadHousehold');
-        
-        // Set the household in the dropdown
-        householdSelect.value = code;
-        
-        // Update the current head and available members
-        updateCurrentHead(code);
-        updateNewHeadOptions(code);
-        
-        // Set default date to today
-        document.getElementById('changeHeadDate').value = new Date().toISOString().split('T')[0];
-        
-        changeHeadModal.style.display = 'flex';
-    }
-
-    window.closeChangeHeadModal = function() {
-        const changeHeadModal = document.getElementById('changeHeadModal');
-        changeHeadModal.style.display = 'none';
-        
-        // Reset form
-        document.getElementById('changeHeadForm').reset();
-        resetFormDisplays();
-    }
-
-    function resetFormDisplays() {
-        document.getElementById('householdAddress').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-map-marker-alt"></i>
-                <span>Chọn hộ khẩu để hiển thị địa chỉ</span>
-            </div>
-        `;
-        document.getElementById('currentHead').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-user"></i>
-                <span>Chọn hộ khẩu để hiển thị chủ hộ hiện tại</span>
-            </div>
-        `;
-        document.getElementById('currentHeadDob').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-calendar"></i>
-                <span>--/--/----</span>
-            </div>
-        `;
-        document.getElementById('currentHeadId').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-id-card"></i>
-                <span>Chưa có thông tin</span>
-            </div>
-        `;
-        document.getElementById('currentHeadJob').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-briefcase"></i>
-                <span>Chưa có thông tin</span>
-            </div>
-        `;
-        document.getElementById('newHeadRelation').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-users"></i>
-                <span>Chọn thành viên để hiển thị quan hệ</span>
-            </div>
-        `;
-        document.getElementById('newHeadDob').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-calendar"></i>
-                <span>--/--/----</span>
-            </div>
-        `;
-        document.getElementById('newHeadId').innerHTML = `
-            <div class="info-card">
-                <i class="fas fa-id-card"></i>
-                <span>Chưa có thông tin</span>
-            </div>
-        `;
-        document.getElementById('newHead').innerHTML = '<option value="">-- Chọn chủ hộ mới --</option>';
-    }
-
-    window.saveChangeHead = function() {
-        const householdCode = document.getElementById('changeHeadHousehold').value;
-        const newHeadId = document.getElementById('newHead').value;
-        const changeDate = document.getElementById('changeHeadDate').value;
-        const reason = document.getElementById('changeHeadReason').value;
-        const performer = document.getElementById('changeHeadPerformer').value;
-        const approval = document.getElementById('changeHeadApproval').value;
-        const note = document.getElementById('changeHeadNote').value;
-        const confirmCheck = document.getElementById('confirmChange').checked;
-
-        // Validation
-        if (!householdCode || !newHeadId || !changeDate || !reason || !performer) {
-            alert('Vui lòng điền đầy đủ thông tin bắt buộc (có dấu *)!');
-            return;
-        }
-
-        if (!confirmCheck) {
-            alert('Vui lòng xác nhận đã kiểm tra thông tin và giấy tờ!');
-            return;
-        }
-
-        // Get new head info
-        const members = householdMembers[householdCode] || [];
-        const newHead = members.find(m => m.id == newHeadId);
-        const currentHead = members.find(m => m.isHead);
-        
-        if (!newHead) {
-            alert('Không tìm thấy thành viên được chọn!');
-            return;
-        }
-
-        // Confirm action
-        const confirmMsg = `Xác nhận thay đổi chủ hộ?\n\n` +
-                          `Hộ khẩu: ${householdCode}\n` +
-                          `Từ: ${currentHead?.name || 'Không xác định'}\n` +
-                          `Thành: ${newHead.name}\n` +
-                          `Ngày: ${new Date(changeDate).toLocaleDateString('vi-VN')}\n` +
-                          `Lý do: ${document.querySelector('#changeHeadReason option:checked')?.text || reason}`;
-        
-        if (!confirm(confirmMsg)) {
-            return;
-        }
-
-        // Update household data
-        const householdIndex = households.findIndex(h => h.code === householdCode);
-        if (householdIndex !== -1) {
-            // Update current head in members
-            members.forEach(member => {
-                if (member.isHead) {
-                    member.isHead = false;
-                    member.relation = member.relation === 'Chủ hộ' ? 'Thành viên' : member.relation;
-                }
-                if (member.id == newHeadId) {
-                    member.isHead = true;
-                    member.relation = 'Chủ hộ';
+            rows.forEach(row => {
+                // Chỉ tìm kiếm nếu hàng đó không phải hàng "Không tìm thấy dữ liệu"
+                if (row.cells.length > 1) { 
+                    const text = row.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
                 }
             });
-            
-            // Update household head name
-            households[householdIndex].head_name = newHead.name;
-        }
 
-        // Create change record (for future history tracking)
-        const changeRecord = {
-            householdCode,
-            oldHead: currentHead?.name,
-            newHead: newHead.name,
-            changeDate,
-            reason,
-            performer,
-            approval,
-            note,
-            timestamp: new Date().toISOString()
-        };
-
-        // Update the household list display
-        updateHouseholdList();
-        closeChangeHeadModal();
-
-        // Show success message
-        showSuccessMessage(
-            `✅ Đã thay đổi chủ hộ thành công!\n\n` +
-            `📋 Hộ khẩu: ${householdCode}\n` +
-            `👑 Chủ hộ mới: ${newHead.name}\n` +
-            `📅 Ngày thay đổi: ${new Date(changeDate).toLocaleDateString('vi-VN')}\n` +
-            `👤 Người thực hiện: ${performer}`
-        );
-    }
-
-    function updateCurrentHead(householdCode) {
-        const currentHeadDiv = document.getElementById('currentHead');
-        const members = householdMembers[householdCode] || [];
-        const currentHead = members.find(m => m.isHead);
-        
-        if (currentHead) {
-            currentHeadDiv.innerHTML = `
-                <div class="info-card">
-                    <i class="fas fa-crown"></i>
-                    <span><strong>${currentHead.name}</strong> (${currentHead.relation})</span>
-                </div>
-            `;
-        } else {
-            currentHeadDiv.innerHTML = `
-                <div class="info-card">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span>Không tìm thấy chủ hộ hiện tại</span>
-                </div>
-            `;
-        }
-    }
-
-    function updateNewHeadOptions(householdCode) {
-        const newHeadSelect = document.getElementById('newHead');
-        const members = householdMembers[householdCode] || [];
-        
-        // Clear current options
-        newHeadSelect.innerHTML = '<option value="">-- Chọn chủ hộ mới --</option>';
-        
-        // Add members who are not current head
-        members.forEach(member => {
-            if (!member.isHead) {
-                const option = document.createElement('option');
-                option.value = member.id;
-                option.textContent = `${member.name} (${member.relation})`;
-                newHeadSelect.appendChild(option);
-            }
+            // Cập nhật số lượng hiển thị
+            if (householdCount) householdCount.textContent = visibleCount;
         });
     }
 
-    // Event listener for household selection change
-    document.getElementById('changeHeadHousehold').addEventListener('change', function() {
-        const selectedHousehold = this.value;
-        if (selectedHousehold) {
-            updateCurrentHead(selectedHousehold);
-            updateNewHeadOptions(selectedHousehold);
-        } else {
-            document.getElementById('currentHead').innerHTML = `
-                <div class="info-card">
-                    <i class="fas fa-user"></i>
-                    <span>Chọn hộ khẩu để hiển thị chủ hộ hiện tại</span>
-                </div>
-            `;
-            document.getElementById('newHead').innerHTML = '<option value="">-- Chọn chủ hộ mới --</option>';
+    // 3. Các hàm đóng mở Modal (Global scope để HTML gọi được)
+    window.showAddHouseholdForm = function() {
+        if (householdModal) {
+            document.getElementById('modalTitle').textContent = 'Tạo hộ khẩu mới';
+            document.getElementById('householdForm').reset();
+            householdModal.style.display = 'flex';
         }
-    });
+    };
 
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-        const changeHeadModal = document.getElementById('changeHeadModal');
+    window.closeModal = function() {
+        if (householdModal) householdModal.style.display = 'none';
+        if (personModal) personModal.style.display = 'none';
+        if (changeHeadModal) changeHeadModal.style.display = 'none';
+    };
+
+    window.closePersonModal = closeModal;
+    window.closeChangeHeadModal = closeModal;
+
+    // 4. Xử lý đổi chủ hộ (Nếu bạn vẫn muốn dùng Modal đổi chủ hộ)
+    window.changeHouseholdHead = function(code, currentName) {
+        if (changeHeadModal) {
+            const householdSelect = document.getElementById('changeHeadHousehold');
+            const currentHeadDiv = document.getElementById('currentHead');
+            
+            if (householdSelect) householdSelect.value = code;
+            if (currentHeadDiv) {
+                currentHeadDiv.innerHTML = `
+                    <div class="info-card">
+                        <i class="fas fa-crown"></i>
+                        <span><strong>${currentName}</strong> (Chủ hộ hiện tại)</span>
+                    </div>`;
+            }
+            changeHeadModal.style.display = 'flex';
+        }
+    };
+
+    // 5. Hàm lưu thay đổi chủ hộ (Gửi về Server)
+    window.saveChangeHead = function() {
+        const formData = new FormData(document.getElementById('changeHeadForm'));
         
-        if (event.target === householdModal) {
+        // Gửi dữ liệu tới URL xử lý của Django
+        fetch('/qlhk_nk/hokhau/update-head/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Cập nhật chủ hộ thành công!');
+                location.reload(); // Load lại trang để thấy dữ liệu mới
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    };
+
+    // Hàm lấy CSRF Token để gửi request POST an toàn
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // 6. Đóng modal khi click ra ngoài
+    window.onclick = function(event) {
+        if (event.target === householdModal || event.target === personModal || event.target === changeHeadModal) {
             closeModal();
         }
-        if (event.target === personModal) {
-            closePersonModal();
-        }
-        if (event.target === changeHeadModal) {
-            closeChangeHeadModal();
-        }
-    }
+    };
 });

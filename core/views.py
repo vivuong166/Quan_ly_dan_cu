@@ -127,8 +127,8 @@ def taohokhau(request, household_id=None):
             ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru") or None,
             dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
 
-            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
-            trang_thai=request.POST.get("trang_thai", "Thường trú"),
+            quan_he_chu_ho = "Chủ hộ",
+            trang_thai="Thường trú",
         )
 
         messages.success(request, "Tạo hộ khẩu thành công")
@@ -136,7 +136,30 @@ def taohokhau(request, household_id=None):
 
     return render(request, "taohokhau.html")
 
+from django.shortcuts import render
+from .models import Household, Person
 
+def quan_ly_ho_khau(request):
+    households = Household.objects.all()
+    
+    # 1. Lấy danh sách mã hộ khẩu hiện có
+    ma_hk_list = [hk.ma_ho_khau for hk in households]
+    
+    # 2. Lấy tất cả những người là 'Chủ hộ' của các mã hộ khẩu đó trong 1 lần truy vấn
+    # Chuyển thành một dictionary để tra cứu cực nhanh: { 'MA_HK': 'Tên Chủ Hộ' }
+    chu_ho_dict = {
+        p.ma_ho_khau: p.ho_ten 
+        for p in Person.objects.filter(
+            ma_ho_khau__in=ma_hk_list, 
+            quan_he_chu_ho__icontains='Chủ hộ'
+        )
+    }
+
+    # 3. Gán tên vào từng hộ khẩu
+    for hk in households:
+        hk.ten_chu_ho = chu_ho_dict.get(hk.ma_ho_khau, "Chưa xác định")
+
+    return render(request, 'sohokhau.html', {'households': households})
 @csrf_exempt
 def suahk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
