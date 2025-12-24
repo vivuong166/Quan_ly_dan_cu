@@ -20,6 +20,7 @@ from .models import (
 # ==================================================
 # AUTH (KHÔNG ĐỔI)
 # ==================================================
+@csrf_exempt
 def login_view(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -60,7 +61,7 @@ def login_view(request):
 
     return render(request, "login.html")
 
-
+@login_required
 def home(request):
     return render(request, "home.html", {
         "role": request.session.get("user_role", "CAN_BO")
@@ -70,7 +71,7 @@ def home(request):
 # ==================================================
 # QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
 # ==================================================
-
+#
 def qlnk(request):
     search_hk = request.GET.get("searchHoKhau", "").strip()
     search_nk = request.GET.get("searchNhanKhau", "").strip()
@@ -104,7 +105,7 @@ def sohokhau(request):
         "households": Household.objects.all()
     })
 
-
+#CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
 @csrf_exempt
 def taohokhau(request, household_id=None):
     if request.method == "POST":
@@ -121,6 +122,31 @@ def taohokhau(request, household_id=None):
             phuong=request.POST.get("phuong"),
             quan=request.POST.get("quan"),
         )
+        Person.objects.create(
+            ma_ho_khau=ma_ho_khau,
+
+            ho_ten=request.POST.get("ho_ten"),
+            bi_danh=request.POST.get("bi_danh"),
+
+            ngay_sinh=request.POST.get("ngay_sinh") or None,
+            gioi_tinh=request.POST.get("gioi_tinh"),
+            noi_sinh=request.POST.get("noi_sinh"),
+            nguyen_quan=request.POST.get("nguyen_quan"),
+            dan_toc=request.POST.get("dan_toc"),
+            nghe_nghiep=request.POST.get("nghe_nghiep"),
+            noi_lam_viec=request.POST.get("noi_lam_viec"),
+
+            cccd=request.POST.get("cccd"),
+            ngay_cap_cccd=request.POST.get("ngay_cap_cccd") or None,
+            noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+
+            ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru") or None,
+            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+
+            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
+            trang_thai=request.POST.get("trang_thai", "Thường trú"),
+        )
+
         messages.success(request, "Tạo hộ khẩu thành công")
         return redirect("sohokhau")
 
@@ -169,6 +195,8 @@ def nhankhau(request):
 
 @csrf_exempt
 def themnk(request):
+    #thêm lại đầy đủ thông tin trong bảng nhân khẩu
+
     if request.method == "POST":
         Person.objects.create(
             ho_ten=request.POST.get("ho_ten"),
@@ -227,11 +255,13 @@ def tamtru(request):
 def tamvang(request):
     if request.method == "POST":
         TemporaryAbsence.objects.create(
-            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
+            cccd=request.POST.get("cccd"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
             ly_do=request.POST.get("ly_do"),
         )
+        #check là có thằng nhân khẩu cccd như thế k, nếu accept -> oke nếu k thì nhót
         messages.success(request, "Đăng ký tạm vắng thành công")
         return redirect("tamvang")
 
@@ -309,3 +339,4 @@ def quanly_truycap(request):
 # ==================================================
 def page_not_found(request):
     return render(request, "404.html", status=404)
+
