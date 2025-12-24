@@ -179,15 +179,25 @@ def nhankhau(request):
 
 @csrf_exempt
 def themnk(request):
+    persons=Person.objects.all()#lấy thông tin bảng nhân khẩu
     #thêm lại đầy đủ thông tin trong bảng nhân khẩu
-
     if request.method == "POST":
         Person.objects.create(
             ho_ten=request.POST.get("ho_ten"),
-            cccd=request.POST.get("cccd"),
-            ma_ho_khau=request.POST.get("ma_ho_khau"),
+            bi_danh=request.POST.get("bi_danh"),
             ngay_sinh=request.POST.get("ngay_sinh"),
             gioi_tinh=request.POST.get("gioi_tinh"),
+            noi_sinh=request.POST.get("noi_sinh"),
+            nguyen_quan=request.POST.get("nguyen_quan"),
+            dan_toc=request.POST.get("dan_toc"),
+            nghe_nghiep=request.POST.get("nghe_nghiep"),
+            noi_lam_viec=request.POST.get("noi_lam_viec"),
+            cccd=request.POST.get("cccd"),
+            ngay_cap_cccd=request.POST.get("ngay_cap_cccd"),
+            noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+            ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru"),
+            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
         )
         messages.success(request, "Thêm nhân khẩu thành công")
         return redirect("nhankhau")
@@ -219,16 +229,21 @@ def qltv_tt(request):
 
 @csrf_exempt
 def tamtru(request):
-    Person.objects.all()
-    #tất cả các dữ liệu đều ở trong bảng tạm trú
-    TemporaryResidence.objects.all()
-    #kiểm tra nếu trong bảng tạm trú có rồi thì k cho tạm trú nữa
-    Household.objects.all()
-    #trả về bảng hộ khẩu
+    # lấy danh sách CCCD đã có trong bảng tạm trú
+    tamtru_cccds = TemporaryResidence.objects.values_list("cccd", flat=True)
+
+    # lấy danh sách nhân khẩu chưa tạm trú
+    persons = Person.objects.exclude(cccd__in=tamtru_cccds)
+
+    # lấy danh sách hộ khẩu
+    hokhau = Household.objects.all()#để lấy mã hộ khẩu thêm vào
+    tamtruhientai=TemporaryResidence.objects.all()# hiển thị bảng đang tạm trú
     if request.method == "POST":
         TemporaryResidence.objects.create(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
             ho_ten=request.POST.get("ho_ten"),
+            nghe_nghiep=request.POST.get("nghe_nghiep"),
+            cccd=request.POST.get("cccd"),
             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
             ly_do=request.POST.get("ly_do"),
@@ -241,24 +256,51 @@ def tamtru(request):
     })
 
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Person, TemporaryAbsence
+
 @csrf_exempt
 def tamvang(request):
-    Person.objects.all()
-    TemporaryAbsence.objects.all()
-    # nếu die trong bảng tạm vắng rồi thì bỏ qua, k cho chọn danh sách cuối cùng
-    #check trạng thái "thường trú" thì hiển thị , lọc trạng thái thường trú
+    # Lấy danh sách CCCD đã tạm vắng
+    tamvang_cccds = TemporaryAbsence.objects.values_list("ma_nhan_khau", flat=True)
+
+    # Lấy danh sách nhân khẩu được phép tạm vắng
+    #    - trạng thái = thường trú
+    #    - chưa có trong bảng tạm vắng
+    persons = Person.objects.filter(
+        trang_thai="Thường trú"
+    ).exclude(
+        ma_nhan_khau__in=tamvang_cccds
+    )
+    bangluutamvang=TemporaryAbsence.objects.all()
+
     if request.method == "POST":
+        cccd = request.POST.get("cccd")
+
+        # check nhân khẩu tồn tại
+        if not Person.objects.filter(cccd=cccd).exists():
+            messages.error(request, "Nhân khẩu không tồn tại")
+            return redirect("tamvang")
+
+        # check đã tạm vắng chưa
+        if TemporaryAbsence.objects.filter(cccd=cccd).exists():
+            messages.error(request, "Nhân khẩu đã đăng ký tạm vắng")
+            return redirect("tamvang")
+
+        # tạo tạm vắng
         TemporaryAbsence.objects.create(
-            ngay_sinh=request.POST.get("ngay_sinh"),
+            cccd=cccd,
             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
             ly_do=request.POST.get("ly_do"),
         )
-        #check là có thằng nhân khẩu cccd như thế k, nếu accept -> oke nếu k thì nhót
+
         messages.success(request, "Đăng ký tạm vắng thành công")
         return redirect("tamvang")
 
     return render(request, "tamvang.html", {
+        "persons": persons,  # danh sách được chọn
         "records": TemporaryAbsence.objects.all()
     })
 
@@ -281,15 +323,15 @@ def formdoichuho(request):
 # ==================================================
 
 def thuphi(request):
-    fees = HygieneFee.objects.all()
-    total_paid = fees.filter(
-        trang_thai="Đã nộp"
-    ).aggregate(total=Sum("so_tien"))["total"] or 0
+    #tạo đợt đóng góp
+    if(request.method == "POST"):
+        ContributionCampaign.objects.create(
+            ten_dot_dong_gop=request.POST.get("ten_dot_dong_gop"),
+            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
+            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
+        )
 
-    return render(request, "thuphi.html", {
-        "fees": fees,
-        "total_paid": total_paid
-    })
+    return render(request, "thuphi.html")
 
 
 
