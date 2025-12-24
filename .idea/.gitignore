@@ -3,5 +3,5 @@
 /workspace.xml
 **/__pycache__/
 *.pyc
+db.sqlite3
 .env
-db.sqlite3 (nếu bạn không muốn đẩy file db cá nhân lên)
