@@ -71,27 +71,10 @@ def home(request):
 # ==================================================
 # QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
 # ==================================================
-#
+# không search trả mã hộ khẩu
 def qlnk(request):
-    search_hk = request.GET.get("searchHoKhau", "").strip()
-    search_nk = request.GET.get("searchNhanKhau", "").strip()
-
     households = Household.objects.all()
-    if search_hk:
-        households = households.filter(
-            Q(ma_ho_khau__icontains=search_hk) |
-            Q(duong_pho__icontains=search_hk) |
-            Q(phuong__icontains=search_hk) |
-            Q(quan__icontains=search_hk)
-        )
-
     persons = Person.objects.all()
-    if search_nk:
-        persons = persons.filter(
-            Q(ho_ten__icontains=search_nk) |
-            Q(cccd__icontains=search_nk)
-        )
-
     return render(request, "qlnk.html", {
         "households": households,
         "persons": persons,
@@ -119,8 +102,8 @@ def taohokhau(request, household_id=None):
             ma_ho_khau=ma_ho_khau,
             so_nha=request.POST.get("so_nha"),
             duong_pho=request.POST.get("duong_pho"),
-            phuong=request.POST.get("phuong"),
-            quan=request.POST.get("quan"),
+            phuong="La Khê",
+            quan="Hà Đông"
         )
         Person.objects.create(
             ma_ho_khau=ma_ho_khau,
@@ -235,6 +218,12 @@ def qltv_tt(request):
 
 @csrf_exempt
 def tamtru(request):
+    Person.objects.all()
+    #tất cả các dữ liệu đều ở trong bảng tạm trú
+    TemporaryResidence.objects.all()
+    #kiểm tra nếu trong bảng tạm trú có rồi thì k cho tạm trú nữa
+    Household.objects.all()
+    #trả về bảng hộ khẩu
     if request.method == "POST":
         TemporaryResidence.objects.create(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
@@ -253,9 +242,12 @@ def tamtru(request):
 
 @csrf_exempt
 def tamvang(request):
+    Person.objects.all()
+    TemporaryAbsence.objects.all()
+    # nếu die trong bảng tạm vắng rồi thì bỏ qua, k cho chọn danh sách cuối cùng
+    #check trạng thái "thường trú" thì hiển thị , lọc trạng thái thường trú
     if request.method == "POST":
         TemporaryAbsence.objects.create(
-            cccd=request.POST.get("cccd"),
             ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
