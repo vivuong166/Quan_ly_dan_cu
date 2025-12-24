@@ -1,6 +1,4 @@
-{% extends 'base.html' %}
-{% load static %}
-{% block content %}
+{% extends 'base.html' %} {% load static %} {% block content %}
 <div class="page-header">
     <h2 class="page-title">Quản lý tạm vắng</h2>
     <div class="header-actions">
@@ -11,31 +9,39 @@
 </div>
 
 <div class="tvtt-wrap">
-    <!-- Tạm vắng -->
-    <section id="tab-tv" class="tvtt-panel active">
-        <form id="formTv" class="tvtt-form">
-            <div class="row">
-                <label>Chọn nhân khẩu</label>
-                <input id="tv_person" placeholder="Nhập họ và tên / CMND/CCCD">
-            </div>
-            <div class="row">
-                <label>Ngày sinh</label>
-                <input id="tv_ngay_sinh" type="date">
-            </div>
-            <div class="row">
-                <label>Ngày bắt đầu</label>
-                <input id="tv_ngay_bat_dau" type="date">
-                <label>Ngày kết thúc</label>
-                <input id="tv_ngay_ket_thuc" type="date">
-            </div>
-            <div class="row">
-                <label>Lý do</label>
-                <input id="tv_ly_do" placeholder="Lý do tạm vắng">
-            </div>
-            <div class="form-actions">
-                <button type="button" id="addTv" class="btn primary">Thêm tạm vắng</button>
-            </div>
-        </form>
+  <!-- Tạm vắng -->
+  <section id="tab-tv" class="tvtt-panel active">
+    <form id="formTv" class="tvtt-form">
+      <div class="row">
+        <label class="required">Chọn hộ khẩu</label>
+        <select
+          id="tv_person"
+          name="person"
+          class="row"
+          required
+        >
+          <option value="">-- Chọn nhân khẩu--</option>
+          <option value="1">HK-001 - Nguyễn Văn A</option>
+          <option value="2">HK-002 - Trần Thị B</option>
+          <option value="3">HK-003 - Lê Văn C</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Ngày bắt đầu</label>
+        <input id="tv_ngay_bat_dau" type="date" />
+        <label>Ngày kết thúc</label>
+        <input id="tv_ngay_ket_thuc" type="date" />
+      </div>
+      <div class="row">
+        <label>Lý do</label>
+        <input id="tv_ly_do" placeholder="Lý do tạm vắng" />
+      </div>
+      <div class="form-actions">
+        <button type="button" id="addTv" class="btn primary">
+          Thêm tạm vắng
+        </button>
+      </div>
+    </form>
 
         <div class="list-panel">
             <h3>Bảng đang tạm vắng</h3>
@@ -86,6 +92,6 @@
 
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
-<link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
-<link rel="stylesheet" href="{% static 'css/nhankhau.css' %}">
+<link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}" />
+<link rel="stylesheet" href="{% static 'css/nhankhau.css' %}" />
 {% endblock %}
