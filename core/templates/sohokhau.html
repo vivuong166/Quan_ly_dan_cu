@@ -10,13 +10,11 @@
     </div>
 </div>
 
-<!-- Main Content Panels -->
 <div class="dashboard-panels">
-    <!-- Household List Panel -->
     <div class="panel">
         <div class="panel-header">
             <h3><i class="fas fa-list"></i> Danh sách hộ khẩu</h3>
-            <span class="badge" id="householdCount">0</span>
+            <span class="badge" id="householdCount">{{ households|length }}</span>
         </div>
         <div class="panel-body">
             <div class="table-container">
@@ -30,241 +28,42 @@
                         </tr>
                     </thead>
                     <tbody id="householdList">
-                        <!-- Sample data - sẽ được thay thế bằng dữ liệu thực -->
+                        {% for hk in households %}
                         <tr>
-                            <td><strong>HK-001</strong></td>
-                            <td>Nguyễn Văn A</td>
-                            <td>Số 12, Đường X, La Khê</td>
+                            <td><strong>{{ hk.ma_ho_khau }}</strong></td>
+                            
+                            <td>{{ hk.ten_chu_ho|default:"Chưa có chủ hộ" }}</td>
+                            
+                            <td>{{ hk.so_nha }}, {{ hk.duong_pho }}, {{ hk.phuong }}, {{ hk.quan }}</td>
+                            
                             <td>
-                                <a href="{% url 'chitiet_hk' 1 %}" class="btn-sm">
+                                <a href="{% url 'chitiet_hk' hk.ma_ho_khau %}" class="btn-sm">
                                     <i class="fas fa-eye"></i> Xem
                                 </a>
-                                <a href="{% url 'suahk' 1 %}" class="btn-sm">
+                                <a href="{% url 'suahk' hk.ma_ho_khau %}" class="btn-sm">
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
-                                <a href="{% url 'tachhk' 1 %}" class="btn-sm">
+                                <a href="{% url 'tachhk' hk.ma_ho_khau %}" class="btn-sm">
                                     <i class="fas fa-code-branch"></i> Tách hộ
                                 </a>
                             </td>
                         </tr>
+                        {% empty %}
                         <tr>
-                            <td><strong>HK-002</strong></td>
-                            <td>Trần Thị B</td>
-                            <td>Số 34, Ngõ Y, La Khê</td>
-                            <td>
-                                <a href="{% url 'chitiet_hk' 2 %}" class="btn-sm">
-                                    <i class="fas fa-eye"></i> Xem
-                                </a>
-                                <a href="{% url 'suahk' 2 %}" class="btn-sm">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </a>
-                                <a href="{% url 'tachhk' 2 %}" class="btn-sm">
-                                    <i class="fas fa-code-branch"></i> Tách hộ
-                                </a>
+                            <td colspan="4" style="text-align: center; padding: 20px;">
+                                <img src="{% static 'images/empty-box.png' %}" alt="" style="width: 50px; opacity: 0.5;"><br>
+                                Chưa có dữ liệu hộ khẩu nào trên hệ thống.
                             </td>
                         </tr>
-                        <tr>
-                            <td><strong>HK-003</strong></td>
-                            <td>Lê Văn C</td>
-                            <td>Số 56, Phố Z, La Khê</td>
-                            <td>
-                                <a href="{% url 'chitiet_hk' 3 %}" class="btn-sm">
-                                    <i class="fas fa-eye"></i> Xem
-                                </a>
-                                <a href="{% url 'suahk' 3 %}" class="btn-sm">
-                                    <i class="fas fa-edit"></i> Sửa
-                                </a>
-                                <a href="{% url 'tachhk' 3 %}" class="btn-sm">
-                                    <i class="fas fa-code-branch"></i> Tách hộ
-                                </a>
-                            </td>
-                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
 </div>
 
-<!-- Modal for Adding/Editing Household -->
-<div id="householdModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Tạo hộ khẩu mới</h3>
-            <span class="close" onclick="closeModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="householdForm">
-                <div class="form-group">
-                    <label>Mã hộ khẩu *</label>
-                    <input type="text" id="householdCode" class="form-input" 
-                           placeholder="HK-XXX" required>
-                </div>
-                <div class="form-group">
-                    <label>Tên chủ hộ *</label>
-                    <input type="text" id="headName" class="form-input" 
-                           placeholder="Họ và tên chủ hộ" required>
-                </div>
-                <div class="form-group">
-                    <label>Địa chỉ *</label>
-                    <input type="text" id="householdAddress" class="form-input" 
-                           placeholder="Số nhà, đường/ngõ/phố, phường" required>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" onclick="closeModal()">Hủy</button>
-            <button class="btn primary" onclick="saveHousehold()">Lưu</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Adding Person -->
-<div id="personModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Thêm nhân khẩu</h3>
-            <span class="close" onclick="closePersonModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="personForm">
-                <div class="form-group">
-                    <label>Chọn hộ khẩu *</label>
-                    <select id="personHousehold" class="form-input" required>
-                        <option value="">-- Chọn hộ khẩu --</option>
-                        <option value="HK-001">HK-001 - Nguyễn Văn A</option>
-                        <option value="HK-002">HK-002 - Trần Thị B</option>
-                        <option value="HK-003">HK-003 - Lê Văn C</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Họ và tên *</label>
-                    <input type="text" id="personFullName" class="form-input" 
-                           placeholder="Họ và tên đầy đủ" required>
-                </div>
-                <div class="form-group">
-                    <label>Tên thường gọi</label>
-                    <input type="text" id="personAlias" class="form-input" 
-                           placeholder="Tên thường gọi">
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Ngày sinh *</label>
-                        <input type="date" id="personDob" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Giới tính *</label>
-                        <select id="personGender" class="form-input" required>
-                            <option value="">-- Chọn --</option>
-                            <option value="M">Nam</option>
-                            <option value="F">Nữ</option>
-                            <option value="O">Khác</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Quan hệ với chủ hộ</label>
-                    <input type="text" id="personRelation" class="form-input" 
-                           placeholder="Con, vợ/chồng, cha/mẹ, ...">
-                </div>
-                <div class="form-group">
-                    <label>Số CMND/CCCD</label>
-                    <input type="text" id="personIdNumber" class="form-input" 
-                           placeholder="Số căn cước công dân">
-                </div>
-                <div class="form-group">
-                    <label>Nghề nghiệp</label>
-                    <input type="text" id="personOccupation" class="form-input" 
-                           placeholder="Nghề nghiệp hiện tại">
-                </div>
-                <div class="form-group">
-                    <label class="checkbox-inline">
-                        <input type="checkbox" id="personIsHead"> Là chủ hộ
-                    </label>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" onclick="closePersonModal()">Hủy</button>
-            <button class="btn primary" onclick="savePerson()">Lưu</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Changing Household Head -->
-<div id="changeHeadModal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-crown"></i> Đổi chủ hộ</h3>
-            <span class="close" onclick="closeChangeHeadModal()">&times;</span>
-        </div>
-        <div class="modal-body">
-            <form id="changeHeadForm">
-                <div class="form-group">
-                    <label>Hộ khẩu cần đổi chủ *</label>
-                    <select id="changeHeadHousehold" class="form-input" required>
-                        <option value="">-- Chọn hộ khẩu --</option>
-                        <option value="HK-001">HK-001 - Nguyễn Văn A</option>
-                        <option value="HK-002">HK-002 - Trần Thị B</option>
-                        <option value="HK-003">HK-003 - Lê Văn C</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Chủ hộ hiện tại</label>
-                    <div id="currentHead" class="info-display">
-                        <div class="info-card">
-                            <i class="fas fa-user"></i>
-                            <span>Chọn hộ khẩu để hiển thị chủ hộ hiện tại</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Chủ hộ mới *</label>
-                    <select id="newHead" class="form-input" required>
-                        <option value="">-- Chọn chủ hộ mới --</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Ngày thay đổi *</label>
-                    <input type="date" id="changeHeadDate" class="form-input" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Lý do thay đổi</label>
-                    <select id="changeHeadReason" class="form-input">
-                        <option value="">-- Chọn lý do --</option>
-                        <option value="chu_cu_chuyen_di">Chủ cũ chuyển đi</option>
-                        <option value="chu_cu_qua_doi">Chủ cũ qua đời</option>
-                        <option value="thay_doi_tu_nguyen">Thay đổi tự nguyện</option>
-                        <option value="khac">Khác</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Số quyết định</label>
-                    <input type="text" id="changeHeadApproval" class="form-input" 
-                           placeholder="Số quyết định thay đổi chủ hộ">
-                </div>
-
-                <div class="form-group">
-                    <label>Ghi chú</label>
-                    <textarea id="changeHeadNote" class="form-input" rows="3" 
-                              placeholder="Ghi chú thêm về việc đổi chủ hộ..."></textarea>
-                </div>
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" onclick="closeChangeHeadModal()">Hủy</button>
-            <button class="btn primary" onclick="saveChangeHead()">Thay đổi chủ hộ</button>
-        </div>
-    </div>
-</div>
-
-<!-- External JS -->
 <script src="{% static 'js/sohokhau.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/sohokhau.css' %}">
+
 {% endblock %}
