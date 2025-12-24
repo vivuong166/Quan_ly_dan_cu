@@ -1,3 +1,17 @@
+/* Nút Lưu và Reload ở Phiếu thu gần đây */
+.btn-save-fee {
+    margin-right: 8px;
+    background-color: #1976d2 !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+.btn-reload-fee {
+    background-color: #e0e0e0 !important;
+    color: #333 !important;
+    border: none !important;
+    font-weight: 500;
+}
 /* Thu phi styles */
 .fee-tabs { 
     display: flex; 

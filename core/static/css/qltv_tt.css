@@ -1,3 +1,30 @@
+/* Nút Lưu và Reload cho bảng tạm vắng */
+.btn-save-fee {
+    margin-right: 8px;
+    background: #1976d2 !important;
+    color: #fff !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background 0.2s;
+}
+.btn-save-fee:hover {
+    background: #1251b5 !important;
+    color: #fff !important;
+}
+
+.btn-reload-fee {
+    background: #e0e0e0 !important;
+    color: #333 !important;
+    border: none !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background 0.2s;
+}
+.btn-reload-fee:hover {
+    background: #cacaca !important;
+    color: #222 !important;
+}
 /* Styles for qltv_tt (Tạm vắng / Tạm trú) */
 .tvtt-tabs { display:flex; gap:8px; margin:12px 0; }
 .tab-btn {

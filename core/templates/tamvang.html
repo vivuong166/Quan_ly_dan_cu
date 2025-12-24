@@ -44,7 +44,13 @@
     </form>
 
         <div class="list-panel">
-            <h3>Bảng đang tạm vắng</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <h3 style="margin: 0;">Bảng đang tạm vắng</h3>
+              <div>
+                <button type="button" id="saveTamVangList" class="btn btn-save-fee">Lưu</button>
+                <button type="button" id="reloadTamVangList" class="btn btn-reload-fee">Reload</button>
+              </div>
+            </div>
             <div class="table-container">
                 <table class="table-basic">
                     <thead>
