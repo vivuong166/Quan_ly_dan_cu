@@ -4,65 +4,60 @@
 <div class="page-header">
     <h2 class="page-title">Thêm nhân khẩu mới</h2>
     <div class="header-actions">
-        <a href="{% url 'qlnk' %}" class="btn">
+        <a href="{% url 'nhankhau' %}" class="btn">
             <i class="fas fa-arrow-left"></i> Quay lại
         </a>
     </div>
 </div>
 
-<!-- Form Panel -->
 <div class="dashboard-panels">
     <div class="panel">
-        <!-- <div class="panel-header">
-            <h3><i class="fas fa-user-plus"></i> Thông tin nhân khẩu</h3>
-        </div> -->
         <div class="panel-body">
             <form id="addPersonForm" method="post">
                 {% csrf_token %}
                 
-                <!-- Household Selection -->
                 <div class="form-section">
                     <h4><i class="fas fa-home"></i> Thông tin hộ khẩu</h4>
                     <div class="form-group">
                         <label class="required">Chọn hộ khẩu</label>
-                        <select id="personHousehold" name="household" class="form-input" required>
-                            <option value="">-- Chọn hộ khẩu --</option>
-                            <option value="HK-001">HK-001 - Nguyễn Văn A (Số 12, Đường X)</option>
-                            <option value="HK-002">HK-002 - Trần Thị B (Số 34, Ngõ Y)</option>
-                            <option value="HK-003">HK-003 - Lê Văn C (Số 56, Phố Z)</option>
-                        </select>
-                        <small class="help-text">Chọn hộ khẩu mà nhân khẩu này thuộc về</small>
+                        <input type="text" id="personHousehold" name="ma_ho_khau" 
+                               class="form-input" list="householdList" 
+                               placeholder="Gõ mã hộ khẩu hoặc tên chủ hộ để tìm..." required>
+                        
+                        <datalist id="householdList">
+                            {% for hk in danh_sach_hk %}
+                                <option value="{{ hk.ma_ho_khau }}">Địa chỉ: {{ hk.so_nha }} {{ hk.duong_pho }}</option>
+                            {% endfor %}
+                        </datalist>
+                        <small class="help-text">Hệ thống sẽ tự động lọc danh sách hộ khẩu hiện có</small>
                     </div>
                 </div>
 
-                <!-- Personal Information -->
                 <div class="form-section">
                     <h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Họ và tên</label>
-                            <input type="text" id="personFullName" name="full_name" class="form-input" 
-                                   placeholder="Nhập họ và tên đầy đủ" required>
+                            <input type="text" id="personFullName" name="ho_ten" class="form-input" placeholder="Nhập họ và tên đầy đủ" required>
                         </div>
                         <div class="form-group">
                             <label>Bí danh</label>
-                            <input type="text" id="personAlias" name="alias" class="form-input" 
-                                   placeholder="Tên gọi khác (không bắt buộc)">
+                            <input type="text" id="personAlias" name="bi_danh" class="form-input" placeholder="Tên gọi khác (không bắt buộc)">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Ngày sinh</label>
-                            <input type="date" id="personDob" name="dob" class="form-input" required>
+                            <input type="date" id="personDob" name="ngay_sinh" class="form-input" required>
                         </div>
                         <div class="form-group">
                             <label class="required">Giới tính</label>
-                            <select id="personGender" name="gender" class="form-input" required>
+                            <select id="personGender" name="gioi_tinh" class="form-input" required>
                                 <option value="">-- Chọn giới tính --</option>
-                                <option value="M">Nam</option>
-                                <option value="F">Nữ</option>
-                                <option value="O">Khác</option>
+                                <option value="Nam">Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
                             </select>
                         </div>
                     </div>
@@ -70,77 +65,65 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nơi sinh</label>
-                            <input type="text" id="personBirthPlace" name="birth_place" class="form-input" 
-                                   placeholder="Bệnh viện, Phường/Xã, Quận/Huyện, Tỉnh/TP...">
+                            <input type="text" name="noi_sinh" class="form-input" placeholder="Bệnh viện, Phường/Xã...">
                         </div>
                         <div class="form-group">
                             <label>Quê quán</label>
-                            <input type="text" id="personHometown" name="hometown" class="form-input" 
-                                   placeholder="Phường/Xã, Quận/Huyện, Tỉnh/TP...">
+                            <input type="text" name="nguyen_quan" class="form-input" placeholder="Tỉnh/TP...">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Quan hệ với chủ hộ</label>
-                            <input type="text" id="personRelation" name="relation_to_head" class="form-input" 
-                                   placeholder="Vợ/Chồng, Con, Cha/Mẹ, Anh/Chị/Em..." required>
+                            <input type="text" id="personRelation" name="quan_he_chu_ho" class="form-input" placeholder="Vợ/Chồng, Con..." required>
                         </div>
                         <div class="form-group">
                             <label>Số CMND/CCCD</label>
-                            <input type="text" id="personIdNumber" name="id_number" class="form-input" 
-                                   placeholder="Nhập số căn cước công dân">
-                            <small class="help-text">Có thể để trống cho trẻ em chưa có giấy tờ</small>
+                            <input type="text" id="personIdNumber" name="cccd" class="form-input" placeholder="Nhập số căn cước">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày cấp CMND/CCCD</label>
-                            <input type="date" id="personIdIssueDate" name="id_issue_date" class="form-input">
+                            <input type="date" name="ngay_cap_cccd" class="form-input">
                         </div>
                         <div class="form-group">
                             <label>Nơi cấp CMND/CCCD</label>
-                            <input type="text" id="personIdIssuePlace" name="id_issue_place" class="form-input" 
-                                   placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư">
+                            <input type="text" name="noi_cap_cccd" class="form-input" placeholder="Nơi cấp">
                         </div>
                     </div>
                 </div>
 
-                <!-- Residence Registration -->
                 <div class="form-section">
                     <h4><i class="fas fa-map-marker-alt"></i> Thông tin đăng ký thường trú</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày đăng ký thường trú</label>
-                            <input type="date" id="personResidenceRegDate" name="residence_reg_date" class="form-input">
+                            <input type="date" name="ngay_dang_ky_thuong_tru" class="form-input">
                         </div>
                         <div class="form-group">
                             <label>Địa chỉ nơi thường trú trước khi chuyển đến</label>
-                            <input type="text" id="personPreviousResidence" name="previous_residence" class="form-input" 
-                                   placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
+                            <input type="text" name="dia_chi_truoc_khi_chuyen" class="form-input">
                         </div>
                     </div>
                 </div>
 
-                <!-- Work Information -->
                 <div class="form-section">
                     <h4><i class="fas fa-briefcase"></i> Thông tin nghề nghiệp</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nghề nghiệp</label>
-                            <input type="text" id="personOccupation" name="occupation" class="form-input" 
-                                   placeholder="Nhập nghề nghiệp hiện tại">
+                            <input type="text" id="personOccupation" name="nghe_nghiep" class="form-input">
                         </div>
                         <div class="form-group">
                             <label>Nơi làm việc</label>
-                            <input type="text" id="personWorkplace" name="workplace" class="form-input" 
-                                   placeholder="Tên công ty/cơ quan">
+                            <input type="text" id="personWorkplace" name="noi_lam_viec" class="form-input">
                         </div>
                     </div>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="form-actions">
                     <button type="button" class="btn" onclick="resetForm()">
                         <i class="fas fa-undo"></i> Làm mới
@@ -152,14 +135,17 @@
             </form>
         </div>
     </div>
-</div>
-
-<!-- Success Message -->
-<div id="successMessage" class="alert alert-success" style="display: none;">
-    <i class="fas fa-check-circle"></i>
-    <span>Thêm nhân khẩu thành công!</span>
+    
 </div>
 
 <script src="{% static 'js/themnk.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/themnk.css' %}">
+{% if messages %}
+    <script type="text/javascript">
+        // Chạy ngay lập tức không cần chờ
+        {% for message in messages %}
+            alert("Thông báo hệ thống: {{ message|escapejs }}");
+        {% endfor %}
+    </script>
+{% endif %}
 {% endblock %}
