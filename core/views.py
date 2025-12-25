@@ -21,42 +21,27 @@ from .models import (
 # ==================================================
 # AUTH (KHÔNG ĐỔI)
 # ==================================================
-@csrf_exempt
+
+@csrf_exempt   # ⚠️ nên bỏ khi đã có csrf_token
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
+        username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # 1. kiểm tra email tồn tại
-        try:
-            user_obj = User.objects.get(email=email)
-        except User.DoesNotExist:
-            messages.error(request, "Email không tồn tại")
-            return redirect("login")
-
-        # 2. xác thực mật khẩu
         user = authenticate(
             request,
-            username=user_obj.username,
+            username=username,
             password=password
         )
-        print(user.id)
 
         if user is None:
-            messages.error(request, "Sai mật khẩu")
+            messages.error(request, "Sai username hoặc mật khẩu")
             return redirect("login")
 
-        # 3. đảm bảo user có role
-        role_obj, created = UserRole.objects.get_or_create(
-            id=user.id,
-        )
-
-        # 4. login + lưu session
         login(request, user)
-        request.session["user_role"] = role_obj.role
 
-        # debug (có thể xoá)
-        print("ROLE:", role_obj.role)
+        # lấy role đã tồn tại (do signal tạo)
+        request.session["user_role"] = user.role.role
 
         return redirect("home")
 
