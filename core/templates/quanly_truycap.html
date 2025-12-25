@@ -3,6 +3,13 @@
 {% load perms_extras %}
 
 {% block content %}
+{% if messages %}
+<script>
+    {% for message in messages %}
+        alert("{{ message|escapejs }}");
+    {% endfor %}
+</script>
+{% endif %}
 <div class="page-header">
     <h2 class="page-title">Quản Lý Truy Cập</h2>
 </div>
@@ -36,7 +43,7 @@
                         Chọn vai trò <span class="required">*</span>
                     </label>
                     <div class="role-selection">
-                        <div class="role-item role-leader">
+                        <!-- <div class="role-item role-leader">
                             <label>
                                 <input type="radio" name="role" value="to_truong">
                                 <span class="role-content">
@@ -44,11 +51,11 @@
                                     <small>Quản lý nhân khẩu, quản lý tạm trú - tạm vắng, thống kê - báo cáo</small>
                                 </span>
                             </label>
-                        </div>
+                        </div> -->
 
                         <div class="role-item role-deputy">
                             <label>
-                                <input type="radio" name="role" value="to_pho">
+                                <input type="radio" name="role" value="TO_PHO">
                                 <span class="role-content">
                                     <strong>Tổ phó</strong>
                                     <small>Quản lý nhân khẩu, quản lý tạm trú - tạm vắng, thống kê - báo cáo</small>
@@ -58,7 +65,7 @@
 
                         <div class="role-item role-staff">
                             <label>
-                                <input type="radio" name="role" value="can_bo">
+                                <input type="radio" name="role" value="CAN_BO" checked>
                                 <span class="role-content">
                                     <strong>Cán bộ</strong>
                                     <small>Quản lý thu phí, thống kê - báo cáo</small>
