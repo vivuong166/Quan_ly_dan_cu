@@ -461,3 +461,25 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+.alert-wrapper {
+    margin: 16px auto;
+    max-width: 600px;
+}
+
+.alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #e6f4ea;
+    color: #1e7e34;
+}
+
+.alert-error {
+    background-color: #fdecea;
+    color: #a71d2a;
+}

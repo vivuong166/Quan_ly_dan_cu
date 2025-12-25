@@ -59,6 +59,9 @@ def home(request):
 # ==================================================
 # không search trả mã hộ khẩu
 def qlnk(request):
+    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
+        return redirect("home")
     households = Household.objects.all()
     persons = Person.objects.all()
     return render(request, "qlnk.html", {
@@ -403,11 +406,16 @@ def thongke_baocao(request):
 # ==================================================
 # QUẢN LÝ TRUY CẬP
 
+@login_required
 def quanly_truycap(request):
+    if request.user.role.role != "TO_TRUONG":
+        messages.error(request, "Bạn không có quyền tạo tài khoản")
+        return redirect("home")
+
     if request.method == "POST":
         username = request.POST.get("username")
-        email = request.POST.get("email")
         password = request.POST.get("password")
+        role = request.POST.get("role")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username đã tồn tại")
@@ -415,24 +423,21 @@ def quanly_truycap(request):
 
         user = User.objects.create_user(
             username=username,
-            email=email,
             password=password
         )
 
-        UserRole.objects.get_or_create(
-            user=user,
-            defaults={"role": "CAN_BO"}
-        )
+        user.role.role = role
+        user.role.save()
 
         messages.success(request, "Tạo tài khoản thành công")
         return redirect("quanly_truycap")
 
     return render(request, "quanly_truycap.html")
 
-
 # ==================================================
 # ERROR
 # ==================================================
 def page_not_found(request):
     return render(request, "404.html", status=404)
+
 
