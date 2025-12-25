@@ -29,7 +29,13 @@
         </div>
 
         <div class="list-panel">
-            <h3>Phiếu thu gần đây</h3>
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="margin: 0;">Phiếu thu gần đây</h3>
+                <div>
+                    <button type="button" id="saveFeeList" class="btn secondary btn-save-fee" >Lưu</button>
+                    <button type="button" id="reloadFeeList" class="btn secondary btn-reload-fee">Reload</button>
+                </div>
+            </div>
             <div class="filter-row">
                 <label>Lọc theo năm:</label>
                 <select id="filterYear">

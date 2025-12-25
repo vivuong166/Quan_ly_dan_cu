@@ -109,26 +109,26 @@ def taohokhau(request, household_id=None):
         Person.objects.create(
             ma_ho_khau=ma_ho_khau,
 
-            ho_ten=request.POST.get("ho_ten"),
-            bi_danh=request.POST.get("bi_danh"),
+            ho_ten=request.POST.get("ho_ten") ,
+            bi_danh=request.POST.get("bi_danh") or None,
 
             ngay_sinh=request.POST.get("ngay_sinh") or None,
-            gioi_tinh=request.POST.get("gioi_tinh"),
-            noi_sinh=request.POST.get("noi_sinh"),
-            nguyen_quan=request.POST.get("nguyen_quan"),
-            dan_toc=request.POST.get("dan_toc"),
-            nghe_nghiep=request.POST.get("nghe_nghiep"),
-            noi_lam_viec=request.POST.get("noi_lam_viec"),
+            gioi_tinh=request.POST.get("gioi_tinh") or None,
+            noi_sinh=request.POST.get("noi_sinh") or None,
+            nguyen_quan=request.POST.get("nguyen_quan") or None,
+            dan_toc=request.POST.get("dan_toc") or None,
+            nghe_nghiep=request.POST.get("nghe_nghiep")or None,
+            noi_lam_viec=request.POST.get("noi_lam_viec")or None,
 
-            cccd=request.POST.get("cccd"),
+            cccd=request.POST.get("cccd")or None,
             ngay_cap_cccd=request.POST.get("ngay_cap_cccd") or None,
-            noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+            noi_cap_cccd=request.POST.get("noi_cap_cccd")or None,
 
             ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru") or None,
-            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen")or None,
 
-            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
-            trang_thai=request.POST.get("trang_thai", "Thường trú"),
+            quan_he_chu_ho = "Chủ hộ",
+            trang_thai="Thường trú",
         )
 
         messages.success(request, "Tạo hộ khẩu thành công")
@@ -136,7 +136,30 @@ def taohokhau(request, household_id=None):
 
     return render(request, "taohokhau.html")
 
+from django.shortcuts import render
+from .models import Household, Person
 
+def quan_ly_ho_khau(request):
+    households = Household.objects.all()
+    
+    # 1. Lấy danh sách mã hộ khẩu hiện có
+    ma_hk_list = [hk.ma_ho_khau for hk in households]
+    
+    # 2. Lấy tất cả những người là 'Chủ hộ' của các mã hộ khẩu đó trong 1 lần truy vấn
+    # Chuyển thành một dictionary để tra cứu cực nhanh: { 'MA_HK': 'Tên Chủ Hộ' }
+    chu_ho_dict = {
+        p.ma_ho_khau: p.ho_ten 
+        for p in Person.objects.filter(
+            ma_ho_khau__in=ma_hk_list, 
+            quan_he_chu_ho__icontains='Chủ hộ'
+        )
+    }
+
+    # 3. Gán tên vào từng hộ khẩu
+    for hk in households:
+        hk.ten_chu_ho = chu_ho_dict.get(hk.ma_ho_khau, "Chưa xác định")
+
+    return render(request, 'sohokhau.html', {'households': households})
 @csrf_exempt
 def suahk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
@@ -177,33 +200,80 @@ def nhankhau(request):
     })
 
 
-@csrf_exempt
+# @csrf_exempt
+# def themnk(request):
+#     persons=Person.objects.all()#lấy thông tin bảng nhân khẩu
+#     #thêm lại đầy đủ thông tin trong bảng nhân khẩu
+#     if request.method == "POST":
+#         Person.objects.create(
+#             ho_ten=request.POST.get("ho_ten"),
+#             bi_danh=request.POST.get("bi_danh"),
+#             ngay_sinh=request.POST.get("ngay_sinh"),
+#             gioi_tinh=request.POST.get("gioi_tinh"),
+#             noi_sinh=request.POST.get("noi_sinh"),
+#             nguyen_quan=request.POST.get("nguyen_quan"),
+#             dan_toc=request.POST.get("dan_toc"),
+#             nghe_nghiep=request.POST.get("nghe_nghiep"),
+#             noi_lam_viec=request.POST.get("noi_lam_viec"),
+#             cccd=request.POST.get("cccd"),
+#             ngay_cap_cccd=request.POST.get("ngay_cap_cccd"),
+#             noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+#             ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru"),
+#             dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+#             quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
+#         )
+#         messages.success(request, "Thêm nhân khẩu thành công")
+#         return redirect("nhankhau")
+
+#     return render(request, "themnk.html")
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Household, Person  # Đúng tên Model bạn đã gửi
+
 def themnk(request):
-    persons=Person.objects.all()#lấy thông tin bảng nhân khẩu
-    #thêm lại đầy đủ thông tin trong bảng nhân khẩu
+    # 1. Lấy danh sách mã hộ khẩu từ bảng Household (new_ho_khau)
+    # Vì Model của bạn không có tên chủ hộ, ta lấy Mã và Địa chỉ để người dùng dễ nhận biết
+    danh_sach_hk = Household.objects.all().values('ma_ho_khau', 'so_nha', 'duong_pho')
+
     if request.method == "POST":
-        Person.objects.create(
-            ho_ten=request.POST.get("ho_ten"),
-            bi_danh=request.POST.get("bi_danh"),
-            ngay_sinh=request.POST.get("ngay_sinh"),
-            gioi_tinh=request.POST.get("gioi_tinh"),
-            noi_sinh=request.POST.get("noi_sinh"),
-            nguyen_quan=request.POST.get("nguyen_quan"),
-            dan_toc=request.POST.get("dan_toc"),
-            nghe_nghiep=request.POST.get("nghe_nghiep"),
-            noi_lam_viec=request.POST.get("noi_lam_viec"),
-            cccd=request.POST.get("cccd"),
-            ngay_cap_cccd=request.POST.get("ngay_cap_cccd"),
-            noi_cap_cccd=request.POST.get("noi_cap_cccd"),
-            ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru"),
-            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
-            quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
-        )
-        messages.success(request, "Thêm nhân khẩu thành công")
-        return redirect("nhankhau")
+        # Hàm xử lý giá trị ngày tháng và CCCD (nếu để trống thì lưu NULL)
+        def clean_val(field):
+            val = request.POST.get(field, "").strip()
+            return val if val != "" else None
 
-    return render(request, "themnk.html")
+        try:
+            # 2. Thực hiện lưu vào bảng new_nhan_khau thông qua Model Person
+            Person.objects.create(
+                ma_ho_khau=request.POST.get("ma_ho_khau"), # Model Person dùng CharField cho ma_ho_khau
+                ho_ten=request.POST.get("ho_ten"),
+                bi_danh=request.POST.get("bi_danh"),
+                ngay_sinh=clean_val("ngay_sinh"),
+                gioi_tinh=request.POST.get("gioi_tinh"),
+                noi_sinh=request.POST.get("noi_sinh"),
+                nguyen_quan=request.POST.get("nguyen_quan"),
+                dan_toc=request.POST.get("dan_toc"),
+                nghe_nghiep=request.POST.get("nghe_nghiep"),
+                noi_lam_viec=request.POST.get("noi_lam_viec"),
+                cccd=clean_val("cccd"),
+                ngay_cap_cccd=clean_val("ngay_cap_cccd"),
+                noi_cap_cccd=request.POST.get("noi_cap_cccd"),
+                ngay_dang_ky_thuong_tru=clean_val("ngay_dang_ky_thuong_tru"),
+                dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
+                quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
+                trang_thai="Thường trú"
+            )
+            messages.success(request, "Thêm nhân khẩu thành công!")
+            danh_sach_hk = Household.objects.all().values('ma_ho_khau', 'so_nha', 'duong_pho')
+            return render(request, "themnk.html", {"danh_sach_hk": danh_sach_hk})
+            
+        except Exception as e:
+            messages.error(request, f"Lỗi: {e}")
+            return render(request, "themnk.html", {"danh_sach_hk": danh_sach_hk})
 
+    # 3. Trả dữ liệu sang HTML
+    return render(request, "themnk.html", {
+        "danh_sach_hk": danh_sach_hk
+    })
 
 @csrf_exempt
 def suank(request, person_id):
