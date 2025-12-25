@@ -136,6 +136,22 @@ class Contribution(models.Model):
 
 
 # =====================
+# HỘ KHẨU ĐẦY ĐỦ
+# =====================
+class HouseholdDetail(models.Model):
+    ma_ho_khau = models.CharField(max_length=10, primary_key=True)
+    dia_chi = models.CharField(max_length=255)
+    ten_chu_ho = models.CharField(max_length=255)
+
+    class Meta:
+        db_table = "v_ho_khau_day_du"
+        managed = False
+
+    def __str__(self):
+        return self.ma_ho_khau
+
+
+# =====================
 # USER ROLE (DJANGO QUẢN LÝ)
 # =====================
 from django.db import models
