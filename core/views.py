@@ -88,46 +88,52 @@ def sohokhau(request):
     return render(request, "sohokhau.html", {
         "households": Household.objects.all()
     })
+def empty_to_none(value):
+    return value if value not in ("", None) else None
 
 #CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
 @csrf_exempt
 def taohokhau(request, household_id=None):
     if request.method == "POST":
-        ma_ho_khau = request.POST.get("ma_ho_khau")
+        ma_ho_khauu = request.POST.get("ma_ho_khau")
 
-        if Household.objects.filter(ma_ho_khau=ma_ho_khau).exists():
+        if Household.objects.filter(ma_ho_khau=ma_ho_khauu).exists():
             messages.error(request, "Mã hộ khẩu đã tồn tại")
             return redirect("taohokhau")
 
         Household.objects.create(
-            ma_ho_khau=ma_ho_khau,
+            ma_ho_khau=ma_ho_khauu,
             so_nha=request.POST.get("so_nha"),
             duong_pho=request.POST.get("duong_pho"),
             phuong="La Khê",
             quan="Hà Đông"
         )
         Person.objects.create(
-            ma_ho_khau=ma_ho_khau,
+            ma_ho_khau=ma_ho_khauu,
 
-            ho_ten=request.POST.get("ho_ten") ,
-            bi_danh=request.POST.get("bi_danh") or None,
+            ho_ten=empty_to_none(request.POST.get("ho_ten")),
+            bi_danh=empty_to_none(request.POST.get("bi_danh")),
+            ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
 
-            ngay_sinh=request.POST.get("ngay_sinh") or None,
-            gioi_tinh=request.POST.get("gioi_tinh") or None,
-            noi_sinh=request.POST.get("noi_sinh") or None,
-            nguyen_quan=request.POST.get("nguyen_quan") or None,
-            dan_toc=request.POST.get("dan_toc") or None,
-            nghe_nghiep=request.POST.get("nghe_nghiep")or None,
-            noi_lam_viec=request.POST.get("noi_lam_viec")or None,
+            gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
+            noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
+            nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
+            dan_toc=empty_to_none(request.POST.get("dan_toc")),
+            nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
+            noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
 
-            cccd=request.POST.get("cccd")or None,
-            ngay_cap_cccd=request.POST.get("ngay_cap_cccd") or None,
-            noi_cap_cccd=request.POST.get("noi_cap_cccd")or None,
+            cccd=empty_to_none(request.POST.get("cccd")),
+            ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
+            noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
 
-            ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru") or None,
-            dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen")or None,
+            ngay_dang_ky_thuong_tru=empty_to_none(
+                request.POST.get("ngay_dang_ky_thuong_tru")
+            ),
+            dia_chi_truoc_khi_chuyen=empty_to_none(
+                request.POST.get("dia_chi_truoc_khi_chuyen")
+            ),
 
-            quan_he_chu_ho = "Chủ hộ",
+            quan_he_chu_ho="Chủ hộ",
             trang_thai="Thường trú",
         )
 
