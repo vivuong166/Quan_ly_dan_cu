@@ -4,6 +4,7 @@
 <div class="page-header">
     <h2 class="page-title">Quản lý hộ khẩu</h2>
     <div class="header-actions">
+        <input type="text" id="searchHousehold" placeholder="Tìm kiếm..." style="padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-right: 10px;">
         <a href="{% url 'taohokhau' %}" class="btn primary" id="addHouseholdBtn">
             <i class="fas fa-plus"></i> Tạo hộ khẩu mới
         </a>
@@ -32,7 +33,15 @@
                         <tr>
                             <td><strong>{{ hk.ma_ho_khau }}</strong></td>
                             
-                            <td>{{ hk.ten_chu_ho|default:"Chưa có chủ hộ" }}</td>
+                            <td>
+                                {% for detail in HouseholdDetails %}
+                                    {% if detail.ma_ho_khau == hk.ma_ho_khau %}
+                                        {{ detail.ten_chu_ho }}
+                                    {% endif %}
+                                {% empty %}
+                                    <span style="color: #9ca3af;">Chưa có dữ liệu chi tiết</span>
+                                {% endfor %}
+                            </td>
                             
                             <td>{{ hk.so_nha }}, {{ hk.duong_pho }}, {{ hk.phuong }}, {{ hk.quan }}</td>
                             
@@ -50,8 +59,8 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 20px;">
-                                <img src="{% static 'images/empty-box.png' %}" alt="" style="width: 50px; opacity: 0.5;"><br>
+                            <td colspan="4" style="text-align: center; padding: 40px; color: #9ca3af;">
+                                <i class="fas fa-box-open" style="font-size: 2rem; display: block; margin-bottom: 10px;"></i>
                                 Chưa có dữ liệu hộ khẩu nào trên hệ thống.
                             </td>
                         </tr>
@@ -65,5 +74,4 @@
 
 <script src="{% static 'js/sohokhau.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/sohokhau.css' %}">
-
 {% endblock %}

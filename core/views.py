@@ -75,6 +75,7 @@ def sohokhau(request):
         "HouseholdDetails":HouseholdDetail.objects.all(),
         "households": Household.objects.all()
     })
+
 def empty_to_none(value):
     return value if value not in ("", None) else None
 
@@ -271,7 +272,17 @@ def themnk(request):
     return render(request, "themnk.html", {
         "danh_sach_hk": danh_sach_hk
     })
+from django.shortcuts import render
+from .models import Person 
 
+def nhankhau(request):
+    # Lấy danh sách nhân khẩu, sắp xếp mã mới nhất lên đầu
+    # Thay 'id' bằng 'ma_nhan_khau' để tránh lỗi FieldError
+    nhankhau_data = Person.objects.all().order_by('-ma_nhan_khau')
+    
+    return render(request, "nhankhau.html", {
+        "nhankhau_list": nhankhau_data
+    })
 @csrf_exempt
 def suank(request, person_id):
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
