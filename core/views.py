@@ -14,7 +14,7 @@ from .models import (
     TemporaryAbsence,
     ContributionCampaign,
     Contribution,
-    UserRole,
+    UserRole, HouseholdDetail,
 )
 
 
@@ -70,7 +70,9 @@ def qlnk(request):
 # ================= HỘ KHẨU =================
 
 def sohokhau(request):
+    HouseholdDetails=HouseholdDetail.objects.all() #dùng để lấy thông tin chủ hộ
     return render(request, "sohokhau.html", {
+        "HouseholdDetails":HouseholdDetail.objects.all(),
         "households": Household.objects.all()
     })
 def empty_to_none(value):
