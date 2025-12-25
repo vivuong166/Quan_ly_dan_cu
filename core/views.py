@@ -14,49 +14,34 @@ from .models import (
     TemporaryAbsence,
     ContributionCampaign,
     Contribution,
-    UserRole,
+    UserRole, HouseholdDetail,
 )
 
 
 # ==================================================
 # AUTH (KHÔNG ĐỔI)
 # ==================================================
-@csrf_exempt
+
+@csrf_exempt   # ⚠️ nên bỏ khi đã có csrf_token
 def login_view(request):
     if request.method == "POST":
-        email = request.POST.get("email")
+        username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # 1. kiểm tra email tồn tại
-        try:
-            user_obj = User.objects.get(email=email)
-        except User.DoesNotExist:
-            messages.error(request, "Email không tồn tại")
-            return redirect("login")
-
-        # 2. xác thực mật khẩu
         user = authenticate(
             request,
-            username=user_obj.username,
+            username=username,
             password=password
         )
-        print(user.id)
 
         if user is None:
-            messages.error(request, "Sai mật khẩu")
+            messages.error(request, "Sai username hoặc mật khẩu")
             return redirect("login")
 
-        # 3. đảm bảo user có role
-        role_obj, created = UserRole.objects.get_or_create(
-            id=user.id,
-        )
-
-        # 4. login + lưu session
         login(request, user)
-        request.session["user_role"] = role_obj.role
 
-        # debug (có thể xoá)
-        print("ROLE:", role_obj.role)
+        # lấy role đã tồn tại (do signal tạo)
+        request.session["user_role"] = user.role.role
 
         return redirect("home")
 
@@ -74,6 +59,9 @@ def home(request):
 # ==================================================
 # không search trả mã hộ khẩu
 def qlnk(request):
+    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
+        return redirect("home")
     households = Household.objects.all()
     persons = Person.objects.all()
     return render(request, "qlnk.html", {
@@ -85,9 +73,12 @@ def qlnk(request):
 # ================= HỘ KHẨU =================
 
 def sohokhau(request):
+    HouseholdDetails=HouseholdDetail.objects.all() #dùng để lấy thông tin chủ hộ
     return render(request, "sohokhau.html", {
+        "HouseholdDetails":HouseholdDetail.objects.all(),
         "households": Household.objects.all()
     })
+
 def empty_to_none(value):
     return value if value not in ("", None) else None
 
@@ -168,19 +159,23 @@ def quan_ly_ho_khau(request):
     return render(request, 'sohokhau.html', {'households': households})
 @csrf_exempt
 def suahk(request, household_id):
-    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    household = get_object_or_404(Household, ma_ho_khau=household_id) #lấy ra hộ khẩu có mã hộ khẩu
+    person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
+    loai_thay_doi=request.POST.get("edit_type")#chọn loại thay đổi
+    if(loai_thay_doi=="address"):
+        if request.method == "POST":
+            household.so_nha = request.POST.get("so_nha")
+            household.duong_pho = request.POST.get("duong_pho")
+            household.save()
+    else:
+        if request.method == "POST":
+            #chỉnh sửa thông tin nhân khẩu
+            messages.success(request, "Cập nhật hộ khẩu thành công")
+            return redirect("sohokhau")
 
-    if request.method == "POST":
-        household.so_nha = request.POST.get("so_nha")
-        household.duong_pho = request.POST.get("duong_pho")
-        household.phuong = request.POST.get("phuong")
-        household.quan = request.POST.get("quan")
-        household.save()
 
-        messages.success(request, "Cập nhật hộ khẩu thành công")
-        return redirect("sohokhau")
 
-    return render(request, "suahk.html", {"household": household})
+    return render(request, "form_sua_hk.html", {"household": household})
 
 
 def chitiet_hk(request, household_id):
@@ -280,7 +275,17 @@ def themnk(request):
     return render(request, "themnk.html", {
         "danh_sach_hk": danh_sach_hk
     })
+from django.shortcuts import render
+from .models import Person 
 
+def nhankhau(request):
+    # Lấy danh sách nhân khẩu, sắp xếp mã mới nhất lên đầu
+    # Thay 'id' bằng 'ma_nhan_khau' để tránh lỗi FieldError
+    nhankhau_data = Person.objects.all().order_by('-ma_nhan_khau')
+    
+    return render(request, "nhankhau.html", {
+        "nhankhau_list": nhankhau_data
+    })
 @csrf_exempt
 def suank(request, person_id):
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
@@ -292,7 +297,7 @@ def suank(request, person_id):
         messages.success(request, "Cập nhật nhân khẩu thành công")
         return redirect("nhankhau")
 
-    return render(request, "suank.html", {"person": person})
+    return render(request, "form_sua_nk.html", {"person": person})
 
 
 # ==================================================
@@ -418,11 +423,16 @@ def thongke_baocao(request):
 # ==================================================
 # QUẢN LÝ TRUY CẬP
 
+@login_required
 def quanly_truycap(request):
+    if request.user.role.role != "TO_TRUONG":
+        messages.error(request, "Bạn không có quyền tạo tài khoản")
+        return redirect("home")
+
     if request.method == "POST":
         username = request.POST.get("username")
-        email = request.POST.get("email")
         password = request.POST.get("password")
+        role = request.POST.get("role")
 
         if User.objects.filter(username=username).exists():
             messages.error(request, "Username đã tồn tại")
@@ -430,24 +440,21 @@ def quanly_truycap(request):
 
         user = User.objects.create_user(
             username=username,
-            email=email,
             password=password
         )
 
-        UserRole.objects.get_or_create(
-            user=user,
-            defaults={"role": "CAN_BO"}
-        )
+        user.role.role = role
+        user.role.save()
 
         messages.success(request, "Tạo tài khoản thành công")
         return redirect("quanly_truycap")
 
     return render(request, "quanly_truycap.html")
 
-
 # ==================================================
 # ERROR
 # ==================================================
 def page_not_found(request):
     return render(request, "404.html", status=404)
+
 
