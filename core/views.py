@@ -155,19 +155,23 @@ def quan_ly_ho_khau(request):
     return render(request, 'sohokhau.html', {'households': households})
 @csrf_exempt
 def suahk(request, household_id):
-    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    household = get_object_or_404(Household, ma_ho_khau=household_id) #lấy ra hộ khẩu có mã hộ khẩu
+    person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
+    loai_thay_doi=request.POST.get("edit_type")#chọn loại thay đổi
+    if(loai_thay_doi=="address"):
+        if request.method == "POST":
+            household.so_nha = request.POST.get("so_nha")
+            household.duong_pho = request.POST.get("duong_pho")
+            household.save()
+    else:
+        if request.method == "POST":
+            #chỉnh sửa thông tin nhân khẩu
+            messages.success(request, "Cập nhật hộ khẩu thành công")
+            return redirect("sohokhau")
 
-    if request.method == "POST":
-        household.so_nha = request.POST.get("so_nha")
-        household.duong_pho = request.POST.get("duong_pho")
-        household.phuong = request.POST.get("phuong")
-        household.quan = request.POST.get("quan")
-        household.save()
 
-        messages.success(request, "Cập nhật hộ khẩu thành công")
-        return redirect("sohokhau")
 
-    return render(request, "suahk.html", {"household": household})
+    return render(request, "form_sua_hk.html", {"household": household})
 
 
 def chitiet_hk(request, household_id):
@@ -279,7 +283,7 @@ def suank(request, person_id):
         messages.success(request, "Cập nhật nhân khẩu thành công")
         return redirect("nhankhau")
 
-    return render(request, "suank.html", {"person": person})
+    return render(request, "form_sua_nk.html", {"person": person})
 
 
 # ==================================================
