@@ -21,7 +21,7 @@
             <nav class="menu">
 
                 <!-- Trang chủ (ai cũng thấy) -->
-                <a href="{% url 'home' %}" class="menu-item">
+                <a href="{% url 'home' %}" class="menu-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <i class="fas fa-house"></i>
                     <span>Trang chủ</span>
                 </a>
@@ -29,12 +29,12 @@
                 <!-- Các mục dành cho CÁN BỘ + TỔ TRƯỞNG -->
                 {% if request.session.user_role == "TO_PHO" or request.session.user_role == "TO_TRUONG" or request.session.user_role == "ADMIN"%}
 
-                    <a href="{% url 'qlnk' %}" class="menu-item">
+                    <a href="{% url 'qlnk' %}" class="menu-item {% if request.resolver_match.url_name == 'qlnk' %}active{% endif %}">
                         <i class="fas fa-users"></i>
                         <span>Hộ khẩu - Nhân khẩu</span>
                     </a>
 
-                    <a href="{% url 'qltv_tt' %}" class="menu-item">
+                    <a href="{% url 'qltv_tt' %}" class="menu-item {% if request.resolver_match.url_name == 'qltv_tt' %}active{% endif %}">
                         <i class="fas fa-receipt"></i>
                         <span>Tạm trú - Tạm vắng</span>
                     </a>
@@ -54,7 +54,7 @@
                         <span>Quản lý tạm vắng / trú</span>
                     </a> -->
 
-                     <a href="{% url 'thuphi' %}" class="menu-item">
+                     <a href="{% url 'thuphi' %}" class="menu-item {% if request.resolver_match.url_name == 'thuphi' %}active{% endif %}">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Thu phí - Đóng góp</span> 
                     </a>
@@ -63,14 +63,14 @@
                 {% endif %}
 
                 <!-- Thống kê (mọi vai trò đều có thể xem) -->
-                <a href="{% url 'thongke_baocao' %}" class="menu-item">
+                <a href="{% url 'thongke_baocao' %}" class="menu-item {% if request.resolver_match.url_name == 'thongke_baocao' %}active{% endif %}">
                     <i class="fas fa-chart-bar"></i>
                     <span>Thống kê - Báo cáo</span>
                 </a>
 
                 {% if request.session.user_role == "TO_TRUONG" or request.session.user_role == "ADMIN" %}
 
-                <a href="{% url 'quanly_truycap' %}" class="menu-item">
+                <a href="{% url 'quanly_truycap' %}" class="menu-item {% if request.resolver_match.url_name == 'quanly_truycap' %}active{% endif %}">
                     <i class="fas fa-user"></i>
                     <span>Tạo tài khoản mới</span>
                 </a>
