@@ -1,11 +1,5 @@
-// Global households data
-const householdsData = [
-    { id: 'HK-001', chu: 'Nguyễn Văn A', members: 4, fees: [{ year: 2025, paid: true }] },
-    { id: 'HK-002', chu: 'Trần Thị B', members: 3, fees: [] },
-    { id: 'HK-003', chu: 'Lê Văn C', members: 5, fees: [] },
-    { id: 'HK-004', chu: 'Phạm Thị D', members: 2, fees: [] },
-    { id: 'HK-005', chu: 'Hoàng Văn E', members: 6, fees: [] }
-];
+
+
 
 document.addEventListener('DOMContentLoaded', function(){
     const households = householdsData;
@@ -129,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function(){
         householdsData.forEach(h => {
             const option = document.createElement('option');
             option.value = h.id;
-            option.textContent = `${h.id} - ${h.chu} (${h.members} người)`;
+            option.textContent = `${h.id}`;
             householdSelect.appendChild(option);
         });
     }
@@ -204,47 +198,29 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     // Donation functionality placeholder
+    // 1. CHỈ giữ lại logic Tab và Modal. 
+// 2. XÓA HOẶC COMMENT hàm initializeHouseholdDropdown().
+// 3. SỬA logic nút Ghi nhận như sau:
+
     const addDonationBtn = document.getElementById('addDonation');
-    
     if (addDonationBtn) {
-        addDonationBtn.addEventListener('click', function(){
+        addDonationBtn.addEventListener('click', function(e) {
+            // Lấy form bao quanh nút này
+            const form = this.closest('form');
+            
             const donationType = document.getElementById('donationType').value;
             const donationHousehold = document.getElementById('donationHousehold').value;
             const donationAmount = document.getElementById('donationAmount').value;
-            
-            if (!donationType) {
-                alert('Vui lòng chọn đợt đóng góp!');
+
+            // Kiểm tra nhanh trước khi gửi
+            if (!donationType || !donationHousehold || !donationAmount) {
+                e.preventDefault(); // Chặn gửi nếu thiếu dữ liệu
+                alert('Vui lòng điền đầy đủ thông tin trước khi ghi nhận!');
                 return;
             }
-            
-            if (!donationHousehold) {
-                alert('Vui lòng chọn hộ gia đình!');
-                return;
-            }
-            
-            if (!donationAmount || parseInt(donationAmount) <= 0) {
-                alert('Vui lòng nhập số tiền đóng góp hợp lệ!');
-                return;
-            }
-            
-            // Get campaign name and household info from selected options
-            const campaignOption = document.getElementById('donationType').selectedOptions[0];
-            const householdOption = document.getElementById('donationHousehold').selectedOptions[0];
-            
-            const campaignName = campaignOption ? campaignOption.textContent : '';
-            const householdInfo = householdOption ? householdOption.textContent : '';
-            
-            const formattedAmount = parseInt(donationAmount).toLocaleString('vi-VN') + 'đ';
-            
-            alert(`Đã ghi nhận đóng góp:\n` +
-                  `- Đợt: ${campaignName}\n` +
-                  `- Hộ gia đình: ${householdInfo}\n` +
-                  `- Số tiền: ${formattedAmount}`);
-            
-            // Clear form
-            document.getElementById('donationType').value = '';
-            document.getElementById('donationHousehold').value = '';
-            document.getElementById('donationAmount').value = '';
+
+            // Nếu mọi thứ OK, để Form tự gửi (không dùng e.preventDefault() ở đây)
+            console.log("Đang gửi dữ liệu về Server...");
         });
     }
 });
@@ -329,53 +305,66 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+});
     
     // Handle form submission
+    // Hàm này để nút "Tạo đợt đóng góp" gọi tới
+function validateAndSubmit() {
     const form = document.getElementById('createCampaignForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(form);
-            const campaignData = {};
-            
-            // Collect form data
-            for (let [key, value] of formData.entries()) {
-                campaignData[key] = value;
-            }
-            
-            // Validate required fields
-            if (!campaignData.campaignName || !campaignData.startDate || 
-                !campaignData.endDate) {
-                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-                return;
-            }
-            
-            // Validate date range
-            const startDate = new Date(campaignData.startDate);
-            const endDate = new Date(campaignData.endDate);
-            
-            if (endDate <= startDate) {
-                alert('Ngày kết thúc phải sau ngày bắt đầu!');
-                return;
-            }
-            
-            // Process the campaign creation
-            console.log('Tạo đợt đóng góp:', campaignData);
-            
-            // Add campaign to dropdown
-            const donationTypeSelect = document.getElementById('donationType');
-            if (donationTypeSelect) {
-                const campaignId = campaignData.campaignName.toLowerCase().replace(/\s+/g, '_');
-                const option = document.createElement('option');
-                option.value = campaignId;
-                option.textContent = campaignData.campaignName;
-                donationTypeSelect.appendChild(option);
-            }
-            
-            alert('Tạo đợt đóng góp thành công!');
-            closeCreateCampaignModal();
-        });
-    }
-});
+    if (!form) return;
 
+    const formData = new FormData(form);
+    const campaignData = {};
+    
+    for (let [key, value] of formData.entries()) {
+        campaignData[key] = value;
+    }
+    
+    // 1. Kiểm tra các trường bắt buộc
+    if (!campaignData.ten_dot_dong_gop || !campaignData.ngay_bat_dau || !campaignData.ngay_ket_thuc) {
+        alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+        return;
+    }
+
+    // 2. Logic kiểm tra ngày tháng
+    const startDate = new Date(campaignData.ngay_bat_dau);
+    const endDate = new Date(campaignData.ngay_ket_thuc);
+                
+    if (endDate <= startDate) {
+        alert('Ngày kết thúc phải sau ngày bắt đầu!');
+        return;
+    }
+    
+    // 3. Nếu mọi thứ hợp lệ, tiến hành gửi form
+    form.submit(); 
+}
+
+// Hàm đóng modal
+function closeCreateCampaignModal() {
+    const modal = document.getElementById('createCampaignModal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Hàm mở modal (nếu bạn cần dùng cho nút "Thêm mới" ở ngoài)
+function openCreateCampaignModal() {
+    const modal = document.getElementById('createCampaignModal');
+    if (modal) modal.style.display = 'block';
+}
+function validateAndSubmit() {
+    const form = document.getElementById('createCampaignForm');
+    const name = document.getElementById('campaignName').value;
+    const start = document.getElementById('startDate').value;
+    const end = document.getElementById('endDate').value;
+
+    if (!name || !start || !end) {
+        alert("Vui lòng nhập đầy đủ thông tin!");
+        return;
+    }
+
+    if (new Date(end) <= new Date(start)) {
+        alert("Ngày kết thúc phải sau ngày bắt đầu!");
+        return;
+    }
+
+    form.submit(); // Gửi về Django để check trùng trong DB
+}
