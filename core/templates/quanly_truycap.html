@@ -3,13 +3,6 @@
 {% load perms_extras %}
 
 {% block content %}
-{% if messages %}
-<script>
-    {% for message in messages %}
-        alert("{{ message|escapejs }}");
-    {% endfor %}
-</script>
-{% endif %}
 <div class="page-header">
     <h2 class="page-title">Quản Lý Truy Cập</h2>
 </div>

@@ -81,92 +81,72 @@ def qlnk(request):
 
 # ================= HỘ KHẨU =================
 
-# def sohokhau(request):
-#     HouseholdDetails=HouseholdDetail.objects.all() #dùng để lấy thông tin chủ hộ
-#     return render(request, "sohokhau.html", {
-#         "HouseholdDetails":HouseholdDetail.objects.all(),
-#         "households": Household.objects.all()
-#     })
 def sohokhau(request):
-
-    # Chỉ lấy những hộ khẩu có mã khác rỗng
-    households = Household.objects.exclude(ma_ho_khau='').exclude(ma_ho_khau__isnull=True).order_by('-ma_ho_khau')
-    
-    # ... giữ nguyên phần logic HouseholdDetails cũ của bạn ...
+    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
+        return redirect("home")
+    HouseholdDetails=HouseholdDetail.objects.all() #dùng để lấy thông tin chủ hộ
     return render(request, "sohokhau.html", {
-        "households": households,
-        "HouseholdDetails": HouseholdDetail.objects.all()
+        "HouseholdDetails":HouseholdDetail.objects.all(),
+        "households": Household.objects.all()
     })
 
 def empty_to_none(value):
     return value if value not in ("", None) else None
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.db import transaction
-from django.views.decorators.csrf import csrf_exempt
-from django.utils import timezone
-from datetime import datetime
-from .models import Household, Person 
-
+#CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
 @csrf_exempt
 def taohokhau(request, household_id=None):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    if request.method == 'POST':
-        try:
-            data = request.POST
-            ma_hk = data.get('ma_ho_khau')
+    if request.method == "POST":
+        ma_ho_khauu = request.POST.get("ma_ho_khau")
 
+        if Household.objects.filter(ma_ho_khau=ma_ho_khauu).exists():
+            messages.error(request, "Mã hộ khẩu đã tồn tại")
+            return redirect("taohokhau")
 
-            # 1. Kiểm tra trùng mã hộ khẩu chủ động
-            if Household.objects.filter(ma_ho_khau=ma_hk).exists():
-                return JsonResponse({
-                    'status': 'error', 
-                    'message': f'Lỗi: Mã hộ khẩu "{ma_hk}" đã tồn tại. Vui lòng nhập mã khác.'
-                }, status=400)
+        Household.objects.create(
+            ma_ho_khau=ma_ho_khauu,
+            so_nha=request.POST.get("so_nha"),
+            duong_pho=request.POST.get("duong_pho"),
+            phuong="La Khê",
+            quan="Hà Đông"
+        )
+        Person.objects.create(
+            ma_ho_khau=ma_ho_khauu,
 
-            # 2. Kiểm tra ngày sinh tương lai
-            ngay_sinh_str = data.get('ngay_sinh')
-            if ngay_sinh_str:
-                ngay_sinh_dt = datetime.strptime(ngay_sinh_str, '%Y-%m-%d').date()
-                if ngay_sinh_dt > timezone.now().date():
-                    return JsonResponse({'status': 'error', 'message': 'Ngày sinh không được là ngày tương lai!'}, status=400)
+            ho_ten=empty_to_none(request.POST.get("ho_ten")),
+            bi_danh=empty_to_none(request.POST.get("bi_danh")),
+            ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
 
-            with transaction.atomic():
-                # 3. Lưu Hộ khẩu
-                hk = Household.objects.create(
-                    ma_ho_khau=ma_hk,
-                    so_nha=data.get('so_nha'),
-                    duong_pho=data.get('duong_pho'),
-                    phuong="La Khê",
-                    quan="Hà Đông"
-                )
+            gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
+            noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
+            nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
+            dan_toc=empty_to_none(request.POST.get("dan_toc")),
+            nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
+            noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
 
-                # 4. Lưu Chủ hộ
-                Person.objects.create(
-                    ma_ho_khau=hk.ma_ho_khau,
-                    ho_ten=data.get('ho_ten'),
-                    bi_danh=data.get('bi_danh') or None,
-                    ngay_sinh=ngay_sinh_str or None,
-                    gioi_tinh=data.get('gioi_tinh'),
-                    noi_sinh=data.get('noi_sinh') or None,
-                    nguyen_quan=data.get('que_quan') or None,
-                    dan_toc=data.get('dan_toc') or 'Kinh',
-                    cccd=data.get('cccd') or None,
-                    ngay_cap_cccd=data.get('ngay_cap_cccd') or None,
-                    noi_cap_cccd=data.get('noi_cap_cccd') or None,
-                    ngay_dang_ky_thuong_tru=data.get('ngay_dang_ky_thuong_tru') or None,
-                    dia_chi_truoc_khi_chuyen=data.get('dia_chi_truoc_khi_den') or None,
-                    quan_he_chu_ho="Chủ hộ",
-                    trang_thai="Thường trú"
-                )
-            return JsonResponse({'status': 'success'})
-        except Exception as e:
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            cccd=empty_to_none(request.POST.get("cccd")),
+            ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
+            noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
 
-    return render(request, 'taohokhau.html')
+            ngay_dang_ky_thuong_tru=empty_to_none(
+                request.POST.get("ngay_dang_ky_thuong_tru")
+            ),
+            dia_chi_truoc_khi_chuyen=empty_to_none(
+                request.POST.get("dia_chi_truoc_khi_chuyen")
+            ),
+
+            quan_he_chu_ho="Chủ hộ",
+            trang_thai="Thường trú",
+        )
+
+        messages.success(request, "Tạo hộ khẩu thành công")
+        return redirect("sohokhau")
+
+    return render(request, "taohokhau.html")
 
 def quan_ly_ho_khau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
