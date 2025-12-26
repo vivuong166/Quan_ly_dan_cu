@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
 
@@ -7,6 +9,7 @@ urlpatterns = [
     # AUTH
     # =====================
     path("login/", views.login_view, name="login"),
+    path("logout/", views.logout_view, name="logout"),
     path("home/", views.home, name="home"),
 
     # =====================
@@ -76,3 +79,9 @@ urlpatterns = [
     # =====================
     path("404/", views.page_not_found, name="404"),
 ]
+
+if not settings.DEBUG:
+    urlpatterns += static(
+        settings.STATIC_URL,
+        document_root=settings.STATIC_ROOT
+    )
