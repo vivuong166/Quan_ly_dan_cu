@@ -321,9 +321,11 @@ def suank(request, person_id):
         return redirect("home")
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
     ma_ho_khau_hien_tai=person.ma_ho_khau
-    thaydoink=get_object_or_404(Person_Change,ma_nhan_khau=person_id)
+    thaydoink=Person_Change.objects.create(
+        ma_nhan_khau=person_id
+    )
     loai_thay_doi=request.POST.get("move_type")
-    household=Household.object.exclude(ma_ho_khau__in=ma_ho_khau_hien_tai)#danh sách hộ khẩu mới mà k có hộ khẩu hiện tại
+    household=Household.objects.exclude(ma_ho_khau__in=ma_ho_khau_hien_tai)#danh sách hộ khẩu mới mà k có hộ khẩu hiện tại
     if(loai_thay_doi=="transfer"):
         thaydoink.ghi_chu=request.POST.get("transfer_note")
         thaydoink.ngay_chuyen_di=request.POST.get("ngay_chuyen_di")
@@ -356,8 +358,8 @@ def suank(request, person_id):
             person.noi_lam_viec=request.POST.get("noi_lam_viec")
             person.save()
         else:
-            person.trang_thai=request.POST.get("trang_thai")
-            thaydoink.loai_thay_doi=request.POST.get("loai_thay_doi")
+            person.trang_thai="đã qua đời"
+            thaydoink.loai_thay_doi="đã qua đời"
             thaydoink.ghi_chu=request.POST.get("ghi_chu")
             thaydoink.save()
             person.save()
