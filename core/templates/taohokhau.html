@@ -31,7 +31,7 @@
 
 <!-- Main Form Container -->
 <div class="form-container">
-    <form id="householdForm" class="household-form">
+    <form id="householdForm" class="household-form" novalidate>
         <!-- Step 1: Basic Information & Address -->
         <div class="form-step active" id="step-1">
             <div class="step-header">
@@ -261,7 +261,7 @@
             <button type="button" class="btn nav-btn primary" id="nextBtn" onclick="nextStep()">
                 Bước tiếp <i class="fas fa-chevron-right"></i>
             </button>
-            <button type="submit" class="btn nav-btn primary" id="submitBtn" style="display: none;" onclick="submitForm()">
+            <button type="submit" class="btn nav-btn primary" id="submitBtn" style="display: none;">
                 <i class="fas fa-save"></i> Lưu hộ khẩu
             </button>
         </div>
