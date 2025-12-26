@@ -96,12 +96,14 @@
                         <button class="user-avatar" id="userMenuButton" aria-haspopup="true" aria-expanded="false">
                             N1
                         </button>
-
-                        <div class="user-dropdown" id="userDropdown" role="menu" aria-labelledby="userMenuButton">
-                            <a href="{% url 'login' %}" class="dropdown-item logout">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Đăng xuất
-                            </a>
+                        <div class="user-dropdown" id="userDropdown" role="menu">
+                            <form action="{% url 'logout' %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="dropdown-item logout">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Đăng xuất
+                                </button>
+                            </form>
                         </div>
                     </div>
                     <!-- ================================================= -->

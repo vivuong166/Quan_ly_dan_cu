@@ -80,3 +80,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# Session hết hạn sau 30 phút
+SESSION_COOKIE_AGE = 30 * 60  
+
+# Gia hạn session mỗi request
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
