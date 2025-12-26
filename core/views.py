@@ -594,8 +594,12 @@ def quanly_truycap(request):
 
         messages.success(request, "Tạo tài khoản thành công")
         return redirect("quanly_truycap")
-
-    return render(request, "quanly_truycap.html")
+    users = User.objects.select_related('role').all()
+    
+    context = {
+        'users': users,
+    }
+    return render(request, "quanly_truycap.html", context)
 
 # ==================================================
 # ERROR
