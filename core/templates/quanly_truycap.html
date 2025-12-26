@@ -69,56 +69,31 @@
         <div class="panel-body">
             <div class="table-container">
                 <table class="table-basic">
-                    <thead>
-                        <tr>
-                            <th>Tài khoản</th>
-                            <th>Quyền truy cập</th>
-                            <th style="text-align:center;">Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for u in users %}
-                        <tr>
-                            <td>
-                                <strong>{{ u.username }}</strong>
-                                {% if u.is_staff %}
-                                <span class="badge badge-admin">ADMIN</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if assignments|dict_get:u.id|dict_get:'qlnk' %}
-                                    <span class="perm-badge perm-qlnk">
-                                        Quản lý nhân khẩu
-                                    </span>
-                                {% endif %}
-                                {% if assignments|dict_get:u.id|dict_get:'thuphi' %}
-                                    <span class="perm-badge perm-thuphi">
-                                        Thu phí
-                                    </span>
-                                {% endif %}
-                                {% if assignments|dict_get:u.id|dict_get:'tamtru' %}
-                                    <span class="perm-badge perm-tamtru">
-                                        Tạm trú/vắng
-                                    </span>
-                                {% endif %}
-                                {% if assignments|dict_get:u.id|dict_get:'thongke' %}
-                                    <span class="perm-badge perm-thongke">
-                                        Thống kê
-                                    </span>
-                                {% endif %}
-                                {% if not assignments|dict_get:u.id or not assignments|dict_get:u.id|dict_get:'qlnk' and not assignments|dict_get:u.id|dict_get:'thuphi' and not assignments|dict_get:u.id|dict_get:'tamtru' and not assignments|dict_get:u.id|dict_get:'thongke' %}
-                                    <span class="no-perms">Chưa có quyền</span>
-                                {% endif %}
-                            </td>
-                            <td style="text-align:center;">
-                                <button onclick="editUser('{{ u.id }}', '{{ u.username }}')" class="btn-sm">
-                                    Sửa quyền
-                                </button>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+    <thead>
+        <tr>
+            <th>Tài khoản</th>
+            <th>Quyền truy cập</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td><strong>{{ user.username }}</strong></td>
+            <td>
+                {% if user.role %}
+                    <span class="badge-role">{{ user.role.get_role_display }}</span>
+                {% else %}
+                    <span class="badge-none">Chưa gán quyền</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="2" style="text-align: center;">Chưa có tài khoản nào được tạo.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    </table>
             </div>
         </div>
     </div>
