@@ -460,8 +460,6 @@ def thongke_baocao(request):
 
 # ==================================================
 # QUẢN LÝ TRUY CẬP
-
-@login_required
 def quanly_truycap(request):
     if request.user.role.role != "TO_TRUONG":
         messages.error(request, "Bạn không có quyền tạo tài khoản")
