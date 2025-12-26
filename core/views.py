@@ -214,7 +214,7 @@ def tachhk(request, household_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
     household = get_object_or_404(Household, ma_ho_khau=household_id)
-    return render(request, "tachhk.html", {"household": household})
+    return render(request, "form_tach_hk.html", {"household": household})
 
 
 # ================= NHÂN KHẨU =================
