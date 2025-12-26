@@ -215,3 +215,17 @@ def auto_assign_role(sender, instance, created, **kwargs):
             user=instance,
             role=get_role_from_email(instance.email)
         )
+class Person_Change(models.Model):
+    ma_thay_doi=models.AutoField(primary_key=True)
+    ma_nhan_khau = models.IntegerField()
+    loai_thay_doi=models.CharField(max_length=100)
+    ngay_thay_doi=models.DateField()
+    ngay_chuyen_di=models.DateField()
+    noi_chuyen_den=models.CharField(max_length=100)
+    ghi_chu=models.CharField(max_length=100)
+    class Meta:
+        db_table = "new_thay_doi_nhan_khau"
+        managed = False
+
+    def __str__(self):
+        return self.ho_ten

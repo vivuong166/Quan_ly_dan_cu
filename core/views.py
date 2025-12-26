@@ -14,7 +14,7 @@ from .models import (
     TemporaryAbsence,
     ContributionCampaign,
     Contribution,
-    UserRole, HouseholdDetail,
+    UserRole, HouseholdDetail,Person_Change
 )
 
 # ==================================================
@@ -320,13 +320,47 @@ def suank(request, person_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
-
-    if request.method == "POST":
-        person.ho_ten = request.POST.get("ho_ten")
-        person.cccd = request.POST.get("cccd")
-        person.save()
+    ma_ho_khau_hien_tai=person.ma_ho_khau
+    thaydoink=get_object_or_404(Person_Change,ma_nhan_khau=person_id)
+    loai_thay_doi=request.POST.get("move_type")
+    household=Household.object.exclude(ma_ho_khau__in=ma_ho_khau_hien_tai)#danh sách hộ khẩu mới mà k có hộ khẩu hiện tại
+    if(loai_thay_doi=="transfer"):
+        thaydoink.ghi_chu=request.POST.get("transfer_note")
+        thaydoink.ngay_chuyen_di=request.POST.get("ngay_chuyen_di")
+        thaydoink.save()
+        transfer_destination_type=request.POST.get("transfer_destination_type")
+        if(transfer_destination_type=="household"):
+            #sửa mã hộ khẩu của nhân khẩu theo mã hộ khẩu mới
+            person.ma_ho_khau=request.POST.get("new_household")
+            person.quan_he_chu_ho=request.POST.get("newHouseholdRelation")
+            person.save()
+        else:
+            thaydoink.noi_chuyen_den=request.POST.get("noi_chuyen_den")
+            thaydoink.save()
         messages.success(request, "Cập nhật nhân khẩu thành công")
         return redirect("nhankhau")
+    else:
+        if(loai_thay_doi=="update"):
+            person.ho_ten=request.POST.get("ho_ten")
+            person.ngay_sinh=request.POST.get("ngay_sinh")
+            person.bi_danh=request.POST.get("bi_danh")
+            person.gioi_tinh=request.POST.get("gioi_tinh")
+            person.noi_sinh=request.POST.get("noi_sinh")
+            person.nguyen_quan=request.POST.get("nguyen_quan")
+            person.cccd=request.POST.get("cccd")
+            person.ngay_cap_cccd=request.POST.get("ngay_cap_cccd")
+            person.noi_cap_cccd=request.POST.get("noi_cap_cccd")
+            person.ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru")
+            person.dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_chuyen")
+            person.nghe_nghiep=request.POST.get("nghe_nghiep")
+            person.noi_lam_viec=request.POST.get("noi_lam_viec")
+            person.save()
+        else:
+            person.trang_thai=request.POST.get("trang_thai")
+            thaydoink.loai_thay_doi=request.POST.get("loai_thay_doi")
+            thaydoink.ghi_chu=request.POST.get("ghi_chu")
+            thaydoink.save()
+            person.save()
 
     return render(request, "form_sua_nk.html", {"person": person})
 
