@@ -97,16 +97,14 @@ document.getElementById('householdForm').addEventListener('submit', function(e) 
 });
 
 // --- HÀM LƯU DỮ LIỆU (KHỚP VIEW.PY) ---
+// --- HÀM LƯU DỮ LIỆU ---
 window.submitForm = function() {
     if (!document.getElementById('confirmInformation').checked) {
         alert('Bạn phải xác nhận thông tin trước khi lưu');
         return;
     }
-    console.log("Đang bắt đầu gửi form...");
     
     const formData = new FormData();
-    
-    // Mapping: ID TRÊN HTML -> NAME TRONG VIEW.PY
     const mapping = {
         'householdCode': 'ma_ho_khau',
         'houseNumber': 'so_nha',
@@ -129,15 +127,8 @@ window.submitForm = function() {
 
     for (let id in mapping) {
         const el = document.getElementById(id);
-        if (el) {
-            formData.append(mapping[id], el.value.trim());
-        } else {
-            console.warn(`Không tìm thấy phần tử có ID: ${id}`);
-        }
+        if (el) formData.append(mapping[id], el.value.trim());
     }
-
-    formData.append('quan_he_chu_ho', 'Chủ hộ');
-    formData.append('trang_thai', 'Thường trú');
 
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
@@ -148,21 +139,25 @@ window.submitForm = function() {
         body: formData
     })
     .then(response => {
-        if (response.redirected) {
-            window.location.href = response.url;
-        } else {
-            alert("Lưu thất bại! Kiểm tra lại mã hộ khẩu.");
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'Lưu Hộ Khẩu';
-        }
+        // Chuyển đổi phản hồi sang JSON
+        return response.json().then(data => {
+            if (!response.ok) {
+                // Nếu mã lỗi 400 hoặc 500, ném lỗi để nhảy vào .catch()
+                throw new Error(data.message || "Lỗi không xác định");
+            }
+            return data;
+        });
+    })
+    .then(data => {
+        alert(data.message); // Hiển thị "Tạo hộ khẩu thành công!"
+        window.location.href = "/qlhk_nk/hokhau/"; // Redirect bằng JS
     })
     .catch(error => {
-        console.error("Lỗi fetch:", error);
-        alert("Lỗi kết nối server!");
+        alert("THẤT BẠI: " + error.message); // Hiển thị "Mã hộ khẩu đã tồn tại!"
         submitBtn.disabled = false;
+        submitBtn.innerText = 'Lưu hộ khẩu';
     });
 };
-
 // Khởi tạo trang
 document.addEventListener('DOMContentLoaded', function() {
     window.showStep(1);
