@@ -140,12 +140,4 @@
 
 <script src="{% static 'js/themnk.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/themnk.css' %}">
-{% if messages %}
-    <script type="text/javascript">
-        // Chạy ngay lập tức không cần chờ
-        {% for message in messages %}
-            alert("Thông báo hệ thống: {{ message|escapejs }}");
-        {% endfor %}
-    </script>
-{% endif %}
 {% endblock %}

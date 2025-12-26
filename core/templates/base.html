@@ -111,7 +111,18 @@
                 </div>
             </header>
 
-            <main class="content-area">
+            <main class="content-area">  
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="django-message" data-message="{{ message|escapejs }}"></div>
+                    {% endfor %}
+                {% endif %}
+
+                <script>
+                    document.querySelectorAll('.django-message').forEach(el => {
+                        alert(el.dataset.message);
+                    });
+                </script>
                 {% block content %}
                 {% endblock %}
             </main>
