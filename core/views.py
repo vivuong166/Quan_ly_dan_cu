@@ -95,56 +95,68 @@ def empty_to_none(value):
     return value if value not in ("", None) else None
 
 #CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Household, Person
+import json
+
+def empty_to_none(value):
+    if value is None or str(value).strip() == "":
+        return None
+    return value
+
 @csrf_exempt
 def taohokhau(request, household_id=None):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
-        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
-        return redirect("home")
+    # Kiểm tra quyền (giữ nguyên logic của bạn)
+    role = getattr(request.user.role, 'role', None)
+    if role not in ["TO_TRUONG", "TO_PHO"]:
+        return JsonResponse({"status": "error", "message": "Bạn không có quyền!"}, status=403)
+
     if request.method == "POST":
-        ma_ho_khauu = request.POST.get("ma_ho_khau")
+        ma_ho = request.POST.get("ma_ho_khau", "").strip()
 
-        if Household.objects.filter(ma_ho_khau=ma_ho_khauu).exists():
-            messages.error(request, "Mã hộ khẩu đã tồn tại")
-            return redirect("taohokhau")
+        # 1. Kiểm tra tồn tại mã hộ khẩu
+        if Household.objects.filter(ma_ho_khau=ma_ho).exists():
+            return JsonResponse({
+                "status": "error", 
+                "message": f"Mã hộ khẩu '{ma_ho}' đã tồn tại trong hệ thống!"
+            }, status=400)
 
-        Household.objects.create(
-            ma_ho_khau=ma_ho_khauu,
-            so_nha=request.POST.get("so_nha"),
-            duong_pho=request.POST.get("duong_pho"),
-            phuong="La Khê",
-            quan="Hà Đông"
-        )
-        Person.objects.create(
-            ma_ho_khau=ma_ho_khauu,
+        try:
+            # 2. Tạo Hộ Khẩu (Table: new_ho_khau)
+            Household.objects.create(
+                ma_ho_khau=ma_ho,
+                so_nha=request.POST.get("so_nha"),
+                duong_pho=request.POST.get("duong_pho"),
+                phuong="La Khê",
+                quan="Hà Đông"
+            )
 
-            ho_ten=empty_to_none(request.POST.get("ho_ten")),
-            bi_danh=empty_to_none(request.POST.get("bi_danh")),
-            ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
+            # 3. Tạo Nhân Khẩu cho Chủ hộ (Table: new_nhan_khau)
+            Person.objects.create(
+                ma_ho_khau=ma_ho,
+                ho_ten=empty_to_none(request.POST.get("ho_ten")),
+                bi_danh=empty_to_none(request.POST.get("bi_danh")),
+                ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
+                gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
+                noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
+                nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
+                dan_toc=empty_to_none(request.POST.get("dan_toc")),
+                nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
+                noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
+                cccd=empty_to_none(request.POST.get("cccd")),
+                ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
+                noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
+                ngay_dang_ky_thuong_tru=empty_to_none(request.POST.get("ngay_dang_ky_thuong_tru")),
+                dia_chi_truoc_khi_chuyen=empty_to_none(request.POST.get("dia_chi_truoc_khi_chuyen")),
+                quan_he_chu_ho="Chủ hộ",
+                trang_thai="Thường trú",
+            )
+            return JsonResponse({"status": "success", "message": "Tạo hộ khẩu thành công!"})
 
-            gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
-            noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
-            nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
-            dan_toc=empty_to_none(request.POST.get("dan_toc")),
-            nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
-            noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
-
-            cccd=empty_to_none(request.POST.get("cccd")),
-            ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
-            noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
-
-            ngay_dang_ky_thuong_tru=empty_to_none(
-                request.POST.get("ngay_dang_ky_thuong_tru")
-            ),
-            dia_chi_truoc_khi_chuyen=empty_to_none(
-                request.POST.get("dia_chi_truoc_khi_chuyen")
-            ),
-
-            quan_he_chu_ho="Chủ hộ",
-            trang_thai="Thường trú",
-        )
-
-        messages.success(request, "Tạo hộ khẩu thành công")
-        return redirect("sohokhau")
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": f"Lỗi Database: {str(e)}"}, status=500)
 
     return render(request, "taohokhau.html")
 
@@ -196,15 +208,34 @@ def suahk(request, household_id):
     return render(request, "form_sua_hk.html", {"household": household})
 
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Household, Person, TemporaryResidence
+
 def chitiet_hk(request, household_id):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+    # 1. Kiểm tra quyền
+    if not hasattr(request.user, 'role') or request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
+    
+    # 2. Lấy dữ liệu hộ khẩu và nhân khẩu
     household = get_object_or_404(Household, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
+    
+    # 3. Lấy dữ liệu tạm trú cho hộ này
+    # Lưu ý: Model của bạn dùng ma_ho_khau_tam_tru
+    temp_residents = TemporaryResidence.objects.filter(ma_ho_khau_tam_tru=household_id)
+    
+    # 4. Xác định tên chủ hộ cho phần Header
+    head_of_household = persons.filter(quan_he_chu_ho="Chủ hộ").first()
+    head_name = head_of_household.ho_ten if head_of_household else "Chưa xác định"
+
     return render(request, "chitiet_hk.html", {
         "household": household,
         "persons": persons,
+        "temp_residents": temp_residents,
+        "head_name": head_name,
+        "ma_ho_khau": household_id
     })
 
 
@@ -474,19 +505,64 @@ def formdoichuho(request):
 # THU PHÍ – THỐNG KÊ
 # ==================================================
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import ContributionCampaign, Contribution, HouseholdDetail
+
 def thuphi(request):
-    if request.user.role.role != "CAN_BO":
+    # Kiểm tra quyền
+    if not hasattr(request.user, 'role') or request.user.role.role != "CAN_BO":
         messages.error(request, "Bạn không có quyền quản lý thu phí đóng góp")
         return redirect("home")
-    #tạo đợt đóng góp
-    if(request.method == "POST"):
-        ContributionCampaign.objects.create(
-            ten_dot_dong_gop=request.POST.get("ten_dot_dong_gop"),
-            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
-            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
-        )
 
-    return render(request, "thuphi.html")
+    if request.method == "POST":
+        action = request.POST.get("action")
+        print(f"Action nhận được: {action}") # Dòng này để bạn kiểm tra trong terminal/cmd
+
+        if action == "create_campaign":
+            ten = request.POST.get("ten_dot_dong_gop")
+            # Kiểm tra trùng tên
+            if ContributionCampaign.objects.filter(ten_dot_dong_gop=ten).exists():
+                messages.error(request, f"Tên đợt '{ten}' đã tồn tại!")
+            else:
+                ContributionCampaign.objects.create(
+                    ten_dot_dong_gop=ten,
+                    ngay_bat_dau=request.POST.get("ngay_bat_dau") or None,
+                    ngay_ket_thuc=request.POST.get("ngay_ket_thuc") or None
+                )
+                messages.success(request, f"Đã tạo đợt '{ten}' thành công!")
+            
+            return redirect("thuphi")
+
+        # TRƯỜNG HỢP 2: GHI NHẬN TIỀN ĐÓNG GÓP
+        elif action == "record_donation":
+            ma_dot = request.POST.get("ma_dot_dong_gop")
+            ma_ho = request.POST.get("ma_ho_khau")
+            so_tien = request.POST.get("so_tien")
+
+            if ma_dot and ma_ho and so_tien:
+                Contribution.objects.create(
+                    ma_dot_dong_gop=int(ma_dot),
+                    ma_ho_khau=ma_ho,
+                    so_tien=so_tien
+                )
+                messages.success(request, f"Đã ghi nhận đóng góp cho hộ {ma_ho}")
+            else:
+                messages.error(request, "Vui lòng nhập đầy đủ thông tin!")
+            return redirect("thuphi")
+
+    # Lấy dữ liệu hiển thị
+    campaigns = ContributionCampaign.objects.all().order_by('-ma_dot_dong_gop')
+    # Lấy danh sách hộ khẩu từ View HouseholdDetail
+    households = HouseholdDetail.objects.all()
+    # Lấy danh sách đóng góp (JOIN thủ công hoặc query)
+    recent_contributions = Contribution.objects.all().order_by('-ma_khoan_dong_gop')[:10]
+
+    return render(request, "thuphi.html", {
+        "campaigns": campaigns,
+        "households": households,
+        "recent_contributions": recent_contributions
+    })
 
 
 
