@@ -14,13 +14,14 @@
 </div>
 
 <div class="fee-container">
-    <!-- Thu phí vệ sinh -->
     <section id="tab-fee" class="fee-panel active">
         <div class="fee-form">
             <div class="row">
                 <label>Chọn năm lập phiếu</label>
                 <select id="feeYear">
                     <option value="">-- Chọn năm --</option>
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
                 </select>
             </div>
             <div class="form-actions">
@@ -69,9 +70,7 @@
         </div>
     </section>
 
-    <!-- Đóng góp (giữ nguyên) -->
     <section id="tab-donation" class="fee-panel">
-        <!-- Header với nút tạo đợt đóng góp -->
         <div class="donation-header">
             <h3>Quản lý đóng góp</h3>
             <button type="button" id="showCreateCampaignForm" class="btn primary">
@@ -79,70 +78,116 @@
             </button>
         </div>
 
-        <div class="fee-form">
+        <form method="POST" class="fee-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="record_donation">
+            
             <div class="row">
                 <label>Đợt đóng góp</label>
-                <select id="donationType">
+                <select name="ma_dot_dong_gop" id="donationType" required>
                     <option value="">-- Chọn đợt đóng góp --</option>
-                    <option value="default1">Ủng hộ ngày thương binh-liệt sỹ 27/07</option>
+                    {% for campaign in campaigns %}
+                        <option value="{{ campaign.ma_dot_dong_gop }}">{{ campaign.ten_dot_dong_gop }}</option>
+                    {% endfor %}
                 </select>
             </div>
-            <div class="row">
+           <div class="row">
                 <label>Hộ gia đình</label>
-                <select id="donationHousehold">
+                <select name="ma_ho_khau" id="donationHousehold" required>
                     <option value="">-- Chọn hộ gia đình --</option>
-                    <option value="HK-001">HK-001 - Nguyễn Văn A (4 người)</option>
-                    <option value="HK-002">HK-002 - Trần Thị B (3 người)</option>
-                    <option value="HK-003">HK-003 - Lê Văn C (5 người)</option>
-                    <option value="HK-004">HK-004 - Phạm Thị D (2 người)</option>
-                    <option value="HK-005">HK-005 - Hoàng Văn E (6 người)</option>
+                    {% for h in households %}
+                        <option value="{{ h.ma_ho_khau }}">
+                            {{ h.ma_ho_khau }} - {{ h.ten_chu_ho }}
+                        </option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="row">
                 <label>Số tiền đóng góp</label>
-                <input type="number" id="donationAmount" placeholder="Nhập số tiền">
+                <input type="number" name="so_tien" id="donationAmount" placeholder="Nhập số tiền" required>
             </div>
             <div class="form-actions">
-                <button type="button" id="addDonation" class="btn primary">Ghi nhận</button>
+                <button type="submit" id="addDonation" class="btn primary">Ghi nhận</button>
             </div>
-        </div>
+        </form>
 
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #eee;">
+        <h4>Giao dịch đóng góp gần đây</h4>
+        <div class="table-container">
+            <table class="fee-table">
+                <thead>
+                    <tr>
+                        <th>Mã Hộ</th>
+                        <th>Mã Đợt</th>
+                        <th>Số tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for con in recent_contributions %}
+                    <tr>
+                        <td>{{ con.ma_ho_khau }}</td>
+                        <td>{{ con.ma_dot_dong_gop }}</td>
+                        <td>{{ con.so_tien }} đ</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" style="text-align: center;">Chưa có dữ liệu đóng góp.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </section>
 </div>
 
-<!-- Modal tạo đợt đóng góp -->
 <div id="createCampaignModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
             <h4>Tạo đợt đóng góp mới</h4>
-            <span class="close">&times;</span>
+            <span class="close" onclick="closeCreateCampaignModal()">&times;</span>
         </div>
         <div class="modal-body">
-            <form id="createCampaignForm">
+            <form id="createCampaignForm" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="create_campaign">
                 <div class="form-group">
                     <label for="campaignName">Tên đợt đóng góp *</label>
-                    <input type="text" id="campaignName" name="campaignName" required>
+                    <input type="text" id="campaignName" name="ten_dot_dong_gop" required>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="startDate">Ngày bắt đầu *</label>
-                        <input type="date" id="startDate" name="startDate" required>
+                        <input type="date" id="startDate" name="ngay_bat_dau" required>
                     </div>
                     <div class="form-group">
                         <label for="endDate">Ngày kết thúc *</label>
-                        <input type="date" id="endDate" name="endDate" required>
+                        <input type="date" id="endDate" name="ngay_ket_thuc" required>
                     </div>
                 </div>
             </form>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn secondary" onclick="closeCreateCampaignModal()">Hủy</button>
-            <button type="submit" form="createCampaignForm" class="btn primary">Tạo đợt đóng góp</button>
+            <button type="button" class="btn primary" onclick="validateAndSubmit()">Tạo đợt đóng góp</button>
         </div>
     </div>
 </div>
 
-<!-- thay thẻ script inline bằng file JS tách riêng -->
+{% if messages %}
+<script>
+    {% for message in messages %}
+        alert("{{ message|escapejs }}");
+    {% endfor %}
+</script>
+{% endif %}
+<script>
+    const householdsData = [
+        {% for h in households %}
+        {
+            "id": "{{ h.ma_ho_khau|escapejs }}",
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
+    console.log("Dữ liệu hộ gia đình đã tải:", householdsData);
+</script>
 <script src="{% static 'js/thuphi.js' %}" defer></script>
 {% endblock %}
