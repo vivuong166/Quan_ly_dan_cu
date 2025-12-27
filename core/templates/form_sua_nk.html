@@ -44,7 +44,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="required">Ngày chuyển đi</label>
-                                <input type="date" id="transferDate" name="ngay_chuyen_di" class="form-input">
+                                <input type="date" id="transferDate" name="ngay_chuyen_di" class="form-input" value="{{ today }}">
                             </div>
                         </div>
                         <div class="form-group">
@@ -111,7 +111,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Nơi sinh</label>
-                                <input type="text" id="personBirthPlace" name="noi_sinh" class="form-input" placeholder="Bệnh viện, Phường/Xã..." value="{{ person.noi_sinh }}">
+                                <input type="text" id="personBirthPlace" name="noi_sinh" class="form-input" placeholder="Bệnh viện..." value="{{ person.noi_sinh }}">
                             </div>
                             <div class="form-group">
                                 <label>Quê quán</label>
@@ -121,7 +121,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="required">Quan hệ với chủ hộ</label>
-                                <input type="text" id="personRelation" name="quan_he_voi_chu_ho" class="form-input" placeholder="Vợ/Chồng, Con..." value="{{ person.quan_he_voi_chu_ho }}">
+                                <input type="text" id="personRelation" name="quan_he_voi_chu_ho" class="form-input" placeholder="Vợ/Chồng, Con..." value="{{ person.quan_he_chu_ho }}">
                             </div>
                             <div class="form-group">
                                 <label>Số CMND/CCCD</label>
