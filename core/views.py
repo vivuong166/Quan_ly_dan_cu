@@ -5,6 +5,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
 from django.views.decorators.csrf import csrf_exempt
+from datetime import date
+from django.http import JsonResponse
+import json
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 
 from .models import (
     Household,
@@ -95,11 +100,6 @@ def empty_to_none(value):
     return value if value not in ("", None) else None
 
 #CHỈ CẦN SO NHA ĐƯỜNG PHỐ, TỰ THÊM LA KHÊ , HÀ ĐÔNG
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from .models import Household, Person
-import json
 
 def empty_to_none(value):
     if value is None or str(value).strip() == "":
@@ -158,7 +158,9 @@ def taohokhau(request, household_id=None):
         except Exception as e:
             return JsonResponse({"status": "error", "message": f"Lỗi Database: {str(e)}"}, status=500)
 
-    return render(request, "taohokhau.html")
+    return render(request, "taohokhau.html", {
+        "today": date.today().isoformat()
+    })
 
 def quan_ly_ho_khau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
@@ -206,11 +208,6 @@ def suahk(request, household_id):
 
 
     return render(request, "form_sua_hk.html", {"household": household})
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Household, Person, TemporaryResidence
 
 def chitiet_hk(request, household_id):
     # 1. Kiểm tra quyền
@@ -301,6 +298,19 @@ def themnk(request):
             return val if val != "" else None
 
         try:
+            cccd_val = clean_val("cccd")
+            if cccd_val is not None:
+                trung_cccd = Person.objects.filter(cccd=cccd_val).exists()
+                if trung_cccd:
+                    messages.error(
+                        request,
+                        f"Lỗi: Số CCCD {cccd_val} đã được sử dụng!"
+                    )
+                    return render(
+                        request,
+                        "themnk.html",
+                        {"danh_sach_hk": danh_sach_hk}
+                    )
             # 2. Thực hiện lưu vào bảng new_nhan_khau thông qua Model Person
             Person.objects.create(
                 ma_ho_khau=request.POST.get("ma_ho_khau"), # Model Person dùng CharField cho ma_ho_khau
@@ -313,7 +323,7 @@ def themnk(request):
                 dan_toc=request.POST.get("dan_toc"),
                 nghe_nghiep=request.POST.get("nghe_nghiep"),
                 noi_lam_viec=request.POST.get("noi_lam_viec"),
-                cccd=clean_val("cccd"),
+                cccd=cccd_val,
                 ngay_cap_cccd=clean_val("ngay_cap_cccd"),
                 noi_cap_cccd=request.POST.get("noi_cap_cccd"),
                 ngay_dang_ky_thuong_tru=clean_val("ngay_dang_ky_thuong_tru"),
@@ -331,7 +341,8 @@ def themnk(request):
 
     # 3. Trả dữ liệu sang HTML
     return render(request, "themnk.html", {
-        "danh_sach_hk": danh_sach_hk
+        "danh_sach_hk": danh_sach_hk,
+        "today": date.today().isoformat()
     })
 
 def nhankhau(request):
@@ -345,15 +356,6 @@ def nhankhau(request):
     return render(request, "nhankhau.html", {
         "nhankhau_list": nhankhau_data
     })
-from django.db import IntegrityError
-from django.db.models import Q # Thêm Q để tìm kiếm điều kiện phức tạp
-
-from django.db import IntegrityError
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ValidationError
-from .models import Person, Household, Person_Change
 
 @csrf_exempt
 def suank(request, person_id):
@@ -491,7 +493,11 @@ def suank(request, person_id):
         except Exception as e:
             messages.error(request, f"Có lỗi xảy ra: {str(e)}")
 
-    return render(request, "form_sua_nk.html", {"person": person, "household": household})
+    return render(request, "form_sua_nk.html", {
+        "person": person, 
+        "household": household,
+        "today": date.today().isoformat()
+    })
 
 
 # ==================================================
