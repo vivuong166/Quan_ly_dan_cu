@@ -235,3 +235,6 @@ class Person_Change(models.Model):
     def __str__(self):
         # Ép kiểu string để tránh lỗi "hệ nhị phân" khi hiển thị số
         return str(self.ma_thay_doi)
+
+
+
