@@ -20,15 +20,26 @@
                     <h4><i class="fas fa-home"></i> Thông tin hộ khẩu</h4>
                     <div class="form-group">
                         <label class="required">Chọn hộ khẩu</label>
-                        <input type="text" id="personHousehold" name="ma_ho_khau" 
-                               class="form-input" list="householdList" 
-                               placeholder="Gõ mã hộ khẩu hoặc tên chủ hộ để tìm..." required>
-                        
-                        <datalist id="householdList">
-                            {% for hk in danh_sach_hk %}
-                                <option value="{{ hk.ma_ho_khau }}">Địa chỉ: {{ hk.so_nha }} {{ hk.duong_pho }}</option>
-                            {% endfor %}
-                        </datalist>
+                            <div class="input-wrapper">
+                                
+                            <input type="text" id="personHousehold"
+                                class="form-input"
+                                placeholder="Gõ mã hộ khẩu hoặc tên chủ hộ..."
+                                autocomplete="off">
+
+                            <div id="householdDropdown" class="dropdown hidden">
+                                {% for hk in danh_sach_hk %}
+                                <div class="dropdown-item"
+                                    data-value="{{ hk.ma_ho_khau }}">
+                                    <strong>{{ hk.ma_ho_khau }}</strong> – {{ hk.ten_chu_ho }}<br>
+                                    <small>{{ hk.dia_chi }}</small>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="ma_ho_khau" id="maHoKhauHidden">
+
                         <small class="help-text">Hệ thống sẽ tự động lọc danh sách hộ khẩu hiện có</small>
                     </div>
                 </div>
