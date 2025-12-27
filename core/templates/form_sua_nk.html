@@ -10,14 +10,12 @@
     </div>
 </div>
 
-<!-- Form Panel -->
 <div class="dashboard-panels">
     <div class="panel">
         <div class="panel-body">
             <form id="editPersonForm" method="post">
                 {% csrf_token %}
                 
-                <!-- Moving/Transfer Section - Moved to top -->
                 <div class="form-section">
                     <h4><i class="fas fa-exchange-alt"></i> Nội dung thay đổi</h4>
                     <div class="form-group">
@@ -30,7 +28,6 @@
                         </select>
                     </div>
 
-                    <!-- Transfer Fields -->
                     <div id="transferFields" style="display: none;">
                         <div class="form-row">
                             <div class="form-group">
@@ -40,7 +37,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="required">Ngày chuyển đi</label>
-                                <input type="date" id="transferDate" name="ngay_chuyen_di" class="form-input"  value="{{ today }}">
+                                <input type="date" id="transferDate" name="transfer_date" class="form-input">
                             </div>
                         </div>
                         <div class="form-group">
@@ -52,7 +49,6 @@
                             </select>
                         </div>
 
-                        <!-- Household selection -->
                         <div id="householdSelection" style="display: none;">
                             <div class="form-group">
                                 <label class="required">Chọn hộ khẩu mới</label>
@@ -67,7 +63,6 @@
                             </div>
                         </div>
 
-                        <!-- Area input -->
                         <div id="areaInput" style="display: none;">
                             <div class="form-group">
                                 <label class="required">Địa chỉ nơi chuyển đến</label>
@@ -77,7 +72,6 @@
                         </div>
                     </div>
 
-                    <!-- Past Fields -->
                     <div id="pastFields" style="display: none;">
                         <div class="form-group">
                             <label>Ghi chú</label>
@@ -87,7 +81,6 @@
                     </div>
                 </div>
 
-                <!-- Personal Information -->
                 <div class="form-section" id="personalInfoSection" style="display: none;">
                     <h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>
                     <div class="form-row">
@@ -159,7 +152,6 @@
                     </div>
                 </div>
 
-                <!-- Residence Registration -->
                 <div class="form-section" id="residenceSection" style="display: none;">
                     <h4><i class="fas fa-map-marker-alt"></i> Thông tin đăng ký thường trú</h4>
                     <div class="form-row">
@@ -175,7 +167,6 @@
                     </div>
                 </div>
 
-                <!-- Work Information -->
                 <div class="form-section" id="workInfoSection" style="display: none;">
                     <h4><i class="fas fa-briefcase"></i> Thông tin nghề nghiệp</h4>
                     <div class="form-row">
@@ -192,11 +183,7 @@
                     </div>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="form-actions">
-                    <!-- <button type="button" class="btn" onclick="window.location.href='{% url 'qlnk' %}'">
-                        <i class="fas fa-times"></i> Hủy
-                    </button> -->
                     <button type="submit" class="btn primary-1">
                         <i class="fas fa-save"></i> Cập nhật
                     </button>
@@ -206,7 +193,6 @@
     </div>
 </div>
 
-<!-- Success Message -->
 <div id="successMessage" class="alert alert-success" style="display: none;">
     <i class="fas fa-check-circle"></i>
     <span>Cập nhật nhân khẩu thành công!</span>

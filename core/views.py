@@ -375,6 +375,7 @@ from django.core.exceptions import ValidationError
 from .models import Person, Household, Person_Change
 
 @csrf_exempt
+@csrf_exempt
 def suank(request, person_id):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -424,39 +425,7 @@ def suank(request, person_id):
             thaydoink.save()
             person.save()
 
-                # Luôn ghi nhận vào bảng lịch sử thay đổi
-                Person_Change.objects.create(
-                    ma_nhan_khau=person_id,
-                    loai_thay_doi="Chuyển đi",
-                    ngay_chuyen_di=ngay_chuyen,
-                    noi_chuyen_den=noi_den_str,
-                    ghi_chu=ghi_chu_transfer
-                )
-                messages.success(request, "Đã thực hiện chuyển đi thành công!")
-
-            elif loai_thay_doi == "past":
-                person.trang_thai = "đã qua đời"
-                person.save()
-                Person_Change.objects.create(
-                    ma_nhan_khau=person_id,
-                    loai_thay_doi="đã qua đời",
-                    ghi_chu=request.POST.get("ghi_chu")
-                )
-                messages.success(request, "Đã cập nhật trạng thái qua đời")
-
-            elif loai_thay_doi == "update":
-                messages.success(request, "Cập nhật thông tin thành công!")
-
-            return redirect("nhankhau")
-
-        except ValidationError as e:
-            messages.error(request, f"Lỗi định dạng dữ liệu: {e}")
-        except IntegrityError:
-            messages.error(request, "Lỗi hệ thống: Trùng lặp dữ liệu không thể lưu.")
-        except Exception as e:
-            messages.error(request, f"Có lỗi xảy ra: {str(e)}")
-
-    return render(request, "form_sua_nk.html", {"person": person, "household": household})
+    return render(request, "form_sua_nk.html", {"person": person})
 
 
 # ==================================================
