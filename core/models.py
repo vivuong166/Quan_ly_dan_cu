@@ -98,6 +98,9 @@ class TemporaryAbsence(models.Model):
     ngay_ket_thuc = models.DateField()
     trang_thai_hoan_thanh = models.BooleanField(default=False)
     ly_do = models.TextField(null=True, blank=True)
+    ho_ten = models.CharField(max_length=255, null=False)
+    ngay_sinh = models.DateField(null=True, blank=True)
+    cccd = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = "new_tam_vang"

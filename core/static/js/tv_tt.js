@@ -1,24 +1,26 @@
 // Sample data for tạm vắng
-const tamVangData = [
-    { 
-        id: 1, 
-        name: 'Nguyễn Văn A', 
-        dob: '15/03/1985',
-        startDate: '01/10/2025',
-        endDate: '15/10/2025',
-        completed: true,
-        reason: 'Công tác'
-    },
-    { 
-        id: 2, 
-        name: 'Trần Thị B', 
-        dob: '22/08/1990',
-        startDate: '05/10/2025',
-        endDate: '12/10/2025',
-        completed: false,
-        reason: 'Du lịch'
-    }
-];
+// const tamVangData = [
+//     { 
+//         id: 1, 
+//         name: 'Nguyễn Văn A', 
+//         dob: '15/03/1985',
+//         startDate: '01/10/2025',
+//         endDate: '15/10/2025',
+//         completed: true,
+//         reason: 'Công tác'
+//     },
+//     { 
+//         id: 2, 
+//         name: 'Trần Thị B', 
+//         dob: '22/08/1990',
+//         startDate: '05/10/2025',
+//         endDate: '12/10/2025',
+//         completed: false,
+//         reason: 'Du lịch'
+//     }
+// ];
+const tamVangData = window.tamvangRecords;
+const tamTruData = window.tamtruRecords;
 
 document.addEventListener('DOMContentLoaded', function(){
     // tabs
@@ -42,31 +44,108 @@ document.addEventListener('DOMContentLoaded', function(){
     // add tạm vắng
     const addTvBtn = document.getElementById('addTv');
     if(addTvBtn){
-        addTvBtn.addEventListener('click', function(){
-            const person = document.getElementById('tv_person').value.trim() || '—';
-            const ngayDi = document.getElementById('tv_ngay_bat_dau').value || '—';
-            const han = document.getElementById('tv_ngay_ket_thuc').value || '—';
-            const lyDo = document.getElementById('tv_ly_do').value.trim() || '';
-            const html = `<strong>${person}</strong> — ${ngayDi} → ${han} — ${lyDo? '— ' + lyDo : ''}`;
-            appendList(document.getElementById('tvList'), html);
+        addTvBtn.addEventListener('click', async function(){
+            const ten = document.getElementById('tv_ho_ten').value.trim();
+            const ns = document.getElementById('tv_ngay_sinh').value;
+            const cmnd = document.getElementById('tv_cmnd').value.trim();
+            //const cccd = document.getElementById('tv_cmnd').value.trim();
+            const ngayDi = document.getElementById('tv_ngay_bat_dau').value;
+            const han = document.getElementById('tv_ngay_ket_thuc').value;
+            const lyDo = document.getElementById('tv_ly_do').value.trim();
+            //const html = `<strong>${person}</strong> — ${ngayDi} → ${han} — ${lyDo? '— ' + lyDo : ''}`;
+            //appendList(document.getElementById('tvList'), html);
             // clear minimal
-            document.getElementById('formTv').reset();
+            //document.getElementById('formTv').reset();
+
+            if(!ten || !ns || !cmnd || !ngayDi || !han || !lyDo){
+                alert('Vui lòng điền đầy đủ thông tin tạm vắng.');
+                return;
+            }
+
+            const dataForm = new FormData;
+            dataForm.append("ten", ten);
+            dataForm.append("ns", ns);
+            dataForm.append("cmnd", cmnd);
+            dataForm.append("ngayDi", ngayDi);
+            dataForm.append("han", han);
+            dataForm.append("lyDo", lyDo);
+
+            try{
+                const response = await fetch('/tamvang/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: dataForm
+                });
+                if(response.ok){
+                    alert('Dang ky tam vang thanh cong!');
+                    document.getElementById('formTv').reset();
+                }else{
+                    console.log(response);
+                    console.log(error)
+                    alert('Dang ky tam vang that bai!');
+                }
+                //appendList(document.getElementById('tvList'), html);
+                // clear minimal
+                
+            } catch{
+                alert('Co loi xay ra khi dang ky tam vang.');
+            }
         });
     }
 
     // add tạm trú
     const addTtBtn = document.getElementById('addTt');
     if(addTtBtn){
-        addTtBtn.addEventListener('click', function(){
-            const ten = document.getElementById('tt_ho_ten').value.trim() || '—';
-            const ns = document.getElementById('tt_ngay_sinh').value || '—';
-            const cmnd = document.getElementById('tt_cmnd').value.trim() || '';
-            const diaChi = document.getElementById('tt_dia_chi').value.trim() || '—';
-            const ngayDen = document.getElementById('tt_ngay_den').value || '—';
-            const han = document.getElementById('tt_han').value || '—';
-            const html = `${ten} — ${ns} ${cmnd? '— CCCD: ' + cmnd : ''} — Địa chỉ: ${diaChi} — ${ngayDen} → ${han}`;
-            appendList(document.getElementById('ttList'), html);
-            document.getElementById('formTt').reset();
+        addTtBtn.addEventListener('click', async function(){
+            const ma_ho_khau = document.getElementById('tt_ma_hk').value;
+            const ten = document.getElementById('tt_ho_ten').value.trim();
+            const ns = document.getElementById('tt_ngay_sinh').value;
+            const cmnd = document.getElementById('tt_cmnd').value.trim();
+            const ngheNghiep = document.getElementById('tt_nghe_nghiep').value.trim();
+            const ngayDen = document.getElementById('tt_ngay_den').value;
+            const han = document.getElementById('tt_han').value;
+            //const html = `${ten} — ${ns} ${cmnd? '— CCCD: ' + cmnd : ''} — Nghề nghiệp: ${ngheNghiep} — ${ngayDen} → ${han}`;
+            // appendList(document.getElementById('ttList'), html);
+            // document.getElementById('formTt').reset();
+
+            if(!ma_ho_khau || !ten || !ns || !cmnd || !ngheNghiep || !ngayDen || !han){
+                alert('Vui lòng điền đầy đủ thông tin tạm trú.');
+                return;
+            }
+
+            const dataForm = new FormData;
+            dataForm.append("ma_ho_khau", ma_ho_khau);
+            dataForm.append("ten", ten);
+            dataForm.append("ns", ns);
+            dataForm.append("cmnd", cmnd);
+            dataForm.append("ngheNghiep", ngheNghiep);
+            dataForm.append("ngayDen", ngayDen);
+            dataForm.append("han", han);
+
+
+            try{
+                const response = await fetch('/tamtru/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: dataForm
+                });
+
+                if(response.ok){
+                    alert('Dang li tam tru thanh cong!');
+                }else{
+                    alert('Dang ky tam tru that bai!');
+                }
+                appendList(document.getElementById('ttList'), html);
+                // clear minimal
+                document.getElementById('formTt').reset();
+            } catch{
+                alert('Co loi xay ra khi dang ky tam tru.');
+
+            }
         });
     }
 
@@ -158,26 +237,26 @@ function parseDate(dateStr) {
 }
 
 // Sample data for tạm trú
-const tamTruData = [
-    { 
-        id: 1, 
-        name: 'Nguyễn Văn C', 
-        dob: '12/05/2001',
-        householdCode: 'HK-001',
-        startDate: '01/11/2025',
-        endDate: '15/11/2025',
-        completed: true
-    },
-    { 
-        id: 2, 
-        name: 'Lê Thị D', 
-        dob: '08/09/1995',
-        householdCode: 'HK-002',
-        startDate: '10/11/2025',
-        endDate: '20/11/2025',
-        completed: false
-    }
-];
+// const tamTruData = [
+//     { 
+//         id: 1, 
+//         name: 'Nguyễn Văn C', 
+//         dob: '12/05/2001',
+//         householdCode: 'HK-001',
+//         startDate: '01/11/2025',
+//         endDate: '15/11/2025',
+//         completed: true
+//     },
+//     { 
+//         id: 2, 
+//         name: 'Lê Thị D', 
+//         dob: '08/09/1995',
+//         householdCode: 'HK-002',
+//         startDate: '10/11/2025',
+//         endDate: '20/11/2025',
+//         completed: false
+//     }
+// ];
 
 // Global function to toggle tạm trú status (similar to toggleStatus for tạm vắng)
 function toggleTamTruStatus(id) {
@@ -223,3 +302,109 @@ function toggleTamTruStatus(id) {
         statusCell.style.transform = 'scale(1)';
     }, 150);
 }
+
+function getCookie(name){
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== ''){
+        const cookies = document.cookie.split(';'); 
+        for (let i = 0; i < cookies.length; i++){
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')){
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+//Nhan xu ly reload danh sach tam tru
+document.addEventListener('DOMContentLoaded', function(){
+    const reloadBtn = document.getElementById('reloadTamTruList');
+
+if (reloadBtn) {
+    reloadBtn.addEventListener('click', async function () {
+        try {
+            const response = await fetch('/tamtru/', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            const tbody = document.getElementById('ttList');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${item.ho_ten}</strong></td>
+                    <td>${item.ngay_sinh}</td>
+                    <td>${item.ma_ho_khau}</td>
+                    <td>${item.ngay_bat_dau}</td>
+                    <td>${item.ngay_ket_thuc}</td>
+                    <td>
+                        ${item.trang_thai
+                            ? '<span class="status-badge status-completed">Đã kết thúc</span>'
+                            : '<span class="status-badge status-active">Chưa kết thúc</span>'}
+                    </td>
+                    <td>
+                        <button class="btn-sm btn-action" onclick="toggleTamTruStatus(${item.id}, ${item.trang_thai})">
+                            ${item.trang_thai ? 'Hoàn tác' : 'Kết thúc'}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+        } catch (err) {
+            alert("Không thể reload danh sách");
+
+        }
+    });
+}
+
+});
+
+//Nhan xu ly reload danh sach tam vang
+document.addEventListener('DOMContentLoaded', function(){
+    const reloadBtn = document.getElementById('reloadTamVangList');
+    if (reloadBtn) {
+        reloadBtn.addEventListener('click', async function () {
+            try {
+                const response = await fetch('/tamvang/', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+                const tbody = document.getElementById('tvList');
+                tbody.innerHTML = '';
+
+                data.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td><strong>${item.ho_ten}</strong></td>
+                        <td>${item.ngay_sinh}</td>
+                        <td>${item.ngay_bat_dau}</td>
+                        <td>${item.ngay_ket_thuc}</td>
+                        <td>
+                            ${item.trang_thai
+                                ? '<span class="status-badge status-completed">Đã kết thúc</span>'
+                                : '<span class="status-badge status-active">Chưa kết thúc</span>'}
+                        </td>
+                        <td>
+                            <button class="btn-sm btn-action" onclick="toggleStatus(${item.id}, ${item.trang_thai})">
+                                ${item.trang_thai ? 'Hoàn tác' : 'Kết thúc'}
+                            </button>
+                        </td>`;
+                    tbody.appendChild(tr);
+                });
+
+            } catch (err) {
+                alert("Không thể reload danh sách");        
+            }
+        });
+    }
+});
