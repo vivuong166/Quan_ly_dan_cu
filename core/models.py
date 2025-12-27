@@ -233,10 +233,5 @@ class Person_Change(models.Model):
         managed = False # Giữ nguyên vì bạn đã có bảng sẵn trong DB
 
     def __str__(self):
-<<<<<<< HEAD
         # Ép kiểu string để tránh lỗi "hệ nhị phân" khi hiển thị số
         return str(self.ma_thay_doi)
-=======
-        return self.ho_ten
-    
->>>>>>> 1dd3457 (Sửa tạm Vắng)
