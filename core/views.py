@@ -249,7 +249,11 @@ def tachhk(request, household_id):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    #lấy toàn bộ nk của toàn bộ hk
+    household_detail=HouseholdDetail.objects.filter(ma_ho_khau=household_id) # hiển thị thông tin mhk, chủ hộ hiện , địa chỉ
+    person=get_object_or_404(Person, ma_ho_khau=household_id) #CHỌN NHÂN KHẨU TRONG CHỦ HỘ
+    person=person.objects.exclude(quan_he_chu_ho__in="Chủ hộ")# lấy trừ chủ hộ
+    household = get_object_or_404(Household, ma_ho_khau=household_id)# CHỌN HỘ KHẨU
     return render(request, "form_tach_hk.html", {"household": household})
 
 
