@@ -364,148 +364,68 @@ def nhankhau(request):
     return render(request, "nhankhau.html", {
         "nhankhau_list": nhankhau_data
     })
+from django.db import IntegrityError
+from django.db.models import Q # Thêm Q để tìm kiếm điều kiện phức tạp
+
+from django.db import IntegrityError
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import ValidationError
+from .models import Person, Household, Person_Change
 
 @csrf_exempt
+@csrf_exempt
 def suank(request, person_id):
-    # Kiểm tra quyền
-    if request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
-        messages.error(request, "Bạn không có quyền")
+    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
-    household = Household.objects.exclude(ma_ho_khau=person.ma_ho_khau)
+    ma_ho_khau_hien_tai=person.ma_ho_khau
+    thaydoink=Person_Change.objects.create(
+        ma_nhan_khau=person_id
+    )
+    loai_thay_doi=request.POST.get("move_type")
+    household=Household.objects.exclude(ma_ho_khau__in=ma_ho_khau_hien_tai)#danh sách hộ khẩu mới mà k có hộ khẩu hiện tại
+    if(loai_thay_doi=="transfer"):
+        thaydoink.ghi_chu=request.POST.get("transfer_note")
+        thaydoink.ngay_chuyen_di=request.POST.get("ngay_chuyen_di")
+        thaydoink.save()
+        transfer_destination_type=request.POST.get("transfer_destination_type")
+        if(transfer_destination_type=="household"):
+            #sửa mã hộ khẩu của nhân khẩu theo mã hộ khẩu mới
+            person.ma_ho_khau=request.POST.get("new_household")
+            person.quan_he_chu_ho=request.POST.get("newHouseholdRelation")
+            person.save()
+        else:
+            thaydoink.noi_chuyen_den=request.POST.get("noi_chuyen_den")
+            thaydoink.save()
+        messages.success(request, "Cập nhật nhân khẩu thành công")
+        return redirect("nhankhau")
+    else:
+        if(loai_thay_doi=="update"):
+            person.ho_ten=request.POST.get("ho_ten")
+            person.ngay_sinh=request.POST.get("ngay_sinh")
+            person.bi_danh=request.POST.get("bi_danh")
+            person.gioi_tinh=request.POST.get("gioi_tinh")
+            person.noi_sinh=request.POST.get("noi_sinh")
+            person.nguyen_quan=request.POST.get("nguyen_quan")
+            person.cccd=request.POST.get("cccd")
+            person.ngay_cap_cccd=request.POST.get("ngay_cap_cccd")
+            person.noi_cap_cccd=request.POST.get("noi_cap_cccd")
+            person.ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru")
+            person.dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_chuyen")
+            person.nghe_nghiep=request.POST.get("nghe_nghiep")
+            person.noi_lam_viec=request.POST.get("noi_lam_viec")
+            person.save()
+        else:
+            person.trang_thai="đã qua đời"
+            thaydoink.loai_thay_doi="đã qua đời"
+            thaydoink.ghi_chu=request.POST.get("ghi_chu")
+            thaydoink.save()
+            person.save()
 
-    if request.method == "POST":
-        loai_thay_doi = request.POST.get("move_type")
-        
-        # Hàm xử lý chuỗi ngày tháng trống để tránh lỗi ValidationError
-        def clean_date(date_str):
-            if not date_str or date_str.strip() == "":
-                return None
-            return date_str
-
-        try:
-            # --- 1. CẬP NHẬT THÔNG TIN CÁ NHÂN (Dùng cho cả update và transfer) ---
-            if loai_thay_doi in ["update", "transfer"]:
-                cccd_val = request.POST.get("cccd")
-                if not cccd_val or cccd_val.strip() == "":
-                    cccd_val = None
-                else:
-                    cccd_val = cccd_val.strip()
-
-                # Kiểm tra trùng CCCD
-                if cccd_val is not None:
-                    trung_cccd = Person.objects.filter(cccd=cccd_val).exclude(ma_nhan_khau=person_id).exists()
-                    if trung_cccd:
-                        messages.error(request, f"Lỗi: Số CCCD {cccd_val} đã được sử dụng!")
-                        return render(request, "form_sua_nk.html", {"person": person, "household": household})
-
-                # Gán dữ liệu cơ bản
-                person.ho_ten = request.POST.get("ho_ten")
-                person.bi_danh = request.POST.get("bi_danh")
-                person.gioi_tinh = request.POST.get("gioi_tinh")
-                person.noi_sinh = request.POST.get("noi_sinh")
-                person.nguyen_quan = request.POST.get("nguyen_quan")
-                person.cccd = cccd_val
-                person.noi_cap_cccd = request.POST.get("noi_cap_cccd")
-                person.nghe_nghiep = request.POST.get("nghe_nghiep")
-                person.noi_lam_viec = request.POST.get("noi_lam_viec")
-                quan_he_moi= request.POST.get("quan_he_voi_chu_ho")
-                qh_hien_tai = request.POST.get("quan_he_voi_chu_ho")
-                if qh_hien_tai:
-                    person.quan_he_chu_ho = qh_hien_tai
-                else:
-                    messages.error(request, "Vui lòng nhập quan hệ với chủ hộ!")
-                    return render(request, "form_sua_nk.html", {"person": person, "household": household})
-
-                # person.quan_he_chu_ho = request.POST.get("quan_he_voi_chu_ho") # Quan hệ tại hộ hiện tại/cũ
-
-                # Xử lý ngày tháng an toàn
-                person.ngay_sinh = clean_date(request.POST.get("ngay_sinh"))
-                person.ngay_cap_cccd = clean_date(request.POST.get("ngay_cap_cccd"))
-                person.ngay_dang_ky_thuong_tru = clean_date(request.POST.get("ngay_dang_ky_thuong_tru"))
-                
-                person.save()
-
-            # --- 2. XỬ LÝ RIÊNG CHO CHUYỂN ĐI (TRANSFER) ---
-            if loai_thay_doi == "transfer":
-                dest_type = request.POST.get("transfer_destination_type") # 'household' hoặc 'area'
-                ngay_chuyen = clean_date(request.POST.get("ngay_chuyen_di"))
-                ghi_chu_transfer = request.POST.get("transfer_note")
-
-                if dest_type == "household":
-                    # Trường hợp A: Chuyển sang một hộ khẩu khác có sẵn
-                    ma_ho_moi = request.POST.get("new_household")
-                    quan_he_moi = request.POST.get("quan_he_voi_chu_ho")
-                    
-                    if ma_ho_moi:
-                        person.ma_ho_khau = ma_ho_moi
-                        quan_he_moi = request.POST.get("quan_he_voi_chu_ho")
-                    
-                    if ma_ho_moi:
-                        person.ma_ho_khau = ma_ho_moi
-                        # Logic bạn yêu cầu: Kiểm tra quan hệ mới khi vào hộ mới
-                        if quan_he_moi and quan_he_moi.strip() != "":
-                            person.quan_he_chu_ho = quan_he_moi
-                        else:
-                            messages.error(request, "Vui lòng nhập quan hệ với chủ hộ mới!")
-                            return render(request, "form_sua_nk.html", {"person": person, "household": household})
-                        person.save()
-                        noi_den_str = f"Hộ khẩu mới: {ma_ho_moi}"
-                    else:
-                        messages.error(request, "Vui lòng chọn hộ khẩu mới!")
-                        return render(request, "form_sua_nk.html", {"person": person, "household": household})
-
-                else:
-                    # Trường hợp B: Chuyển đi nơi khác (địa chỉ ngoài hệ thống)
-                    noi_den_str = request.POST.get("noi_chuyen_den")
-                    if not noi_den_str:
-                        messages.error(request, "Vui lòng nhập địa chỉ nơi chuyển đến!")
-                        return render(request, "form_sua_nk.html", {"person": person, "household": household})
-                    
-                    # Đánh dấu trạng thái là đã chuyển đi
-                    person.trang_thai = f"Đã chuyển đi: {noi_den_str}"
-                    # Nếu quy trình yêu cầu xóa khỏi hộ cũ thì set ma_ho_khau = None (nếu DB cho phép)
-                    # person.ma_ho_khau = None 
-                    person.save()
-
-                # Luôn ghi nhận vào bảng lịch sử thay đổi
-                Person_Change.objects.create(
-                    ma_nhan_khau=person_id,
-                    loai_thay_doi="Chuyển đi",
-                    ngay_chuyen_di=ngay_chuyen,
-                    noi_chuyen_den=noi_den_str,
-                    ghi_chu=ghi_chu_transfer
-                )
-                messages.success(request, "Đã thực hiện chuyển đi thành công!")
-
-            elif loai_thay_doi == "past":
-                person.trang_thai = "đã qua đời"
-                person.save()
-                Person_Change.objects.create(
-                    ma_nhan_khau=person_id,
-                    loai_thay_doi="đã qua đời",
-                    ghi_chu=request.POST.get("ghi_chu")
-                )
-                messages.success(request, "Đã cập nhật trạng thái qua đời")
-
-            elif loai_thay_doi == "update":
-                messages.success(request, "Cập nhật thông tin thành công!")
-
-            return redirect("nhankhau")
-
-        except ValidationError as e:
-            messages.error(request, f"Lỗi định dạng dữ liệu: {e}")
-        except IntegrityError:
-            messages.error(request, "Lỗi hệ thống: Trùng lặp dữ liệu không thể lưu.")
-        except Exception as e:
-            messages.error(request, f"Có lỗi xảy ra: {str(e)}")
-
-    return render(request, "form_sua_nk.html", {
-        "person": person, 
-        "household": household,
-        "today": date.today().isoformat()
-    })
+    return render(request, "form_sua_nk.html", {"person": person})
 
 
 # ==================================================
