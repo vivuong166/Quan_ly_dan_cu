@@ -45,10 +45,11 @@ document.addEventListener('DOMContentLoaded', function(){
     const addTvBtn = document.getElementById('addTv');
     if(addTvBtn){
         addTvBtn.addEventListener('click', async function(){
-            const ten = document.getElementById('tv_ho_ten').value.trim();
-            const ns = document.getElementById('tv_ngay_sinh').value;
-            const cmnd = document.getElementById('tv_cmnd').value.trim();
+            // const ten = document.getElementById('tv_ho_ten').value.trim();
+            // const ns = document.getElementById('tv_ngay_sinh').value;
+            // const cmnd = document.getElementById('tv_cmnd').value.trim();
             //const cccd = document.getElementById('tv_cmnd').value.trim();
+            const ma_nhan_khau = document.getElementById('tv_ma_nk').value;
             const ngayDi = document.getElementById('tv_ngay_bat_dau').value;
             const han = document.getElementById('tv_ngay_ket_thuc').value;
             const lyDo = document.getElementById('tv_ly_do').value.trim();
@@ -57,15 +58,16 @@ document.addEventListener('DOMContentLoaded', function(){
             // clear minimal
             //document.getElementById('formTv').reset();
 
-            if(!ten || !ns || !cmnd || !ngayDi || !han || !lyDo){
+            if(!ma_nhan_khau || !ngayDi || !han || !lyDo){
                 alert('Vui lòng điền đầy đủ thông tin tạm vắng.');
                 return;
             }
 
             const dataForm = new FormData;
-            dataForm.append("ten", ten);
-            dataForm.append("ns", ns);
-            dataForm.append("cmnd", cmnd);
+            // dataForm.append("ten", ten);
+            // dataForm.append("ns", ns);
+            // dataForm.append("cmnd", cmnd);
+            dataForm.append("ma_nhan_khau", ma_nhan_khau);
             dataForm.append("ngayDi", ngayDi);
             dataForm.append("han", han);
             dataForm.append("lyDo", lyDo);
@@ -104,14 +106,18 @@ document.addEventListener('DOMContentLoaded', function(){
             const ns = document.getElementById('tt_ngay_sinh').value;
             const cmnd = document.getElementById('tt_cmnd').value.trim();
             const ngheNghiep = document.getElementById('tt_nghe_nghiep').value.trim();
-            const ngayDen = document.getElementById('tt_ngay_den').value;
             const han = document.getElementById('tt_han').value;
             //const html = `${ten} — ${ns} ${cmnd? '— CCCD: ' + cmnd : ''} — Nghề nghiệp: ${ngheNghiep} — ${ngayDen} → ${han}`;
             // appendList(document.getElementById('ttList'), html);
             // document.getElementById('formTt').reset();
 
-            if(!ma_ho_khau || !ten || !ns || !cmnd || !ngheNghiep || !ngayDen || !han){
+            if(!ma_ho_khau || !ten || !ns || !cmnd || !ngheNghiep || !han){
                 alert('Vui lòng điền đầy đủ thông tin tạm trú.');
+                return;
+            }
+
+            if(new Date(han) <= new Date() - 1){
+                alert('Ngày hết hạn không hợp lệ.');
                 return;
             }
 
@@ -121,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function(){
             dataForm.append("ns", ns);
             dataForm.append("cmnd", cmnd);
             dataForm.append("ngheNghiep", ngheNghiep);
-            dataForm.append("ngayDen", ngayDen);
+
             dataForm.append("han", han);
 
 
@@ -136,12 +142,13 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 if(response.ok){
                     alert('Dang li tam tru thanh cong!');
+                    document.getElementById('formTt').reset();
                 }else{
                     alert('Dang ky tam tru that bai!');
                 }
-                appendList(document.getElementById('ttList'), html);
+                //appendList(document.getElementById('ttList'), html);
                 // clear minimal
-                document.getElementById('formTt').reset();
+                
             } catch{
                 alert('Co loi xay ra khi dang ky tam tru.');
 

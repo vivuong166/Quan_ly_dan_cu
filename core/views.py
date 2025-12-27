@@ -16,6 +16,7 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
 from django.db.models import OuterRef, Subquery
+from django.http import HttpResponse
 
 
 
@@ -541,10 +542,10 @@ class TamTru(View):
         tamtru_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            qs = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
+            tt_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
             data = []
-            for tt in qs:
+            for tt in tt_list:
                 data.append({
                     "id": tt.ma_tam_tru,
                     "ho_ten": tt.ho_ten,
@@ -569,15 +570,32 @@ class TamTru(View):
         if not self.check_permission(request):
             return redirect("home")
         
-        TemporaryResidence.objects.create(
+        tamtru_data = {
+            "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
+            "ho_ten": request.POST.get("ten"),
+            "ngay_sinh": request.POST.get("ns"),
+            "nghe_nghiep": request.POST.get("ngheNghiep"),
+            "cccd": request.POST.get("cccd"),
+            "ngay_bat_dau": timezone.now().date(),
+            "ngay_ket_thuc": request.POST.get("han")
+        }
+
+        
+        #already registered check
+        if TemporaryResidence.objects.filter(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
             ho_ten=request.POST.get("ten"),
-            ngay_sinh = request.POST.get("ns"),
-            nghe_nghiep=request.POST.get("ngheNghiep"),
-            cccd=request.POST.get("cccd"),
-            ngay_bat_dau=request.POST.get("ngayDen"),
+            ngay_sinh=request.POST.get("ns"),
             ngay_ket_thuc=request.POST.get("han"),
-        )
+            ).exists():  
+                
+                return JsonResponse({"message": "Nhân khẩu đã đăng ký tạm trú"
+                                     , "redirect_url": 'tamtru/'}
+                                     , status=400)    
+                
+
+        TemporaryResidence.objects.create(**tamtru_data)
+        Person.objects.filter(cccd=request.POST.get("cccd")).update(trang_thai="Tạm trú")
         messages.success(request, "Đăng ký tạm trú thành công")
         return redirect("tamtru")
     
@@ -593,64 +611,53 @@ class TamVang(View):
         if not self.check_permission(request):
             return redirect("home")
         
-        subquery = Person.objects.filter(
-            ma_ho_khau=OuterRef("ma_ho_khau"),
-            quan_he_chu_ho="Chủ hộ"
-            ).values("ho_ten")[:1]
+        nhankhau_list = Person.objects.all().values("ma_nhan_khau", "ho_ten", "ngay_sinh", "ma_ho_khau")
         
-        hokhau_list = Household.objects.annotate(
-            ten_chu_ho=Subquery(subquery)
-            ).values("ma_ho_khau", "ten_chu_ho")
-        
-        tamvang_list = TemporaryAbsence.objects.values("ho_ten", "ngay_sinh", "ngay_bat_dau", "ngay_ket_thuc").order_by("-ma_tam_vang")
+        nhan_khau_subquery = Person.objects.filter(
+            ma_nhan_khau=OuterRef("ma_nhan_khau")
+        )
+
+        tamvang_list = TemporaryAbsence.objects.annotate(
+            ho_ten=Subquery(nhan_khau_subquery.values("ho_ten")[:1]),
+            ngay_sinh=Subquery(nhan_khau_subquery.values("ngay_sinh")[:1]),
+            ma_ho_khau=Subquery(nhan_khau_subquery.values("ma_ho_khau")[:1]),
+        ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc")
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            qs = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
+            tv_list = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
             data = []
-            for tv in qs:
+            for tv in tv_list:
+                person = Person.objects.filter(ma_nhan_khau=tv.ma_nhan_khau).first()
                 data.append({
-                    "ho_ten": tv.ho_ten,
-                    "ngay_sinh": tv.ngay_sinh.strftime("%d/%m/%Y") if tv.ngay_sinh else "",
+                    "ho_ten": person.ho_ten if person else "",
+                    "ngay_sinh": person.ngay_sinh.strftime("%d/%m/%Y") if person and person.ngay_sinh else "",
                     "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
                     "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
                 })
             return JsonResponse(data, safe=False)
         context = {
-            "hokhau_list": list(hokhau_list),
+            "nhankhau_list": list(nhankhau_list),
             "records": tamvang_list,
         }
         return render(request, "tamvang.html", context)
-    
-    
-        
 
-    
     def post(self, request):
         if not self.check_permission(request):
-            return redirect("home")
-        
-        #verify person exists
-        if not Person.objects.filter(cccd=request.POST.get("cmnd")).exists():
-            messages.error(request, "Nhân khẩu không tồn tại")
-            return redirect("tamvang")
-        #verify not already temporary absence
-        if TemporaryAbsence.objects.filter(cccd=request.POST.get("cmnd")).exists():
-            messages.error(request, "Nhân khẩu đã đăng ký tạm vắng")
-            return redirect("tamvang")
+            return JsonResponse({"error": "Không có quyền"}, status=403)
         
         TemporaryAbsence.objects.create(
-            ma_nhan_khau=37,
-            ho_ten=request.POST.get("ten"),
-            ngay_sinh=request.POST.get("ns"),
-            cccd=request.POST.get("cmnd"),
+            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
             ngay_bat_dau=request.POST.get("ngayDi"),
             ngay_ket_thuc=request.POST.get("han"),
             ly_do=request.POST.get("lyDo"),
         )
-        Person.objects.filter(cccd=request.POST.get("cmnd")).update(trang_thai="Tạm vắng")
 
-        messages.success(request, "Đăng ký tạm vắng thành công")
-        return redirect("tamvang")
+        person = Person.objects.get(ma_nhan_khau=request.POST.get("ma_nhan_khau"))
+        person.trang_thai = "Tạm vắng"
+        person.save()
+        
+        return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
+
     
 
 

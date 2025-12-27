@@ -98,9 +98,6 @@ class TemporaryAbsence(models.Model):
     ngay_ket_thuc = models.DateField()
     trang_thai_hoan_thanh = models.BooleanField(default=False)
     ly_do = models.TextField(null=True, blank=True)
-    ho_ten = models.CharField(max_length=255, null=False)
-    ngay_sinh = models.DateField(null=True, blank=True)
-    cccd = models.CharField(max_length=20, null=True, blank=True)
 
     class Meta:
         db_table = "new_tam_vang"
@@ -236,5 +233,10 @@ class Person_Change(models.Model):
         managed = False # Giữ nguyên vì bạn đã có bảng sẵn trong DB
 
     def __str__(self):
+<<<<<<< HEAD
         # Ép kiểu string để tránh lỗi "hệ nhị phân" khi hiển thị số
         return str(self.ma_thay_doi)
+=======
+        return self.ho_ten
+    
+>>>>>>> 1dd3457 (Sửa tạm Vắng)

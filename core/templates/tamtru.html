@@ -36,8 +36,6 @@
                 </select>
             </div>
             <div class="row">
-                <label>Ngày đến</label>
-                <input id="tt_ngay_den" type="date">
                 <label>Thời hạn</label>
                 <input id="tt_han" type="date">
             </div>
@@ -83,8 +81,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                <button class="btn-sm btn-action"
-                                onclick="toggleTamTruStatus(2)">
+                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus({{ tamtru.ma_tam_tru }})">
                                     <i class="fas fa-check"></i> Kết thúc
                                 </button>
                             </td>
