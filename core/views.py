@@ -301,7 +301,7 @@ def themnk(request):
         return redirect("home")
     # 1. Lấy danh sách mã hộ khẩu từ bảng Household (new_ho_khau)
     # Vì Model của bạn không có tên chủ hộ, ta lấy Mã và Địa chỉ để người dùng dễ nhận biết
-    danh_sach_hk = Household.objects.all().values('ma_ho_khau', 'so_nha', 'duong_pho')
+    danh_sach_hk = HouseholdDetail.objects.all()
 
     if request.method == "POST":
         # Hàm xử lý giá trị ngày tháng và CCCD (nếu để trống thì lưu NULL)
