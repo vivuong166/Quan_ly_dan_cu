@@ -10,12 +10,14 @@
     </div>
 </div>
 
+<!-- Form Panel -->
 <div class="dashboard-panels">
     <div class="panel">
         <div class="panel-body">
             <form id="editPersonForm" method="post">
                 {% csrf_token %}
                 
+                <!-- Moving/Transfer Section - Moved to top -->
                 <div class="form-section">
                     <h4><i class="fas fa-exchange-alt"></i> Nội dung thay đổi</h4>
                     <div class="form-group">
@@ -23,11 +25,12 @@
                         <select id="moveType" name="move_type" class="form-input" onchange="handleMoveTypeChange()">
                             <option value="">-- Chọn loại --</option>
                             <option value="transfer">Chuyển đi</option>
-                            <!-- <option value="update">Cập nhật thông tin</option> -->
+                            <option value="update">Cập nhật thông tin</option>
                             <option value="past">Qua đời</option>
                         </select>
                     </div>
 
+                    <!-- Transfer Fields -->
                     <div id="transferFields" style="display: none;">
                         <div class="form-row">
                             <div class="form-group">
@@ -49,85 +52,96 @@
                             </select>
                         </div>
 
+                        <!-- Household selection -->
                         <div id="householdSelection" style="display: none;">
                             <div class="form-group">
                                 <label class="required">Chọn hộ khẩu mới</label>
                                 <select id="newHousehold" name="new_household" class="form-input">
                                     <option value="">-- Chọn hộ khẩu --</option>
-                                    {% for hh in household %}
-                                    <option value="{{ hh.ma_ho_khau }}">{{ hh.ma_ho_khau }} - {{ hh.ten_chu_ho }} ({{ hh.dia_chi }})</option>
-                                    {% endfor %}
+                                    <option value="HK-001">HK-001 - Nguyễn Văn B (Số 12, Đường X)</option>
+                                    <option value="HK-002">HK-002 - Trần Thị C (Số 34, Ngõ Y)</option>
+                                    <option value="HK-003">HK-003 - Lê Văn D (Số 56, Phố Z)</option>
                                 </select>
+                                <input type="text" id="newHouseholdRelation" name="new_household_relation" 
+                                       class="form-input" placeholder="Quan hệ với chủ hộ mới" style="margin-top: 12px;">
                             </div>
                         </div>
 
+                        <!-- Area input -->
                         <div id="areaInput" style="display: none;">
                             <div class="form-group">
                                 <label class="required">Địa chỉ nơi chuyển đến</label>
-                                <input type="text" id="transferAddress" name="noi_chuyen_den" 
+                                <input type="text" id="transferAddress" name="transfer_address" 
                                        class="form-input" placeholder="Nhập địa chỉ khu vực chuyển đến">
                             </div>
                         </div>
                     </div>
 
+                    <!-- Past Fields -->
                     <div id="pastFields" style="display: none;">
                         <div class="form-group">
                             <label>Ghi chú</label>
-                            <input type="text" id="pastNote" name="ghi_chu" class="form-input" 
+                            <input type="text" id="pastNote" name="past_note" class="form-input" 
                                    placeholder="Ghi chú về việc qua đời">
                         </div>
                     </div>
                 </div>
 
+                <!-- Personal Information -->
                 <div class="form-section" id="personalInfoSection" style="display: none;">
                     <h4><i class="fas fa-user"></i> Thông tin cá nhân</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Họ và tên</label>
-                            <input type="text" id="personFullName" name="ho_ten" class="form-input" 
-                                   placeholder="Nhập họ và tên đầy đủ" value="{{ person.ho_ten }}" required>
+                            <input type="text" id="personFullName" name="full_name" class="form-input" 
+                                   placeholder="Nhập họ và tên đầy đủ" value="Nguyễn Văn A" required>
                         </div>
                         <div class="form-group">
                             <label>Bí danh</label>
-                            <input type="text" id="personAlias" name="bi_danh" class="form-input" 
-                                   placeholder="Tên gọi khác (không bắt buộc)" value="{{ person.bi_danh }}">
+                            <input type="text" id="personAlias" name="alias" class="form-input" 
+                                   placeholder="Tên gọi khác (không bắt buộc)">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Ngày sinh</label>
-                            <input type="date" id="personDob" name="ngay_sinh" class="form-input" value="{{ person.ngay_sinh|date:'Y-m-d' }}" required>
+                            <input type="date" id="personDob" name="dob" class="form-input" value="1990-05-15" required>
                         </div>
                         <div class="form-group">
                             <label class="required">Giới tính</label>
-                            <input type="text" id="personGender" name="gioi_tinh" class="form-input" value="{{ person.gioi_tinh }}" required>
+                            <select id="personGender" name="gender" class="form-input" required>
+                                <option value="">-- Chọn giới tính --</option>
+                                <option value="M" selected>Nam</option>
+                                <option value="F">Nữ</option>
+                                <option value="O">Khác</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nơi sinh</label>
-                            <input type="text" id="personBirthPlace" name="noi_sinh" class="form-input" 
-                                   placeholder="Bệnh viện, Phường/Xã..." value="{{ person.noi_sinh }}">
+                            <input type="text" id="personBirthPlace" name="birth_place" class="form-input" 
+                                   placeholder="Bệnh viện, Phường/Xã, Quận/Huyện, Tỉnh/TP..." value="Hà Nội">
                         </div>
                         <div class="form-group">
                             <label>Quê quán</label>
-                            <input type="text" id="personHometown" name="nguyen_quan" class="form-input" 
-                                   placeholder="Phường/Xã, Quận/Huyện..." value="{{ person.nguyen_quan }}">
+                            <input type="text" id="personHometown" name="hometown" class="form-input" 
+                                   placeholder="Phường/Xã, Quận/Huyện, Tỉnh/TP..." value="Hà Nội">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Quan hệ với chủ hộ</label>
-                            <input type="text" id="personRelation" name="quan_he_voi_chu_ho" class="form-input" 
-                                   placeholder="Vợ/Chồng, Con..." value="{{ person.quan_he_voi_chu_ho }}" required> 
+                            <input type="text" id="personRelation" name="relation_to_head" class="form-input" 
+                                   placeholder="Vợ/Chồng, Con, Cha/Mẹ, Anh/Chị/Em..." value="Chủ hộ" required>
                         </div>
                         <div class="form-group">
                             <label>Số CMND/CCCD</label>
-                            <input type="text" id="personIdNumber" name="cccd" class="form-input" 
-                                   placeholder="Nhập số căn cước công dân" value="{{ person.cccd }}">
+                            <input type="text" id="personIdNumber" name="id_number" class="form-input" 
+                                   placeholder="Nhập số căn cước công dân" value="001234567890">
                             <small class="help-text">Có thể để trống cho trẻ em chưa có giấy tờ</small>
                         </div>
                     </div>
@@ -135,48 +149,54 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày cấp CMND/CCCD</label>
-                            <input type="date" id="personIdIssueDate" name="ngay_cap_cccd" class="form-input" value="{{ person.ngay_cap_cccd|date:'Y-m-d' }}">
+                            <input type="date" id="personIdIssueDate" name="id_issue_date" class="form-input" value="2015-01-10">
                         </div>
                         <div class="form-group">
                             <label>Nơi cấp CMND/CCCD</label>
-                            <input type="text" id="personIdIssuePlace" name="noi_cap_cccd" class="form-input" 
-                                   placeholder="Nơi cấp..." value="{{ person.noi_cap_cccd }}">
+                            <input type="text" id="personIdIssuePlace" name="id_issue_place" class="form-input" 
+                                   placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư" value="Cục Cảnh sát Hà Nội">
                         </div>
                     </div>
                 </div>
 
+                <!-- Residence Registration -->
                 <div class="form-section" id="residenceSection" style="display: none;">
                     <h4><i class="fas fa-map-marker-alt"></i> Thông tin đăng ký thường trú</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Ngày đăng ký thường trú</label>
-                            <input type="date" id="personResidenceRegDate" name="ngay_dang_ky_thuong_tru" class="form-input" value="{{ person.ngay_dang_ky_thuong_tru|date:'Y-m-d' }}">
+                            <input type="date" id="personResidenceRegDate" name="residence_reg_date" class="form-input" value="2020-01-15">
                         </div>
                         <div class="form-group">
                             <label>Địa chỉ nơi thường trú trước khi chuyển đến</label>
-                            <input type="text" id="personPreviousResidence" name="dia_chi_truoc_khi_chuyen" class="form-input" 
-                                   placeholder="Địa chỉ cũ..." value="{{ person.dia_chi_truoc_khi_chuyen }}">
+                            <input type="text" id="personPreviousResidence" name="previous_residence" class="form-input" 
+                                   placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
                         </div>
                     </div>
                 </div>
 
+                <!-- Work Information -->
                 <div class="form-section" id="workInfoSection" style="display: none;">
                     <h4><i class="fas fa-briefcase"></i> Thông tin nghề nghiệp</h4>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nghề nghiệp</label>
-                            <input type="text" id="personOccupation" name="nghe_nghiep" class="form-input" 
-                                   placeholder="Nhập nghề nghiệp hiện tại" value="{{ person.nghe_nghiep }}">
+                            <input type="text" id="personOccupation" name="occupation" class="form-input" 
+                                   placeholder="Nhập nghề nghiệp hiện tại" value="Kỹ sư">
                         </div>
                         <div class="form-group">
                             <label>Nơi làm việc</label>
-                            <input type="text" id="personWorkplace" name="noi_lam_viec" class="form-input" 
-                                   placeholder="Tên công ty/cơ quan" value="{{ person.noi_lam_viec }}">
+                            <input type="text" id="personWorkplace" name="workplace" class="form-input" 
+                                   placeholder="Tên công ty/cơ quan" value="Công ty ABC">
                         </div>
                     </div>
                 </div>
 
+                <!-- Form Actions -->
                 <div class="form-actions">
+                    <!-- <button type="button" class="btn" onclick="window.location.href='{% url 'qlnk' %}'">
+                        <i class="fas fa-times"></i> Hủy
+                    </button> -->
                     <button type="submit" class="btn primary-1">
                         <i class="fas fa-save"></i> Cập nhật
                     </button>
@@ -186,6 +206,7 @@
     </div>
 </div>
 
+<!-- Success Message -->
 <div id="successMessage" class="alert alert-success" style="display: none;">
     <i class="fas fa-check-circle"></i>
     <span>Cập nhật nhân khẩu thành công!</span>
