@@ -378,59 +378,91 @@ from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import ValidationError
 from .models import Person, Household, Person_Change
 
-@csrf_exempt
-@csrf_exempt
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Person, HouseholdDetail, Person_Change
+from datetime import datetime
+
 def suank(request, person_id):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
-        messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
-        return redirect("home")
-    person = get_object_or_404(Person, ma_nhan_khau=person_id)
-    ma_ho_khau_hien_tai=person.ma_ho_khau
-    thaydoink=Person_Change.objects.create(
-        ma_nhan_khau=person_id
-    )
-    loai_thay_doi=request.POST.get("move_type")
-    household=Household.objects.exclude(ma_ho_khau__in=ma_ho_khau_hien_tai)#danh sách hộ khẩu mới mà k có hộ khẩu hiện tại
-    if(loai_thay_doi=="transfer"):
-        thaydoink.ghi_chu=request.POST.get("transfer_note")
-        thaydoink.ngay_chuyen_di=request.POST.get("ngay_chuyen_di")
-        thaydoink.save()
-        transfer_destination_type=request.POST.get("transfer_destination_type")
-        if(transfer_destination_type=="household"):
-            #sửa mã hộ khẩu của nhân khẩu theo mã hộ khẩu mới
-            person.ma_ho_khau=request.POST.get("new_household")
-            person.quan_he_chu_ho=request.POST.get("newHouseholdRelation")
-            person.save()
-        else:
-            thaydoink.noi_chuyen_den=request.POST.get("noi_chuyen_den")
-            thaydoink.save()
-        messages.success(request, "Cập nhật nhân khẩu thành công")
+    # 1. Kiểm tra quyền truy cập
+    if request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
+        messages.error(request, "Bạn không có quyền thực hiện thao tác này.")
         return redirect("nhankhau")
-    else:
-        if(loai_thay_doi=="update"):
-            person.ho_ten=request.POST.get("ho_ten")
-            person.ngay_sinh=request.POST.get("ngay_sinh")
-            person.bi_danh=request.POST.get("bi_danh")
-            person.gioi_tinh=request.POST.get("gioi_tinh")
-            person.noi_sinh=request.POST.get("noi_sinh")
-            person.nguyen_quan=request.POST.get("nguyen_quan")
-            person.cccd=request.POST.get("cccd")
-            person.ngay_cap_cccd=request.POST.get("ngay_cap_cccd")
-            person.noi_cap_cccd=request.POST.get("noi_cap_cccd")
-            person.ngay_dang_ky_thuong_tru=request.POST.get("ngay_dang_ky_thuong_tru")
-            person.dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_chuyen")
-            person.nghe_nghiep=request.POST.get("nghe_nghiep")
-            person.noi_lam_viec=request.POST.get("noi_lam_viec")
-            person.save()
-        else:
-            person.trang_thai="đã qua đời"
-            thaydoink.loai_thay_doi="đã qua đời"
-            thaydoink.ghi_chu=request.POST.get("ghi_chu")
-            thaydoink.save()
+
+    person = get_object_or_404(Person, ma_nhan_khau=person_id)
+    households = HouseholdDetail.objects.exclude(ma_ho_khau=person.ma_ho_khau)
+
+    if request.method == "POST":
+        move_type = request.POST.get("move_type")
+        
+        try:
+            # --- PHẦN 1: XỬ LÝ DỮ LIỆU PERSON ---
+            if move_type == "update":
+                person.ho_ten = request.POST.get("ho_ten")
+                person.bi_danh = request.POST.get("bi_danh")
+                person.ngay_sinh = request.POST.get("ngay_sinh") or None
+                person.gioi_tinh = request.POST.get("gioi_tinh")
+                person.noi_sinh = request.POST.get("noi_sinh")
+                person.nguyen_quan = request.POST.get("nguyen_quan")
+                person.quan_he_chu_ho = request.POST.get("quan_he_voi_chu_ho")
+                person.cccd = request.POST.get("cccd")
+                person.ngay_cap_cccd = request.POST.get("ngay_cap_cccd") or None
+                person.noi_cap_cccd = request.POST.get("noi_cap_cccd")
+                person.ngay_dang_ky_thuong_tru = request.POST.get("ngay_dang_ky_thuong_tru") or None
+                person.dia_chi_truoc_khi_chuyen = request.POST.get("dia_chi_truoc_khi_chuyen")
+                person.nghe_nghiep = request.POST.get("nghe_nghiep")
+                person.noi_lam_viec = request.POST.get("noi_lam_viec")
+                
+                ten_loai = "Cập nhật thông tin"
+                noi_den = "Tại chỗ"
+                ghi_chu_log = "Thay đổi thông tin hành chính nhân khẩu"
+
+            elif move_type == "transfer":
+                dest_type = request.POST.get("transfer_destination_type")
+                if dest_type == "household":
+                    ma_ho_moi = request.POST.get("new_household")
+                    person.ma_ho_khau = ma_ho_moi
+                    person.quan_he_chu_ho = request.POST.get("newHouseholdRelation")
+                    noi_den = f"Chuyển sang hộ mới: {ma_ho_moi}"
+                else:
+                    noi_den = request.POST.get("noi_chuyen_den") or "Chuyển vùng khác"
+                
+                ten_loai = "Chuyển đi"
+                ghi_chu_log = request.POST.get("transfer_note") or "Thay đổi nơi cư trú"
+
+            elif move_type == "past":
+                person.trang_thai = "Đã qua đời"
+                ten_loai = "Qua đời"
+                noi_den = "N/A"
+                ghi_chu_log = request.POST.get("ghi_chu") or "Đã khai tử"
+
+            # Lưu bảng Person trước
             person.save()
 
-    return render(request, "form_sua_nk.html", {"person": person})
+            # --- PHẦN 2: LƯU VÀO PERSON_CHANGE ---
+            # Sử dụng .create() để Django tự xử lý việc INSERT vào bảng ma_thay_doi
+            Person_Change.objects.create(
+                ma_nhan_khau=int(person.ma_nhan_khau),
+                loai_thay_doi=ten_loai,
+                noi_chuyen_den=noi_den,
+                ghi_chu=ghi_chu_log
+                # ngay_chuyen_di tự động lấy theo auto_now_add
+            )
 
+            messages.success(request, f"Đã cập nhật thông tin và lưu lịch sử cho {person.ho_ten}!")
+            return redirect("nhankhau")
+
+        except Exception as e:
+            # Hiển thị lỗi cụ thể nếu DB vẫn chặn (ví dụ lỗi NOT NULL)
+            messages.error(request, f"Lỗi hệ thống không thể lưu lịch sử: {str(e)}")
+
+    return render(request, "form_sua_nk.html", {
+        "person": person,
+        "household": households
+    })
 
 # ==================================================
 # TẠM TRÚ – TẠM VẮNG

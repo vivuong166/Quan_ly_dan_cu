@@ -218,16 +218,23 @@ def auto_assign_role(sender, instance, created, **kwargs):
             user=instance,
             role=get_role_from_email(instance.email)
         )
+from django.db import models
+
 class Person_Change(models.Model):
-    ma_thay_doi=models.AutoField(primary_key=True)
+    # Khớp chính xác với SERIAL PRIMARY KEY trong ảnh của bạn
+    ma_thay_doi = models.AutoField(primary_key=True) 
     ma_nhan_khau = models.IntegerField()
-    loai_thay_doi=models.CharField(max_length=100)
-    ngay_chuyen_di=models.DateField()
-    noi_chuyen_den=models.CharField(max_length=100)
-    ghi_chu=models.CharField(max_length=100)
+    loai_thay_doi = models.CharField(max_length=100)
+    # Khớp với DEFAULT CURRENT_DATE trong DB
+    ngay_chuyen_di = models.DateField(auto_now_add=True)
+    # Khớp với kiểu TEXT trong ảnh của bạn
+    noi_chuyen_den = models.TextField()
+    ghi_chu = models.TextField()
+
     class Meta:
         db_table = "new_thay_doi_nhan_khau"
-        managed = False
+        managed = False # Giữ nguyên vì bạn đã có bảng sẵn trong DB
 
     def __str__(self):
-        return self.ho_ten
+        # Ép kiểu string để tránh lỗi "hệ nhị phân" khi hiển thị số
+        return str(self.ma_thay_doi)
