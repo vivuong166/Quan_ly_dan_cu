@@ -30,9 +30,9 @@
                 <label>Hộ khẩu tạm trú</label>
                 <select id="tt_ma_hk">
                     <option value="">-- Chọn mã hộ khẩu --</option>
-                    <option value="HK-001">HK-001 - Nguyễn Văn A</option>
-                    <option value="HK-002">HK-002 - Trần Thị B</option>
-                    <option value="HK-003">HK-003 - Lê Văn C</option>
+                    {% for hokhau in hokhau_list %}
+                        <option value="{{ hokhau.ma_ho_khau }}">{{ hokhau.ma_ho_khau }} - {{ hokhau.ten_chu_ho }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="row">
@@ -68,8 +68,31 @@
                         </tr>
                     </thead>
                     <tbody id="ttList">
+                        {% for tamtru in records %}
+                        <tr data-id="{{ tamtru.ma_tam_tru }}">
+                            <td><strong>{{ tamtru.ho_ten }}</strong></td>
+                            <td>{{ tamtru.ngay_sinh|date:"d/m/Y" }}</td>
+                            <td>{{ tamtru.ma_ho_khau_tam_tru }}</td>
+                            <td>{{ tamtru.ngay_bat_dau|date:"d/m/Y" }}</td>
+                            <td>{{ tamtru.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if tamtru.trang_thai_hoan_thanh %}
+                                <span class="status-badge status-completed">Đã kết thúc</span>
+                                {% else %}
+                                <span class="status-badge status-active">Chưa kết thúc</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn-sm btn-action"
+                                onclick="toggleTamTruStatus(2)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                         <!-- Dữ liệu mẫu -->
-                        <tr data-id="1">
+                        <!-- <tr data-id="1">
                             <td><strong>Nguyễn Văn C</strong></td>
                             <td>12/05/2001</td>
                             <td>HK-001</td>
@@ -89,13 +112,13 @@
                             <td>10/11/2025</td>
                             <td>20/11/2025</td>
                             <td><span class="status-badge status-active">Chưa kết thúc</span></td>
-                            <td>
-                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus(2)">
+                            <td> -->
+                                <!-- <button class="btn-sm btn-action" onclick="toggleTamTruStatus(2)">
                                     <i class="fas fa-check"></i> Kết thúc
-                                </button>
-                            </td>
+                                </button> -->
+                            <!-- </td>
                         </tr>
-                    </tbody>
+                    </tbody> -->
                 </table>
             </div>
         </div>

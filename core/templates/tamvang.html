@@ -13,17 +13,26 @@
   <section id="tab-tv" class="tvtt-panel active">
     <form id="formTv" class="tvtt-form">
       <div class="row">
+        <label class="required">Họ tên</label>
+        <input id="tv_ho_ten" placeholder="Họ tên" required />
+        <label class="required">Ngày sinh</label>
+        <input id="tv_ngay_sinh" type="date" required />  
+      </div>
+      <div class="row">
+        <label class="required">CMND/CCCD</label>
+        <input id="tv_cmnd" placeholder="Số CMND/CCCD" required />
+      </div>
+      <div class="row">
         <label class="required">Chọn hộ khẩu</label>
-        <select
-          id="tv_person"
-          name="person"
-          class="row"
-          required
-        >
+        <select id="tv_ma_hk" name="person" class="row" required>
           <option value="">-- Chọn nhân khẩu--</option>
-          <option value="1">HK-001 - Nguyễn Văn A</option>
+          {% for hokhau in hokhau_list %}
+            <option value="{{ hokhau.ma_ho_khau }}">{{ hokhau.ma_ho_khau }} - {{ hokhau.ten_chu_ho }}</option>
+          {% endfor %}
+          <!-- <option value="1">HK-001 - Nguyễn Văn A</option>
           <option value="2">HK-002 - Trần Thị B</option>
           <option value="3">HK-003 - Lê Văn C</option>
+          <option value="4">37</option> -->
         </select>
       </div>
       <div class="row">
@@ -64,7 +73,35 @@
                         </tr>
                     </thead>
                     <tbody id="tvList">
-                        <!-- Dữ liệu mẫu -->
+                        {% for tamvang in records %}
+                        <tr data-id="{{ tamvang.ma_tam_vang }}">
+                            <td><strong>{{ tamvang.ho_ten }}</strong></td>
+                            <td>{{ tamvang.ngay_sinh|date:"d/m/Y" }}</td>
+                            <td>{{ tamvang.ngay_bat_dau|date:"d/m/Y" }}</td>
+                            <td>{{ tamvang.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if tamvang.trang_thai_hoan_thanh %}
+                                    <span class="status-badge status-overdue">Đã kết thúc</span>
+                                {% else %}
+                                    <span class="status-badge status-active">Chưa kết thúc</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tamvang.trang_thai_hoan_thanh %}
+                                <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                                {% else %}
+                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                        <!-- Dữ liệu mẫu
                         <tr data-id="1">
                             <td><strong>Nguyễn Văn A</strong></td>
                             <td>15/03/1985</td>
@@ -83,10 +120,10 @@
                             <td>05/10/2025</td>
                             <td>12/10/2025</td>
                             <td><span class="status-badge status-active">Chưa kết thúc</span></td>
-                            <td>
-                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                            <td> -->
+                                <!-- <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
                                     <i class="fas fa-check"></i> Kết thúc
-                                </button>
+                                </button> -->
                             </td>
                         </tr>
                     </tbody>

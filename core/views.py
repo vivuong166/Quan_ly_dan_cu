@@ -1,3 +1,4 @@
+from urllib import request
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -10,6 +11,13 @@ from django.http import JsonResponse
 import json
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.views import View
+from django.http import JsonResponse
+from django.db import transaction
+from django.utils import timezone
+from django.db.models import OuterRef, Subquery
+
+
 
 from .models import (
     Household,
@@ -508,86 +516,226 @@ def qltv_tt(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
         return redirect("home")
-    return render(request, "qltv_tt.html")
+    tamtru_list = list(TemporaryResidence.objects.all())
+    tamvang_list = list(TemporaryAbsence.objects.all())
+    context = {
+        "tamtru_list": tamtru_list,
+        "tamvang_list": tamvang_list,
+    }
 
+    return render(request, "qltv_tt.html", context)
 
-@csrf_exempt
-def tamtru(request):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
-        messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
-        return redirect("home")
-    # lấy danh sách CCCD đã có trong bảng tạm trú
-    tamtru_cccds = TemporaryResidence.objects.values_list("cccd", flat=True)
+class TamTru(View):
+    def check_permission(self, request):
+        user_role = request.session.get("user_role")
+        if user_role not in ["TO_TRUONG", "TO_PHO"]:
+            messages.error(request, "Bạn không có quyền truy cập")
+            return False
+        return True
+        
+    
+    def get(self, request):
+        subquery = Person.objects.filter(
+            ma_ho_khau=OuterRef("ma_ho_khau"),
+            quan_he_chu_ho="Chủ hộ"
+            ).values("ho_ten")[:1]
+        
+        hokhau_list = Household.objects.annotate(
+            ten_chu_ho=Subquery(subquery)
+            ).values("ma_ho_khau", "ten_chu_ho")
+        
+        tamtru_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
-    # lấy danh sách nhân khẩu chưa tạm trú
-    persons = Person.objects.exclude(cccd__in=tamtru_cccds)
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            qs = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
-    # lấy danh sách hộ khẩu
-    hokhau = Household.objects.all()#để lấy mã hộ khẩu thêm vào
-    tamtruhientai=TemporaryResidence.objects.all()# hiển thị bảng đang tạm trú
-    if request.method == "POST":
+            data = []
+            for tt in qs:
+                data.append({
+                    "id": tt.ma_tam_tru,
+                    "ho_ten": tt.ho_ten,
+                    "ngay_sinh": tt.ngay_sinh.strftime("%d/%m/%Y") if tt.ngay_sinh else "",
+                    "ma_ho_khau": tt.ma_ho_khau_tam_tru,
+                    "ngay_bat_dau": tt.ngay_bat_dau.strftime("%d/%m/%Y"),
+                    "ngay_ket_thuc": tt.ngay_ket_thuc.strftime("%d/%m/%Y"),
+                    "trang_thai": tt.trang_thai_hoan_thanh
+                })
+            return JsonResponse(data, safe=False)
+
+        if not self.check_permission(request):
+            return redirect("home")
+
+        context = {
+            "hokhau_list": list(hokhau_list),
+            "records": tamtru_list,
+        }
+        return render(request, "tamtru.html", context)       
+    
+    def post(self, request):
+        if not self.check_permission(request):
+            return redirect("home")
+        
         TemporaryResidence.objects.create(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
-            ho_ten=request.POST.get("ho_ten"),
-            nghe_nghiep=request.POST.get("nghe_nghiep"),
+            ho_ten=request.POST.get("ten"),
+            ngay_sinh = request.POST.get("ns"),
+            nghe_nghiep=request.POST.get("ngheNghiep"),
             cccd=request.POST.get("cccd"),
-            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
-            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
-            ly_do=request.POST.get("ly_do"),
+            ngay_bat_dau=request.POST.get("ngayDen"),
+            ngay_ket_thuc=request.POST.get("han"),
         )
         messages.success(request, "Đăng ký tạm trú thành công")
         return redirect("tamtru")
+    
+class TamVang(View):
+    def check_permission(self, request):
+        user_role = request.session.get("user_role")
+        if user_role not in ["TO_TRUONG", "TO_PHO"]:
+            messages.error(request, "Bạn không có quyền truy cập")
+            return False
+        return True
+    
+    def get(self, request):
+        if not self.check_permission(request):
+            return redirect("home")
+        
+        subquery = Person.objects.filter(
+            ma_ho_khau=OuterRef("ma_ho_khau"),
+            quan_he_chu_ho="Chủ hộ"
+            ).values("ho_ten")[:1]
+        
+        hokhau_list = Household.objects.annotate(
+            ten_chu_ho=Subquery(subquery)
+            ).values("ma_ho_khau", "ten_chu_ho")
+        
+        tamvang_list = TemporaryAbsence.objects.values("ho_ten", "ngay_sinh", "ngay_bat_dau", "ngay_ket_thuc").order_by("-ma_tam_vang")
 
-    return render(request, "tamtru.html", {
-        "records": TemporaryResidence.objects.all()
-    })
+        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+            qs = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
+            data = []
+            for tv in qs:
+                data.append({
+                    "ho_ten": tv.ho_ten,
+                    "ngay_sinh": tv.ngay_sinh.strftime("%d/%m/%Y") if tv.ngay_sinh else "",
+                    "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
+                    "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
+                })
+            return JsonResponse(data, safe=False)
+        context = {
+            "hokhau_list": list(hokhau_list),
+            "records": tamvang_list,
+        }
+        return render(request, "tamvang.html", context)
+    
+    
+        
 
-@csrf_exempt
-def tamvang(request):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
-        messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
-        return redirect("home")
-    # Lấy danh sách CCCD đã tạm vắng
-    tamvang_cccds = TemporaryAbsence.objects.values_list("ma_nhan_khau", flat=True)
-
-    # Lấy danh sách nhân khẩu được phép tạm vắng
-    #    - trạng thái = thường trú
-    #    - chưa có trong bảng tạm vắng
-    persons = Person.objects.filter(
-        trang_thai="Thường trú"
-    ).exclude(
-        ma_nhan_khau__in=tamvang_cccds
-    )
-    bangluutamvang=TemporaryAbsence.objects.all()
-
-    if request.method == "POST":
-        cccd = request.POST.get("cccd")
-
-        # check nhân khẩu tồn tại
-        if not Person.objects.filter(cccd=cccd).exists():
+    
+    def post(self, request):
+        if not self.check_permission(request):
+            return redirect("home")
+        
+        #verify person exists
+        if not Person.objects.filter(cccd=request.POST.get("cmnd")).exists():
             messages.error(request, "Nhân khẩu không tồn tại")
             return redirect("tamvang")
-
-        # check đã tạm vắng chưa
-        if TemporaryAbsence.objects.filter(cccd=cccd).exists():
+        #verify not already temporary absence
+        if TemporaryAbsence.objects.filter(cccd=request.POST.get("cmnd")).exists():
             messages.error(request, "Nhân khẩu đã đăng ký tạm vắng")
             return redirect("tamvang")
-
-        # tạo tạm vắng
+        
         TemporaryAbsence.objects.create(
-            cccd=cccd,
-            ngay_bat_dau=request.POST.get("ngay_bat_dau"),
-            ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
-            ly_do=request.POST.get("ly_do"),
+            ma_nhan_khau=37,
+            ho_ten=request.POST.get("ten"),
+            ngay_sinh=request.POST.get("ns"),
+            cccd=request.POST.get("cmnd"),
+            ngay_bat_dau=request.POST.get("ngayDi"),
+            ngay_ket_thuc=request.POST.get("han"),
+            ly_do=request.POST.get("lyDo"),
         )
+        Person.objects.filter(cccd=request.POST.get("cmnd")).update(trang_thai="Tạm vắng")
 
         messages.success(request, "Đăng ký tạm vắng thành công")
         return redirect("tamvang")
+    
 
-    return render(request, "tamvang.html", {
-        "persons": persons,  # danh sách được chọn
-        "records": TemporaryAbsence.objects.all()
-    })
+# @csrf_exempt
+# def tamtru(request):
+#     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+#         messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
+#         return redirect("home")
+#     # lấy danh sách CCCD đã có trong bảng tạm trú
+#     tamtru_cccds = TemporaryResidence.objects.values_list("cccd", flat=True)
+
+#     # lấy danh sách nhân khẩu chưa tạm trú
+#     persons = Person.objects.exclude(cccd__in=tamtru_cccds)
+
+#     # lấy danh sách hộ khẩu
+#     hokhau = Household.objects.all()#để lấy mã hộ khẩu thêm vào
+#     tamtruhientai=TemporaryResidence.objects.all()# hiển thị bảng đang tạm trú
+#     if request.method == "POST":
+#         TemporaryResidence.objects.create(
+#             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
+#             ho_ten=request.POST.get("ho_ten"),
+#             nghe_nghiep=request.POST.get("nghe_nghiep"),
+#             cccd=request.POST.get("cccd"),
+#             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
+#             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
+#             ly_do=request.POST.get("ly_do"),
+#         )
+#         messages.success(request, "Đăng ký tạm trú thành công")
+#         return redirect("tamtru")
+
+#     return render(request, "tamtru.html", {
+#         "records": TemporaryResidence.objects.all()
+#     })
+
+# @csrf_exempt
+# def tamvang(request):
+#     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+#         messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
+#         return redirect("home")
+#     # Lấy danh sách CCCD đã tạm vắng
+#     tamvang_cccds = TemporaryAbsence.objects.values_list("ma_nhan_khau", flat=True)
+
+#     # Lấy danh sách nhân khẩu được phép tạm vắng
+#     #    - trạng thái = thường trú
+#     #    - chưa có trong bảng tạm vắng
+#     persons = Person.objects.filter(
+#         trang_thai="Thường trú"
+#     ).exclude(
+#         ma_nhan_khau__in=tamvang_cccds
+#     )
+#     bangluutamvang=TemporaryAbsence.objects.all()
+
+#     if request.method == "POST":
+#         cccd = request.POST.get("cccd")
+
+#         # check nhân khẩu tồn tại
+#         if not Person.objects.filter(cccd=cccd).exists():
+#             messages.error(request, "Nhân khẩu không tồn tại")
+#             return redirect("tamvang")
+
+#         # check đã tạm vắng chưa
+#         if TemporaryAbsence.objects.filter(cccd=cccd).exists():
+#             messages.error(request, "Nhân khẩu đã đăng ký tạm vắng")
+#             return redirect("tamvang")
+
+#         # tạo tạm vắng
+#         TemporaryAbsence.objects.create(
+#             cccd=cccd,
+#             ngay_bat_dau=request.POST.get("ngay_bat_dau"),
+#             ngay_ket_thuc=request.POST.get("ngay_ket_thuc"),
+#             ly_do=request.POST.get("ly_do"),
+#         )
+
+#         messages.success(request, "Đăng ký tạm vắng thành công")
+#         return redirect("tamvang")
+
+#     return render(request, "tamvang.html", {
+#         "persons": persons,  # danh sách được chọn
+#         "records": TemporaryAbsence.objects.all()
+#     })
 
 
 # ==================================================
