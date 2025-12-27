@@ -67,8 +67,15 @@ def login_view(request):
 @login_required
 def home(request):
     print(request.user.is_authenticated)
+    household_count = Household.objects.count()
+    person_count = Person.objects.count()
+    fee_count = HygieneFee.objects.count() + Contribution.objects.count()
+
     return render(request, "home.html", {
-        "role": request.session.get("user_role", "CAN_BO")
+        "role": request.session.get("user_role", "CAN_BO"),
+        "household_count": household_count,
+        "person_count": person_count,
+        "fee_count": fee_count
     })
 
 def logout_view(request):
