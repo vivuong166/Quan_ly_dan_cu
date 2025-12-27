@@ -269,6 +269,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const element = document.getElementById(field.id);
             if (!element || !element.value.trim()) {
                 if (element) element.classList.add('error');
+                showMessage('Vui lòng kiểm tra lại các thông tin bắt buộc!', 'error');
                 isValid = false;
             }
         });
@@ -295,37 +296,46 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        if (!isValid) {
-            showMessage('Vui lòng kiểm tra lại các thông tin bắt buộc!', 'error');
-        }
+        // if (!isValid) {
+        //     showMessage('Vui lòng kiểm tra lại các thông tin bắt buộc!', 'error');
+        // }
 
         return isValid;
     }
 
     // 4. Hàm hiển thị thông báo (Alert)
+    // function showMessage(message, type) {
+    //     // Xóa thông báo cũ
+    //     document.querySelectorAll('.alert-js').forEach(alert => alert.remove());
+
+    //     const alertDiv = document.createElement('div');
+    //     alertDiv.className = `alert alert-${type} alert-js`;
+        
+    //     const icon = type === 'success' ? 'check-circle' : 
+    //                 type === 'error' ? 'exclamation-triangle' : 'info-circle';
+        
+    //     alertDiv.innerHTML = `
+    //         <i class="fas fa-${icon}"></i>
+    //         <span>${message}</span>
+    //     `;
+
+    //     const pageHeader = document.querySelector('.page-header');
+    //     if (pageHeader) {
+    //         pageHeader.insertAdjacentElement('afterend', alertDiv);
+    //     }
+
+    //     // Tự động xóa sau 5 giây nếu không phải lỗi
+    //     if (type !== 'error') {
+    //         setTimeout(() => alertDiv.remove(), 5000);
+    //     }
+    // }
     function showMessage(message, type) {
-        // Xóa thông báo cũ
-        document.querySelectorAll('.alert-js').forEach(alert => alert.remove());
-
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-js`;
-        
-        const icon = type === 'success' ? 'check-circle' : 
-                    type === 'error' ? 'exclamation-triangle' : 'info-circle';
-        
-        alertDiv.innerHTML = `
-            <i class="fas fa-${icon}"></i>
-            <span>${message}</span>
-        `;
-
-        const pageHeader = document.querySelector('.page-header');
-        if (pageHeader) {
-            pageHeader.insertAdjacentElement('afterend', alertDiv);
-        }
-
-        // Tự động xóa sau 5 giây nếu không phải lỗi
-        if (type !== 'error') {
-            setTimeout(() => alertDiv.remove(), 5000);
+        if (type === 'error') {
+            alert("LỖI: " + message);
+        } else if (type === 'success') {
+            alert("THÀNH CÔNG: " + message);
+        } else {
+            alert(message);
         }
     }
 
