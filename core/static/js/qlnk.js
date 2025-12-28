@@ -187,9 +187,15 @@ function showPersonDetail(person) {
 
   viewContent.innerHTML = `
             <div class="person-details" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                <div style="grid-column:span 2;border-bottom:2px solid #2563eb;padding-bottom:8px;margin-bottom:10px;">
-                    <h4 style="margin:0;color:#1e3a8a;font-size:1.2rem;">${person.ho_ten}</h4>
-                    <p style="margin:5px 0 0;font-size:0.8rem;color:#666;">Mã hộ khẩu: ${person.ma_ho_khau}</p>
+                <div style="grid-column:span 2;border-bottom:2px solid #2563eb;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h4 style="margin:0;color:#1e3a8a;font-size:1.2rem;">${person.ho_ten}</h4>
+                        <p style="margin:5px 0 0;font-size:0.8rem;color:#666;">Mã hộ khẩu: ${person.ma_ho_khau}</p>
+                    </div>
+                    <a class="edit-button" href="nhankhau/suank/${person.ma_nhan_khau}/">
+                        <i class="fas fa-edit"></i>
+                        Sửa
+                    </a>
                 </div>
                 <div><strong>Ngày sinh:</strong> ${person.ngay_sinh}</div>
                 <div><strong>Giới tính:</strong> ${person.gioi_tinh}</div>
@@ -211,7 +217,7 @@ function showPersonDetail(person) {
 }
 
 // Close person detail modal
-function closePersonDetailModal() {
+function closeViewModal() {
   const viewModal = document.getElementById('viewPersonModal');
   viewModal.style.display = "none";
 }
