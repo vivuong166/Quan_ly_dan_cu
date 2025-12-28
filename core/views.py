@@ -94,11 +94,17 @@ def qlnk(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    households = Household.objects.all()
-    persons = Person.objects.all()
+    
+    ho_ten_subquery = Person.objects.filter(
+        ma_ho_khau=OuterRef('ma_ho_khau'),
+        quan_he_chu_ho__icontains='Chủ hộ'
+    ).values('ho_ten')[:1]
+    households = Household.objects.annotate(ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau", "ho_ten", "so_nha", "duong_pho", "phuong", "quan")
+
+    persons = Person.objects.values("ho_ten", "ma_ho_khau", "cccd")
     return render(request, "qlnk.html", {
-        "households": households,
-        "persons": persons,
+        "households_json": json.dumps(list(households), ensure_ascii=False),
+        "persons_json": json.dumps(list(persons), ensure_ascii=False),
     })
 
 
