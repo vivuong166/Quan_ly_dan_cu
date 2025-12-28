@@ -19,8 +19,9 @@
 //         reason: 'Du lịch'
 //     }
 // ];
-const tamVangData = window.tamvangRecords;
-const tamTruData = window.tamtruRecords;
+
+const tamtrus = window.tamtrus;
+const tamvangs = window.tamvangs
 
 document.addEventListener('DOMContentLoaded', function(){
     // tabs
@@ -63,8 +64,9 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
 
-            if(new Date(ngayDi) > new Date(han)){
+            if((new Date(ngayDi) > new Date(han)) || (new Date(han) <= new Date())) {
                 alert("Ngay bat dau va ngay di khong hop le")
+                return;
             }
 
             const dataForm = new FormData;
@@ -121,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
 
-            if(new Date(ngay_den) > new Date(han)){
+            if((new Date(ngay_den) > new Date(han)) || (new Date(han) <= new Date())){
                 alert('Ngày hết hạn không hợp lệ.');
                 return;
             }
@@ -161,19 +163,21 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 
     // simple search filter
-    function bindSearch(inputId, listId) {
-        const inp = document.getElementById(inputId);
-        const list = document.getElementById(listId);
-        if(!inp || !list) return;
-        inp.addEventListener('input', function(){
-            const q = this.value.trim().toLowerCase();
-            Array.from(list.children).forEach(li=>{
-                li.style.display = (!q || li.textContent.toLowerCase().includes(q)) ? '' : 'none';
-            });
-        });
-    }
-    bindSearch('searchTv','tvList');
-    bindSearch('searchTt','ttList');
+    // function bindSearch(inputId, listId) {
+    //     const inp = document.getElementById(inputId);
+    //     const list = document.getElementById(listId);
+    //     if(!inp || !list) return;
+    //     inp.addEventListener('input', function(){
+    //         const q = this.value.trim().toLowerCase();
+    //         Array.from(list.children).forEach(li=>{
+    //             li.style.display = (!q || li.textContent.toLowerCase().includes(q)) ? '' : 'none';
+    //         });
+    //     });
+    // }
+    // bindSearch('searchTv','tamvangs');
+    // bindSearch('searchTt','tamtrus');
+
+
 
     // print handlers: print the selected panel content (simple)
     const printTvBtn = document.getElementById('printTv');
@@ -335,7 +339,7 @@ document.addEventListener('DOMContentLoaded', function(){
 if (reloadBtn) {
     reloadBtn.addEventListener('click', async function () {
         try {
-            const response = await fetch('qltv_tt/tamtru/', {
+            const response = await fetch('/qltv_tt/tamtru/', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -355,14 +359,9 @@ if (reloadBtn) {
                     <td>${item.ngay_bat_dau}</td>
                     <td>${item.ngay_ket_thuc}</td>
                     <td>
-                        ${item.trang_thai
+                        ${item.trang_thai                  
                             ? '<span class="status-badge status-completed">Đã kết thúc</span>'
                             : '<span class="status-badge status-active">Chưa kết thúc</span>'}
-                    </td>
-                    <td>
-                        <button class="btn-sm btn-action" onclick="toggleTamTruStatus(${item.id}, ${item.trang_thai})">
-                            ${item.trang_thai ? 'Hoàn tác' : 'Kết thúc'}
-                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -404,12 +403,8 @@ document.addEventListener('DOMContentLoaded', function(){
                             ${item.trang_thai
                                 ? '<span class="status-badge status-completed">Đã kết thúc</span>'
                                 : '<span class="status-badge status-active">Chưa kết thúc</span>'}
-                        </td>
-                        <td>
-                            <button class="btn-sm btn-action" onclick="toggleStatus(${item.id}, ${item.trang_thai})">
-                                ${item.trang_thai ? 'Hoàn tác' : 'Kết thúc'}
-                            </button>
                         </td>`;
+                        
                     tbody.appendChild(tr);
                 });
 

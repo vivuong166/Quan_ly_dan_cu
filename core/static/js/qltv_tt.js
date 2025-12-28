@@ -12,16 +12,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const tamTruResults = document.getElementById("ttResults");
 
   // Sample data for demonstration
-  const tamVangList = [
-    { id: 1, full_name: 'Nguyễn Văn A', id_number: '012345678', start_date: '15/01/2024', end_date: '15/03/2024', destination: 'TP. Hồ Chí Minh' },
-    { id: 2, full_name: 'Trần Thị B', id_number: '098765432', start_date: '01/02/2024', end_date: '01/04/2024', destination: 'Đà Nẵng' },
-  ];
+  // const tamVangList = [
+  //   { id: 1, full_name: 'Nguyễn Văn A', id_number: '012345678', start_date: '15/01/2024', end_date: '15/03/2024', destination: 'TP. Hồ Chí Minh' },
+  //   { id: 2, full_name: 'Trần Thị B', id_number: '098765432', start_date: '01/02/2024', end_date: '01/04/2024', destination: 'Đà Nẵng' },
+  // ];
 
-  const tamTruList = [
-    { id: 1, full_name: 'Lê Văn C', id_number: '111222333', start_date: '10/01/2024', end_date: '10/06/2024', origin: 'Nghệ An' },
-    { id: 2, full_name: 'Phạm Thị D', id_number: '444555666', start_date: '20/02/2024', end_date: '20/08/2024', origin: 'Thanh Hóa' },
-  ];
+  // const tamTruList = [
+  //   { id: 1, full_name: 'Lê Văn C', id_number: '111222333', start_date: '10/01/2024', end_date: '10/06/2024', origin: 'Nghệ An' },
+  //   { id: 2, full_name: 'Phạm Thị D', id_number: '444555666', start_date: '20/02/2024', end_date: '20/08/2024', origin: 'Thanh Hóa' },
+  // ];
 
+  const tamtrus = window.tamtrus
+  const tamvang = window.tamvangs
   // Tạm vắng search with debounce
   if (tamVangSearchInput) {
     tamVangSearchInput.addEventListener("input", function () {
@@ -48,10 +50,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const filteredList = tamVangList.filter(
+    const filteredList = tamvangs.filter(
       (item) =>
-        item.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.id_number.includes(searchTerm)
+        item.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.cccd && item.cccd.includes(searchTerm)
     );
 
     displayTamVangResults(filteredList);
@@ -63,10 +65,10 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
 
-    const filteredList = tamTruList.filter(
+    const filteredList = tamtrus.filter(
       (item) =>
-        item.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.id_number.includes(searchTerm)
+        item.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.cccd && item.cccd.includes(searchTerm)
     );
 
     displayTamTruResults(filteredList);
@@ -85,8 +87,8 @@ document.addEventListener("DOMContentLoaded", function () {
         resultItem.className = "res";
         resultItem.href = `/tam-vang/${item.id}/`;
         resultItem.innerHTML = `
-          <div class="res-main">${item.full_name}</div>
-          <div class="res-sub">CCCD: ${item.id_number} | Từ ${item.start_date} đến ${item.end_date} | Đến: ${item.destination}</div>
+          <div class="res-main">${item.ho_ten}</div>
+          <div class="res-sub">CCCD: ${item.cccd} | Từ ${item.ngay_bat_dau} đến ${item.ngay_ket_thuc} | Trạng thái: ${item.trang_thai_hoan_thanh}</div>
         `;
         resultsBody.appendChild(resultItem);
       });
@@ -112,8 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
         resultItem.className = "res";
         resultItem.href = `/tam-tru/${item.id}/`;
         resultItem.innerHTML = `
-          <div class="res-main">${item.full_name}</div>
-          <div class="res-sub">CCCD: ${item.id_number} | Từ ${item.start_date} đến ${item.end_date} | Từ: ${item.origin}</div>
+          <div class="res-main">${item.ho_ten}</div>
+          <div class="res-sub">CCCD: ${item.cccd} | Từ ${item.ngay_bat_dau} đến ${item.ngay_ket_thuc} | Trạng thái: ${item.trang_thai_hoan_thanh}</div>
         `;
         resultsBody.appendChild(resultItem);
       });

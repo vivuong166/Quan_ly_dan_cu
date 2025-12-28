@@ -64,7 +64,7 @@
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody id="ttList">
@@ -82,11 +82,11 @@
                                 <span class="status-badge status-active">Chưa kết thúc</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <!-- <td>
                                 <button class="btn-sm btn-action" onclick="toggleTamTruStatus({{ tamtru.ma_tam_tru }})">
                                     <i class="fas fa-check"></i> Kết thúc
                                 </button>
-                            </td>
+                            </td> -->
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -123,7 +123,6 @@
         </div>
     </section>
 </div>
-
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
