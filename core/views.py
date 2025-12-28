@@ -328,8 +328,9 @@ def chitiet_hk(request, household_id):
         return redirect("home")
     
     # 2. Lấy dữ liệu hộ khẩu và nhân khẩu
-    #lấy thông tin cơ bản
-    household_detail=get_object_or_404(HouseholdDetail, ma_ho_khau=household_id)
+    # Lấy thông tin cơ bản
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    household_detail = get_object_or_404(HouseholdDetail, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
     # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
@@ -363,11 +364,10 @@ def tachhk(request, household_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
     #lấy toàn bộ nk của toàn bộ hk
-    household_detail=HouseholdDetail.objects.filter(ma_ho_khau=household_id) # hiển thị thông tin mhk, chủ hộ hiện , địa chỉ
-    person=get_object_or_404(Person, ma_ho_khau=household_id) #CHỌN NHÂN KHẨU TRONG CHỦ HỘ
-    person=person.objects.exclude(quan_he_chu_ho__in="Chủ hộ")# lấy trừ chủ hộ
-    household = get_object_or_404(Household, ma_ho_khau=household_id)# CHỌN HỘ KHẨU
-    return render(request, "form_tach_hk.html", {"household": household})
+    household_detail = HouseholdDetail.objects.filter(ma_ho_khau=household_id)
+    persons = Person.objects.filter(ma_ho_khau=household_id).exclude(quan_he_chu_ho__in=["Chủ hộ"])
+    household = get_object_or_404(Household, ma_ho_khau=household_id) 
+    return render(request, "form_tach_hk.html", {"household": household, "persons": persons, "household_detail": household_detail})
 
 
 # ================= NHÂN KHẨU =================
