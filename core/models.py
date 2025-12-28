@@ -149,6 +149,22 @@ class HouseholdDetail(models.Model):
 
     def __str__(self):
         return self.ma_ho_khau
+    
+# =====================
+# NHÂN KHẨU THƯỜNG TRÚ
+# =====================
+class PersonCurrent(models.Model):
+    ma_nhan_khau = models.AutoField(primary_key=True)
+    ma_ho_khau = models.CharField(max_length=10)
+    ho_ten = models.CharField(max_length=255)
+    dia_chi = models.CharField(max_length=255)
+    ngay_sinh = models.DateField(null=True, blank=True)
+    class Meta:
+        db_table = "v_nhan_khau_thuong_tru"
+        managed = False
+
+    def __str__(self):
+        return self.ho_ten
 
 
 # =====================
@@ -223,9 +239,12 @@ class Person_Change(models.Model):
     ma_nhan_khau = models.IntegerField()
     loai_thay_doi = models.CharField(max_length=100)
     # Khớp với DEFAULT CURRENT_DATE trong DB
-    ngay_chuyen_di = models.DateField(auto_now_add=True)
+    ngay_thay_doi = models.DateField(
+        null=True,
+        blank=True
+    )
     # Khớp với kiểu TEXT trong ảnh của bạn
-    noi_chuyen_den = models.TextField()
+    noi_chuyen_di = models.TextField()
     ghi_chu = models.TextField()
 
     class Meta:
@@ -235,6 +254,21 @@ class Person_Change(models.Model):
     def __str__(self):
         # Ép kiểu string để tránh lỗi "hệ nhị phân" khi hiển thị số
         return str(self.ma_thay_doi)
+# =====================
+# THAY ĐỔI HỘ KHẨU
+# =====================
+class HouseholdChange(models.Model):
+    ma_thay_doi_ho_khau = models.AutoField(primary_key=True) # SERIAL PRIMARY KEY
+    ma_ho_khau = models.CharField(max_length=10)             # VARCHAR(10)
+    ngay_thay_doi = models.DateField(auto_now_add=True)      # DATE
+    truong_thay_doi = models.CharField(max_length=255)       # VARCHAR(255)
+    noi_dung_thay_doi = models.TextField()                   # TEXT
 
+    class Meta:
+        db_table = "new_thay_doi_ho_khau" # Tên bảng thực tế trong DB của bạn
+        managed = False                   # Vì bạn đã có bảng sẵn trong DB
+
+    def __str__(self):
+        return f"{self.ma_ho_khau} - {self.truong_thay_doi}"
 
 

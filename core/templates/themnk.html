@@ -49,11 +49,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Họ và tên</label>
-                            <input type="text" id="personFullName" name="ho_ten" class="form-input" placeholder="Nhập họ và tên đầy đủ" required>
+                            <input type="text" id="personFullName" name="ho_ten" class="form-input" placeholder="Nguyễn Văn An..." required>
                         </div>
                         <div class="form-group">
                             <label>Bí danh</label>
-                            <input type="text" id="personAlias" name="bi_danh" class="form-input" placeholder="Tên gọi khác (không bắt buộc)">
+                            <input type="text" id="personAlias" name="bi_danh" class="form-input" placeholder="An, Anh An...">
                         </div>
                     </div>
                     
@@ -76,34 +76,60 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Nơi sinh</label>
-                            <input type="text" name="noi_sinh" class="form-input" placeholder="Bệnh viện, Phường/Xã...">
+                            <input type="text" name="noi_sinh" class="form-input" placeholder="Bệnh viện...">
                         </div>
                         <div class="form-group">
                             <label>Quê quán</label>
-                            <input type="text" name="nguyen_quan" class="form-input" placeholder="Tỉnh/TP...">
+                            <input type="text" name="nguyen_quan" class="form-input" placeholder="Hà Đông, Hà Nội...">
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label class="required">Quan hệ với chủ hộ</label>
-                            <input type="text" id="personRelation" name="quan_he_chu_ho" class="form-input" placeholder="Vợ/Chồng, Con..." required>
+                            <input type="text" id="personRelation" name="quan_he_chu_ho" class="form-input" placeholder="Vợ, Chồng, Con trai..." required>
                         </div>
                         <div class="form-group">
-                            <label>Số CMND/CCCD</label>
-                            <input type="text" id="personIdNumber" name="cccd" class="form-input" placeholder="Nhập số căn cước">
+                            <label>Dân tộc</label>
+                            <select id="ethnicity" class="form-input">
+                                <option value="Kinh" selected>Kinh</option>
+                                <option value="Tày">Tày</option>
+                                <option value="Thái">Thái</option>
+                                <option value="Hoa">Hoa</option>
+                                <option value="Khmer">Khmer</option>
+                                <option value="Mường">Mường</option>
+                                <option value="Nùng">Nùng</option>
+                                <option value="Hmông">Hmông</option>
+                                <option value="Dao">Dao</option>
+                                <option value="Gia Rai">Gia Rai</option>
+                                <option value="Ê Đê">Ê Đê</option>
+                                <option value="Ba Na">Ba Na</option>
+                                <option value="Sán Chay">Sán Chay</option>
+                                <option value="Chăm">Chăm</option>
+                                <option value="Sán Dìu">Sán Dìu</option>
+                                <option value="Hrê">Hrê</option>
+                                <option value="Ra Glai">Ra Glai</option>
+                                <option value="Mnông">Mnông</option>
+                                <option value="Thổ">Thổ</option>
+                                <option value="Xtiêng">Xtiêng</option>
+                                <option value="Khác">Khác</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label>Số CMND/CCCD</label>
+                            <input type="text" id="personIdNumber" name="cccd" class="form-input" placeholder="001234567890..." pattern="[0-9]{9,12}" maxlength="12">
+                        </div>
+                        <div class="form-group">
                             <label>Ngày cấp CMND/CCCD</label>
                             <input type="date" name="ngay_cap_cccd" class="form-input">
                         </div>
-                        <div class="form-group">
-                            <label>Nơi cấp CMND/CCCD</label>
-                            <input type="text" name="noi_cap_cccd" class="form-input" placeholder="Nơi cấp">
-                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nơi cấp CMND/CCCD</label>
+                        <input type="text" name="noi_cap_cccd" class="form-input" placeholder="Nơi cấp">
                     </div>
                 </div>
 

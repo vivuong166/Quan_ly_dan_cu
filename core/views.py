@@ -5,7 +5,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db.models import Q, Sum
-from django.views.decorators.csrf import csrf_exempt
 from datetime import date
 from django.http import JsonResponse
 import json
@@ -15,9 +14,10 @@ from django.views import View
 from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Exists
 from django.http import HttpResponse
-
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.timezone import now
 
 
 from .models import (
@@ -28,7 +28,10 @@ from .models import (
     TemporaryAbsence,
     ContributionCampaign,
     Contribution,
-    UserRole, HouseholdDetail,Person_Change
+    UserRole, 
+    HouseholdDetail,
+    Person_Change,
+    PersonCurrent
 )
 
 # ==================================================
@@ -40,7 +43,6 @@ from .models import (
 # AUTH (KHÔNG ĐỔI)
 # ==================================================
 
-@csrf_exempt   # ⚠️ nên bỏ khi đã có csrf_token
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -88,6 +90,7 @@ def logout_view(request):
 # QUẢN LÝ HỘ KHẨU – NHÂN KHẨU
 # ==================================================
 # không search trả mã hộ khẩu
+@login_required
 def qlnk(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -97,7 +100,13 @@ def qlnk(request):
         ma_ho_khau=OuterRef('ma_ho_khau'),
         quan_he_chu_ho__icontains='Chủ hộ'
     ).values('ho_ten')[:1]
-    households = Household.objects.annotate(ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau", "ho_ten", "so_nha", "duong_pho", "phuong", "quan")
+    households = Household.objects.annotate(
+        ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau"
+                                                 , "ho_ten"
+                                                 , "so_nha"
+                                                 , "duong_pho"
+                                                 , "phuong"
+                                                 , "quan")
 
     data = []
     for p in Person.objects.all():
@@ -127,7 +136,7 @@ def qlnk(request):
     })
 
 # ================= HỘ KHẨU =================
-
+@login_required
 def sohokhau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -148,7 +157,7 @@ def empty_to_none(value):
         return None
     return value
 
-@csrf_exempt
+@login_required
 def taohokhau(request, household_id=None):
     # Kiểm tra quyền (giữ nguyên logic của bạn)
     role = getattr(request.user.role, 'role', None)
@@ -204,6 +213,7 @@ def taohokhau(request, household_id=None):
         "today": date.today().isoformat()
     })
 
+@login_required
 def quan_ly_ho_khau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -228,29 +238,77 @@ def quan_ly_ho_khau(request):
         hk.ten_chu_ho = chu_ho_dict.get(hk.ma_ho_khau, "Chưa xác định")
 
     return render(request, 'sohokhau.html', {'households': households})
-@csrf_exempt
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db import transaction
+from .models import Household, Person
+
+from datetime import date
+from .models import HouseholdChange
+@login_required
 def suahk(request, household_id):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+    if request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    household = get_object_or_404(Household, ma_ho_khau=household_id) #lấy ra hộ khẩu có mã hộ khẩu
-    person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
-    loai_thay_doi=request.POST.get("edit_type")#chọn loại thay đổi
-    if(loai_thay_doi=="address"):
-        if request.method == "POST":
-            household.so_nha = request.POST.get("so_nha")
-            household.duong_pho = request.POST.get("duong_pho")
-            household.save()
-    else:
-        if request.method == "POST":
-            #chỉnh sửa thông tin nhân khẩu
-            messages.success(request, "Cập nhật hộ khẩu thành công")
-            return redirect("sohokhau")
 
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    members = Person.objects.filter(ma_ho_khau=household_id)
 
+    if request.method == "POST":
+        loai_thay_doi = request.POST.get("edit_type")
 
-    return render(request, "form_sua_hk.html", {"household": household})
+        try:
+            with transaction.atomic():
+                if loai_thay_doi == "address":
+                    old_addr = f"{household.so_nha}, {household.duong_pho}"
+                    household.so_nha = request.POST.get("house_number")
+                    household.duong_pho = request.POST.get("street_name")
+                    household.save()
 
+                    # Ghi lịch sử thay đổi hộ khẩu
+                    new_addr = f"{household.so_nha}, {household.duong_pho}"
+                    HouseholdChange.objects.create(
+                        ma_ho_khau=household_id,
+                        truong_thay_doi="Địa chỉ",
+                        noi_dung_thay_doi=f"Thay đổi từ '{old_addr}' sang '{new_addr}'"
+                    )
+                    messages.success(request, "Cập nhật địa chỉ thành công")
+
+                elif loai_thay_doi == "head":
+                    new_head_id = request.POST.get("new_head")
+                    new_head_person = get_object_or_404(Person, ma_nhan_khau=new_head_id)
+                    
+                    # Ghi lịch sử thay đổi chủ hộ
+                    HouseholdChange.objects.create(
+                        ma_ho_khau=household_id,
+                        truong_thay_doi="Chủ hộ",
+                        noi_dung_thay_doi=f"Chủ hộ mới: {new_head_person.ho_ten}"
+                    )
+
+                    # Cập nhật quan hệ cho tất cả thành viên
+                    for member in members:
+                        if str(member.ma_nhan_khau) == str(new_head_id):
+                            member.quan_he_chu_ho = "Chủ hộ"
+                        else:
+                            new_rel = request.POST.get(f"relation_{member.ma_nhan_khau}")
+                            if new_rel:
+                                member.quan_he_chu_ho = new_rel
+                        member.save()
+                    
+                    messages.success(request, "Thay đổi chủ hộ thành công")
+
+                return redirect("sohokhau")
+        except Exception as e:
+            messages.error(request, f"Lỗi: {str(e)}")
+
+    return render(request, "form_sua_hk.html", {
+        "household": household,
+        "members": members
+    })
+
+@login_required
 def chitiet_hk(request, household_id):
     # 1. Kiểm tra quyền
     if not hasattr(request.user, 'role') or request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
@@ -277,8 +335,7 @@ def chitiet_hk(request, household_id):
         "ma_ho_khau": household_id
     })
 
-
-
+@login_required
 def tachhk(request, household_id):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -292,7 +349,7 @@ def tachhk(request, household_id):
 
 
 # ================= NHÂN KHẨU =================
-
+@login_required
 def nhankhau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -329,6 +386,7 @@ def nhankhau(request):
 
 #     return render(request, "themnk.html")
 
+@login_required
 def themnk(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -391,6 +449,7 @@ def themnk(request):
         "today": date.today().isoformat()
     })
 
+@login_required
 def nhankhau(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
@@ -402,24 +461,8 @@ def nhankhau(request):
     return render(request, "nhankhau.html", {
         "nhankhau_list": nhankhau_data
     })
-from django.db import IntegrityError
-from django.db.models import Q # Thêm Q để tìm kiếm điều kiện phức tạp
 
-from django.db import IntegrityError
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import ValidationError
-from .models import Person, Household, Person_Change
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from .models import Person, HouseholdDetail, Person_Change
-from datetime import datetime
-
+@login_required
 def suank(request, person_id):
     # 1. Kiểm tra quyền truy cập
     if request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
@@ -465,6 +508,7 @@ def suank(request, person_id):
                 
                 ten_loai = "Chuyển đi"
                 ghi_chu_log = request.POST.get("transfer_note") or "Thay đổi nơi cư trú"
+                ngay_thay_doi = request.POST.get("ngay_chuyen_di")
 
             elif move_type == "past":
                 person.trang_thai = "Đã qua đời"
@@ -509,30 +553,70 @@ def suank(request, person_id):
 # ==================================================
 # TẠM TRÚ – TẠM VẮNG
 # ==================================================
-
+@login_required
 def qltv_tt(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
         return redirect("home")
-    tamtru_list = list(TemporaryResidence.objects.all())
-    tamvang_list = list(TemporaryAbsence.objects.all())
+    tamtru_list = TemporaryResidence.objects.all().values("ho_ten", "cccd", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
+
+    # Format date fields to strings so json.dumps won't fail
+    tamtru_data = []
+    for tt in tamtru_list:
+        tt_ngay_bat_dau = tt.get("ngay_bat_dau")
+        tt_ngay_ket_thuc = tt.get("ngay_ket_thuc")
+        tt_trang_thai_hoan_thanh = tt.get("trang_thai_hoan_thanh")
+        
+        tt["trang_thai_hoan_thanh"] = "Đã kết thúc" if tt_trang_thai_hoan_thanh is True else "Chưa kết thúc"
+        tt["ngay_bat_dau"] = tt_ngay_bat_dau.strftime("%d/%m/%Y") if tt_ngay_bat_dau else None
+        tt["ngay_ket_thuc"] = tt_ngay_ket_thuc.strftime("%d/%m/%Y") if tt_ngay_ket_thuc else None
+
+        tamtru_data.append(tt)
+
+    nhan_khau_subquery = Person.objects.filter(
+        ma_nhan_khau=OuterRef("ma_nhan_khau")
+    )
+
+    tamvang_list = TemporaryAbsence.objects.annotate(
+        ho_ten=Subquery(nhan_khau_subquery.values("ho_ten")[:1]),
+        cccd=Subquery(nhan_khau_subquery.values("cccd")[:1]),
+    ).values("ho_ten", "cccd", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
+
+    tamvang_data = []
+    for tv in tamvang_list:
+        tv_ngay_bat_dau = tv.get("ngay_bat_dau")
+        tv_ngay_ket_thuc = tv.get("ngay_ket_thuc")
+        tv_trang_thai_hoan_thanh = tv.get("trang_thai_hoan_thanh")
+
+        tv["trang_thai_hoan_thanh"] = "Đã kết thúc" if tv_trang_thai_hoan_thanh is True else "Chưa kết thúc"
+        tv["ngay_bat_dau"] = tv_ngay_bat_dau.strftime("%d/%m/%Y") if tv_ngay_bat_dau else None
+        tv["ngay_ket_thuc"] = tv_ngay_ket_thuc.strftime("%d/%m/%Y") if tv_ngay_ket_thuc else None
+        tamvang_data.append(tv)
+
     context = {
-        "tamtru_list": tamtru_list,
-        "tamvang_list": tamvang_list,
+        "tamtru_json": json.dumps(tamtru_data, ensure_ascii=False),
+        "tamvang_json": json.dumps(tamvang_data, ensure_ascii=False),
     }
 
     return render(request, "qltv_tt.html", context)
 
-class TamTru(View):
+class TamTru(LoginRequiredMixin, View):
     def check_permission(self, request):
         user_role = request.session.get("user_role")
         if user_role not in ["TO_TRUONG", "TO_PHO"]:
             messages.error(request, "Bạn không có quyền truy cập")
             return False
         return True
-        
-    
+          
     def get(self, request):
+        if not self.check_permission(request):
+            return redirect("home")
+        
+        TemporaryResidence.objects.filter(
+            trang_thai_hoan_thanh=False,
+            ngay_ket_thuc__lt=timezone.now().date()
+        ).update(trang_thai_hoan_thanh=True)
+        
         subquery = Person.objects.filter(
             ma_ho_khau=OuterRef("ma_ho_khau"),
             quan_he_chu_ho="Chủ hộ"
@@ -560,15 +644,14 @@ class TamTru(View):
                 })
             return JsonResponse(data, safe=False)
 
-        if not self.check_permission(request):
-            return redirect("home")
+        
 
         context = {
             "hokhau_list": list(hokhau_list),
             "records": tamtru_list,
         }
         return render(request, "tamtru.html", context)       
-    
+ 
     def post(self, request):
         if not self.check_permission(request):
             return redirect("home")
@@ -576,19 +659,18 @@ class TamTru(View):
         tamtru_data = {
             "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
             "ho_ten": request.POST.get("ten"),
-            "ngay_sinh": request.POST.get("ns"),
-            "nghe_nghiep": request.POST.get("ngheNghiep"),
+            "ngay_sinh": request.POST.get("ngay_sinh"),
+            "nghe_nghiep": request.POST.get("nghe_nghiep"),
             "cccd": request.POST.get("cccd"),
-            "ngay_bat_dau": timezone.now().date(),
+            "ngay_bat_dau": request.POST.get("ngay_den"),
             "ngay_ket_thuc": request.POST.get("han")
         }
 
-        
         #already registered check
         if TemporaryResidence.objects.filter(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
             ho_ten=request.POST.get("ten"),
-            ngay_sinh=request.POST.get("ns"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_ket_thuc=request.POST.get("han"),
             ).exists():  
                 
@@ -601,8 +683,8 @@ class TamTru(View):
         Person.objects.filter(cccd=request.POST.get("cccd")).update(trang_thai="Tạm trú")
         messages.success(request, "Đăng ký tạm trú thành công")
         return redirect("tamtru")
-    
-class TamVang(View):
+
+class TamVang(LoginRequiredMixin, View):
     def check_permission(self, request):
         user_role = request.session.get("user_role")
         if user_role not in ["TO_TRUONG", "TO_PHO"]:
@@ -614,17 +696,34 @@ class TamVang(View):
         if not self.check_permission(request):
             return redirect("home")
         
-        nhankhau_list = Person.objects.all().values("ma_nhan_khau", "ho_ten", "ngay_sinh", "ma_ho_khau")
+        TemporaryAbsence.objects.filter(
+            trang_thai_hoan_thanh=False,
+            ngay_ket_thuc__lt=timezone.now().date()
+        ).update(trang_thai_hoan_thanh=True)
+        
+        hoan_thanh_tam_vang_subquery=TemporaryAbsence.objects.filter(
+            ma_nhan_khau=OuterRef("ma_nhan_khau"),
+            trang_thai_hoan_thanh=True
+        )
+
+        Person.objects.annotate(
+            da_hoan_thanh_tam_vang=Exists(hoan_thanh_tam_vang_subquery)
+        ).filter(
+            da_hoan_thanh_tam_vang=True,
+            trang_thai="Tạm vắng"
+        ).update(trang_thai="Thường trú")
         
         nhan_khau_subquery = Person.objects.filter(
             ma_nhan_khau=OuterRef("ma_nhan_khau")
         )
 
+        nhankhauthuongtru_list = PersonCurrent.objects.all()
+
         tamvang_list = TemporaryAbsence.objects.annotate(
             ho_ten=Subquery(nhan_khau_subquery.values("ho_ten")[:1]),
             ngay_sinh=Subquery(nhan_khau_subquery.values("ngay_sinh")[:1]),
             ma_ho_khau=Subquery(nhan_khau_subquery.values("ma_ho_khau")[:1]),
-        ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc")
+        ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             tv_list = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
@@ -636,10 +735,11 @@ class TamVang(View):
                     "ngay_sinh": person.ngay_sinh.strftime("%d/%m/%Y") if person and person.ngay_sinh else "",
                     "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
                     "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
+                    "trang_thai": tv.trang_thai_hoan_thanh
                 })
             return JsonResponse(data, safe=False)
         context = {
-            "nhankhau_list": list(nhankhau_list),
+            "nhankhauthuongtru_list": list(nhankhauthuongtru_list),
             "records": tamvang_list,
         }
         return render(request, "tamvang.html", context)
@@ -648,32 +748,32 @@ class TamVang(View):
         if not self.check_permission(request):
             return JsonResponse({"error": "Không có quyền"}, status=403)
         
+        
+        
         TemporaryAbsence.objects.create(
             ma_nhan_khau=request.POST.get("ma_nhan_khau"),
             ngay_bat_dau=request.POST.get("ngayDi"),
             ngay_ket_thuc=request.POST.get("han"),
             ly_do=request.POST.get("lyDo"),
+            trang_thai_hoan_thanh=False
         )
 
-        # person = Person.objects.get(ma_nhan_khau=request.POST.get("ma_nhan_khau"))
-        # person.trang_thai = "Tạm vắng"
-        # person.save()
-        
+        Person.objects.filter(
+            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
+            trang_thai="Thường trú"
+        ).update(trang_thai="Tạm vắng")
+                
         return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
-
-    
-
-
 
 # ==================================================
 # BIẾN ĐỘNG NHÂN KHẨU
 # ==================================================
-@csrf_exempt
+@login_required
 def biendong(request):
     return render(request, "biendong.html")
 
 
-@csrf_exempt
+@login_required
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
 
@@ -681,11 +781,7 @@ def formdoichuho(request):
 # ==================================================
 # THU PHÍ – THỐNG KÊ
 # ==================================================
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import ContributionCampaign, Contribution, HouseholdDetail
-
+@login_required
 def thuphi(request):
     # Kiểm tra quyền
     if not hasattr(request.user, 'role') or request.user.role.role != "CAN_BO":
@@ -741,120 +837,14 @@ def thuphi(request):
         "recent_contributions": recent_contributions
     })
 
-
 @login_required
 def thongke_baocao(request):
-    today = date.today()
+    return render(request, "thongke_baocao.html")
 
-    # 1. XỬ LÝ LỌC THEO THÁNG (Nếu người dùng chọn tháng trên giao diện)
-    month_filter = request.GET.get('month')  # Định dạng 'YYYY-MM'
-    if month_filter:
-        try:
-            year_part, month_part = map(int, month_filter.split('-'))
-            target_date = date(year_part, month_part, 1)
-            # Dùng ngày cuối tháng để thống kê chính xác hơn
-            import calendar
-            last_day = calendar.monthrange(year_part, month_part)[1]
-            ref_date = date(year_part, month_part, last_day)
-        except:
-            ref_date = today
-    else:
-        ref_date = today
-
-    current_year = ref_date.year
-
-    # ======================
-    # 1. THỐNG KÊ NHÂN KHẨU
-    # ======================
-    persons = Person.objects.exclude(ngay_sinh__isnull=True)
-
-    def count_by_age(min_age=None, max_age=None):
-        qs = persons
-        if min_age is not None:
-            # Sinh trước hoặc vào năm (năm hiện tại - tuổi tối thiểu)
-            qs = qs.filter(ngay_sinh__lte=date(current_year - min_age, 12, 31))
-        if max_age is not None:
-            # Sinh sau hoặc vào năm (năm hiện tại - tuổi tối đa)
-            qs = qs.filter(ngay_sinh__gte=date(current_year - max_age, 1, 1))
-        return qs
-
-    def gender_stat(qs):
-        return {
-            "total": qs.count(),
-            "nam": qs.filter(gioi_tinh__iexact="Nam").count(),
-            "nu": qs.filter(gioi_tinh__iexact="Nữ").count(),
-        }
-
-    nhankhau_stats = [
-        ("Mầm non", gender_stat(count_by_age(0, 5))),
-        ("Cấp 1", gender_stat(count_by_age(6, 10))),
-        ("Cấp 2", gender_stat(count_by_age(11, 14))),
-        ("Cấp 3", gender_stat(count_by_age(15, 17))),
-        ("Độ tuổi lao động", gender_stat(count_by_age(18, 60))),
-        ("Nghỉ hưu", gender_stat(count_by_age(61, None))),
-    ]
-
-    tong_nk = gender_stat(persons)
-
-    # ======================
-    # 2. TẠM TRÚ / TẠM VẮNG (Dùng ref_date để lọc theo tháng đã chọn)
-    # ======================
-    tamtru_dang_o = TemporaryResidence.objects.filter(ngay_bat_dau__lte=ref_date, ngay_ket_thuc__gte=ref_date)
-    tamtru_qua_han = TemporaryResidence.objects.filter(ngay_ket_thuc__lt=ref_date, trang_thai_hoan_thanh=False)
-
-    tamvang_dang_o = TemporaryAbsence.objects.filter(ngay_bat_dau__lte=ref_date, ngay_ket_thuc__gte=ref_date)
-    tamvang_qua_han = TemporaryAbsence.objects.filter(ngay_ket_thuc__lt=ref_date, trang_thai_hoan_thanh=False)
-
-    # ======================
-    # 3. ĐÓNG GÓP & TRA CỨU AJAX
-    # ======================
-    # Nếu là yêu cầu tìm kiếm từ JS (AJAX)
-    keyword = request.GET.get('keyword')
-    if keyword:
-        results = Contribution.objects.filter(
-            Q(ma_ho_khau__icontains=keyword) |
-            Q(ma_ho_khau__chu_ho__ho_ten__icontains=keyword)  # Giả sử có relation chu_ho
-        ).values('ma_ho_khau', 'ma_dot_dong_gop__ten_dot_dong_gop', 'so_tien')
-
-        return JsonResponse(list(results), safe=False)
-
-    # Tính toán campaign bình thường cho trang chủ report
-    total_households = Household.objects.count()
-    campaigns_data = []
-    campaigns = ContributionCampaign.objects.all().order_by('-ngay_bat_dau')
-
-    for c in campaigns:
-        contributions = Contribution.objects.filter(ma_dot_dong_gop=c.ma_dot_dong_gop)
-        so_ho_da_dong = contributions.values("ma_ho_khau").distinct().count()
-        tong_tien = contributions.aggregate(total=Sum("so_tien"))["total"] or 0
-        chua_dong = max(0, total_households - so_ho_da_dong)
-        ti_le = round((so_ho_da_dong / total_households * 100), 1) if total_households else 0
-
-        campaigns_data.append({
-            "ten": c.ten_dot_dong_gop,
-            "bat_dau": c.ngay_bat_dau,
-            "ket_thuc": c.ngay_ket_thuc,
-            "da_dong": so_ho_da_dong,
-            "chua_dong": chua_dong,
-            "ti_le": ti_le,
-            "tong_tien": "{:,.0f}".format(tong_tien)  # Định dạng tiền 10,000,000
-        })
-
-    context = {
-        "nhankhau_stats": nhankhau_stats,
-        "tong_nk": tong_nk,
-        "tamtru_dang_o": tamtru_dang_o,
-        "tamtru_qua_han": tamtru_qua_han,
-        "tamvang_dang_o": tamvang_dang_o,
-        "tamvang_qua_han": tamvang_qua_han,
-        "campaigns": campaigns_data,
-        "selected_month": month_filter,
-    }
-
-    return render(request, "thongke_baocao.html", context)
 
 # ==================================================
 # QUẢN LÝ TRUY CẬP
+@login_required
 def quanly_truycap(request):
     if request.user.role.role != "TO_TRUONG":
         messages.error(request, "Bạn không có quyền tạo tài khoản")

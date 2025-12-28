@@ -16,11 +16,12 @@
         <label class="required">Chọn nhân khẩu</label>
         <select id="tv_ma_nk" name="ma_nhan_khau" required>
           <option value="">-- Chọn nhân khẩu --</option>
-          {% for nk in nhankhau_list %}
+          {% for nk in nhankhauthuongtru_list %}
           <option value="{{ nk.ma_nhan_khau }}">
             {{ nk.ho_ten }} - 
             ({{ nk.ngay_sinh|date:"d/m/Y" }}) - 
-            HK {{ nk.ma_ho_khau }}
+            Hộ khẩu: {{ nk.ma_ho_khau }} -
+            {{ nk.dia_chi }}
           </option>
           {% endfor %}
         </select>
@@ -59,7 +60,7 @@
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody id="tvList">
@@ -76,7 +77,7 @@
                                     <span class="status-badge status-active">Chưa kết thúc</span>
                                 {% endif %}
                             </td>
-                            <td>
+                            <!-- <td>
                                 {% if tamvang.trang_thai_hoan_thanh %}
                                 <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
                                     <i class="fas fa-undo"></i> Hoàn tác
@@ -87,7 +88,7 @@
                                 </button>
                                 {% endif %}
                             </td>
-                        </tr>
+                        </tr>-->
                         {% endfor %}
                     </tbody>
 
@@ -122,7 +123,6 @@
         </div>
     </section>
 </div>
-
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}" />

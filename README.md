@@ -17,7 +17,7 @@ Quick start (local, without Docker):
    python manage.py createsuperuser
 5. Run server:
    python manage.py runserver
-6. Use: http://127.0.0.1:8000 to login
+6. Use: http://127.0.0.1:8000/admin to login
 
 Notes:
 - This skeleton uses SQLite by default. To use PostgreSQL/Neon later, set DATABASE_URL and update settings.

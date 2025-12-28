@@ -23,6 +23,30 @@ function validateHouseholdCode() {
     return /^HK-\d{3}$/.test(code);
 }
 
+function validateDateNotFuture(inputId, label) {
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+
+    if (!el.value) return true; // không nhập thì bỏ qua
+
+    // Parse yyyy-mm-dd an toàn
+    const [y, m, d] = el.value.split('-').map(Number);
+    const inputDate = new Date(y, m - 1, d);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (inputDate.getTime() > today.getTime()) {
+        el.classList.add('error');
+        alert(`${label} không được sau ngày hôm nay`);
+        el.focus();
+        return false;
+    }
+
+    el.classList.remove('error');
+    return true;
+}
+
 window.showStep = function(stepNumber) {
     console.log("Chuyển sang bước:", stepNumber);
     document.querySelectorAll('.form-step').forEach(step => step.classList.remove('active'));
@@ -64,6 +88,15 @@ window.nextStep = function() {
         alert('Mã hộ khẩu phải đúng định dạng HK-XXX (VD: HK-001)');
         document.getElementById('householdCode').focus();
         return;
+    }
+    if (currentStep === 2) {
+        if (
+            !validateDateNotFuture('headDob', 'Ngày sinh') ||
+            !validateDateNotFuture('headIdIssueDate', 'Ngày cấp CCCD') ||
+            !validateDateNotFuture('headResidenceRegDate', 'Ngày đăng ký thường trú')
+        ) {
+            return;
+        }
     }
     if (currentStep < totalSteps) {
         window.showStep(currentStep + 1);

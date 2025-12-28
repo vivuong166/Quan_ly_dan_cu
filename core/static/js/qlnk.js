@@ -75,9 +75,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredHouseholds = households.filter(
       (household) =>
-        household.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.head_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.address.toLowerCase().includes(searchTerm.toLowerCase())
+        household.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.so_nha.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.duong_pho.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.phuong.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.quan.toLowerCase().includes(searchTerm.toLowerCase())        
     );
 
     displayHouseholdResults(filteredHouseholds);
@@ -91,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredPersons = persons.filter(
       (person) =>
-        person.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.id_number.includes(searchTerm) ||
-        person.household_code.toLowerCase().includes(searchTerm.toLowerCase())
+        person.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.cccd && person.cccd.includes(searchTerm)
     );
 
     displayPersonResults(filteredPersons);
@@ -112,8 +115,8 @@ document.addEventListener("DOMContentLoaded", function () {
         resultItem.className = "res";
         resultItem.href = `hokhau/chitiet/${household.ma_ho_khau}/`;
         resultItem.innerHTML = `
-                    <div class="res-main">${household.code} — ${household.head_name}</div>
-                    <div class="res-sub">${household.address}</div>
+                    <div class="res-main">${household.ma_ho_khau} — ${household.ho_ten}</div>
+                    <div class="res-sub">${household.so_nha}, ${household.duong_pho}, ${household.phuong}, ${household.quan}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });
@@ -138,8 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
           showPersonDetail(person);
         };
         resultItem.innerHTML = `
-                    <div class="res-main">${person.full_name}</div>
-                    <div class="res-sub">CCCD: ${person.id_number} | Hộ khẩu: ${person.household_code}</div>
+                    <div class="res-main">${person.ho_ten}</div>
+                    <div class="res-sub">CCCD: ${person.cccd} | Hộ khẩu: ${person.ma_ho_khau}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });
@@ -184,9 +187,15 @@ function showPersonDetail(person) {
 
   viewContent.innerHTML = `
             <div class="person-details" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
-                <div style="grid-column:span 2;border-bottom:2px solid #2563eb;padding-bottom:8px;margin-bottom:10px;">
-                    <h4 style="margin:0;color:#1e3a8a;font-size:1.2rem;">${person.ho_ten}</h4>
-                    <p style="margin:5px 0 0;font-size:0.8rem;color:#666;">Mã hộ khẩu: ${person.ma_ho_khau}</p>
+                <div style="grid-column:span 2;border-bottom:2px solid #2563eb;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h4 style="margin:0;color:#1e3a8a;font-size:1.2rem;">${person.ho_ten}</h4>
+                        <p style="margin:5px 0 0;font-size:0.8rem;color:#666;">Mã hộ khẩu: ${person.ma_ho_khau}</p>
+                    </div>
+                    <a class="edit-button" href="nhankhau/suank/${person.ma_nhan_khau}/">
+                        <i class="fas fa-edit"></i>
+                        Sửa
+                    </a>
                 </div>
                 <div><strong>Ngày sinh:</strong> ${person.ngay_sinh}</div>
                 <div><strong>Giới tính:</strong> ${person.gioi_tinh}</div>
@@ -208,7 +217,7 @@ function showPersonDetail(person) {
 }
 
 // Close person detail modal
-function closePersonDetailModal() {
+function closeViewModal() {
   const viewModal = document.getElementById('viewPersonModal');
   viewModal.style.display = "none";
 }
