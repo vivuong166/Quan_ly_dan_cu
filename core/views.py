@@ -569,10 +569,10 @@ class TamTru(LoginRequiredMixin, View):
         tamtru_data = {
             "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
             "ho_ten": request.POST.get("ten"),
-            "ngay_sinh": request.POST.get("ns"),
-            "nghe_nghiep": request.POST.get("ngheNghiep"),
+            "ngay_sinh": request.POST.get("ngay_sinh"),
+            "nghe_nghiep": request.POST.get("nghe_nghiep"),
             "cccd": request.POST.get("cccd"),
-            "ngay_bat_dau": timezone.now().date(),
+            "ngay_bat_dau": request.POST.get("ngay_den"),
             "ngay_ket_thuc": request.POST.get("han")
         }
 
@@ -580,7 +580,7 @@ class TamTru(LoginRequiredMixin, View):
         if TemporaryResidence.objects.filter(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
             ho_ten=request.POST.get("ten"),
-            ngay_sinh=request.POST.get("ns"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_ket_thuc=request.POST.get("han"),
             ).exists():  
                 

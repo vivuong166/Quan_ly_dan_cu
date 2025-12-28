@@ -63,6 +63,10 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
 
+            if(new Date(ngayDi) > new Date(han)){
+                alert("Ngay bat dau va ngay di khong hop le")
+            }
+
             const dataForm = new FormData;
             // dataForm.append("ten", ten);
             // dataForm.append("ns", ns);
@@ -73,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function(){
             dataForm.append("lyDo", lyDo);
 
             try{
-                const response = await fetch('/tamvang/', {
+                const response = await fetch('/qltv_tt/tamvang/', {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),
@@ -103,20 +107,21 @@ document.addEventListener('DOMContentLoaded', function(){
         addTtBtn.addEventListener('click', async function(){
             const ma_ho_khau = document.getElementById('tt_ma_hk').value;
             const ten = document.getElementById('tt_ho_ten').value.trim();
-            const ns = document.getElementById('tt_ngay_sinh').value;
+            const ngay_sinh = document.getElementById('tt_ngay_sinh').value;
             const cmnd = document.getElementById('tt_cmnd').value.trim();
-            const ngheNghiep = document.getElementById('tt_nghe_nghiep').value.trim();
+            const nghe_nghiep = document.getElementById('tt_nghe_nghiep').value.trim();
+            const ngay_den = document.getElementById('tt_bat_dau').value;
             const han = document.getElementById('tt_han').value;
             //const html = `${ten} — ${ns} ${cmnd? '— CCCD: ' + cmnd : ''} — Nghề nghiệp: ${ngheNghiep} — ${ngayDen} → ${han}`;
             // appendList(document.getElementById('ttList'), html);
             // document.getElementById('formTt').reset();
 
-            if(!ma_ho_khau || !ten || !ns || !cmnd || !ngheNghiep || !han){
+            if(!ma_ho_khau || !ten || !ngay_sinh || !cmnd || !nghe_nghiep || !ngay_den || !han){
                 alert('Vui lòng điền đầy đủ thông tin tạm trú.');
                 return;
             }
 
-            if(new Date(han) <= new Date() - 1){
+            if(new Date(ngay_den) > new Date(han)){
                 alert('Ngày hết hạn không hợp lệ.');
                 return;
             }
@@ -124,15 +129,14 @@ document.addEventListener('DOMContentLoaded', function(){
             const dataForm = new FormData;
             dataForm.append("ma_ho_khau", ma_ho_khau);
             dataForm.append("ten", ten);
-            dataForm.append("ns", ns);
-            dataForm.append("cmnd", cmnd);
-            dataForm.append("ngheNghiep", ngheNghiep);
-
+            dataForm.append("ngay_sinh", ngay_sinh);
+            dataForm.append("cccd", cmnd);
+            dataForm.append("nghe_nghiep", nghe_nghiep);
+            dataForm.append("ngay_den", ngay_den);
             dataForm.append("han", han);
 
-
             try{
-                const response = await fetch('/tamtru/', {
+                const response = await fetch('/qltv_tt/tamtru/', {
                     method: 'POST',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken'),
@@ -331,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function(){
 if (reloadBtn) {
     reloadBtn.addEventListener('click', async function () {
         try {
-            const response = await fetch('/tamtru/', {
+            const response = await fetch('qltv_tt/tamtru/', {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
@@ -379,7 +383,7 @@ document.addEventListener('DOMContentLoaded', function(){
     if (reloadBtn) {
         reloadBtn.addEventListener('click', async function () {
             try {
-                const response = await fetch('/tamvang/', {
+                const response = await fetch('/qltv_tt/tamvang/', {
                     method: 'GET',
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest'
