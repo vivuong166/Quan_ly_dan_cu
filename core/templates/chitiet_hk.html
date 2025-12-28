@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Chi tiết hộ khẩu{% endblock %}
+{% block title %}Chi tiết hộ khẩu {{ ma_ho_khau }}{% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chitiet_hk.css' %}">
@@ -18,26 +18,24 @@
         </div>
     </div>
 
-    <!-- Phần 1: Thông tin cơ bản -->
     <section class="info-section">
         <h2>Thông tin cơ bản</h2>
         <div class="info-grid">
             <div class="info-item">
                 <span class="info-label">Mã hộ khẩu:</span>
-                <span class="info-value" id="householdCode">-</span>
+                <span class="info-value">{{ household.ma_ho_khau }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Địa chỉ:</span>
-                <span class="info-value" id="householdAddress">-</span>
+                <span class="info-value">{{ household.so_nha }}, {{ household.duong_pho }}, {{ household.phuong }}, {{ household.quan }}</span>
             </div>
             <div class="info-item">
                 <span class="info-label">Họ và tên chủ hộ:</span>
-                <span class="info-value" id="householdHead">-</span>
+                <span class="info-value">{{ head_name }}</span>
             </div>
         </div>
     </section>
 
-    <!-- Phần 2: Danh sách nhân khẩu -->
     <section class="table-section">
         <h2>Danh sách nhân khẩu</h2>
         <div class="table-container">
@@ -46,141 +44,121 @@
                     <tr>
                         <th>STT</th>
                         <th>Họ và tên</th>
-                        <th>Ngày tháng năm sinh</th>
-                        <th>Quan hệ với chủ hộ</th>
+                        <th>Ngày sinh</th>
+                        <th>Quan hệ</th>
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
-                <tbody id="membersTableBody">
-                    <tr>
-                        <td colspan="5" class="no-data">Không có dữ liệu</td>
-                    </tr>
-                </tbody>
+                <tbody id="membersTableBody"></tbody>
             </table>
         </div>
     </section>
 
-    <!-- Phần 3: Danh sách thay đổi nhân khẩu -->
     <section class="table-section">
         <h2>Danh sách thay đổi nhân khẩu</h2>
         <div class="table-container">
             <table id="personChangesTable">
                 <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Ngày thay đổi</th>
-                        <th>Họ và tên</th>
-                        <th>Ngày tháng năm sinh</th>
-                        <th>Dạng thay đổi</th>
-                    </tr>
+                    <tr><th>STT</th><th>Ngày thay đổi</th><th>Mã nhân khẩu</th><th>Dạng thay đổi</th><th>Ghi chú</th></tr>
                 </thead>
-                <tbody id="personChangesTableBody">
-                    <tr>
-                        <td colspan="5" class="no-data">Không có dữ liệu</td>
-                    </tr>
-                </tbody>
+                <tbody id="personChangesTableBody"></tbody>
             </table>
         </div>
     </section>
 
-    <!-- Phần 4: Danh sách thay đổi hộ khẩu -->
     <section class="table-section">
         <h2>Danh sách thay đổi hộ khẩu</h2>
         <div class="table-container">
             <table id="householdChangesTable">
                 <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Ngày thay đổi</th>
-                        <th>Trường thay đổi</th>
-                        <th>Nội dung thay đổi</th>
-                    </tr>
+                    <tr><th>STT</th><th>Ngày thay đổi</th><th>Trường thay đổi</th><th>Nội dung</th></tr>
                 </thead>
-                <tbody id="householdChangesTableBody">
-                    <tr>
-                        <td colspan="4" class="no-data">Không có dữ liệu</td>
-                    </tr>
-                </tbody>
+                <tbody id="householdChangesTableBody"></tbody>
             </table>
         </div>
     </section>
 
-    <!-- Phần 5: Danh sách tạm trú -->
     <section class="table-section">
         <h2>Danh sách đang tạm trú</h2>
         <div class="table-container">
             <table id="temporaryResidentsTable">
                 <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Họ và tên</th>
-                        <th>Ngày tháng năm sinh</th>
-                        <th>Thời gian bắt đầu</th>
-                        <th>Thời gian kết thúc</th>
-                    </tr>
+                    <tr><th>STT</th><th>Họ và tên</th><th>CCCD</th><th>Bắt đầu</th><th>Kết thúc</th></tr>
                 </thead>
-                <tbody id="temporaryResidentsTableBody">
-                    <tr>
-                        <td colspan="5" class="no-data">Không có dữ liệu</td>
-                    </tr>
-                </tbody>
+                <tbody id="temporaryResidentsTableBody"></tbody>
             </table>
         </div>
     </section>
 </div>
 
-<!-- Popup thông tin nhân khẩu -->
 <div id="personInfoPopup" class="popup-overlay">
     <div class="popup-content">
         <div class="popup-header">
             <h3>Thông tin nhân khẩu</h3>
             <button class="popup-close" onclick="closePersonPopup()">&times;</button>
         </div>
-        <div class="popup-body">
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Họ và tên:</span>
-                    <span class="info-value" id="popupName">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Ngày sinh:</span>
-                    <span class="info-value" id="popupBirthDate">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Giới tính:</span>
-                    <span class="info-value" id="popupGender">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">CCCD/CMND:</span>
-                    <span class="info-value" id="popupIdCard">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Số điện thoại:</span>
-                    <span class="info-value" id="popupPhone">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Quan hệ với chủ hộ:</span>
-                    <span class="info-value" id="popupRelationship">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Nghề nghiệp:</span>
-                    <span class="info-value" id="popupOccupation">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Nơi làm việc:</span>
-                    <span class="info-value" id="popupWorkplace">-</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">Trạng thái:</span>
-                    <span class="info-value" id="popupStatus">-</span>
-                </div>
+        <div class="popup-body" id="popupBodyContent">
             </div>
-        </div>
     </div>
 </div>
 
-<!-- <script>
-    const HOUSEHOLD_ID = {{ household_id|default:0 }};
-</script> -->
+{{ persons_json|safe }} 
+<script id="members-data" type="application/json">
+    [
+        {% for p in persons %}
+        {
+            "id": {{ p.ma_nhan_khau }},
+            "name": "{{ p.ho_ten }}",
+            "birthDate": "{{ p.ngay_sinh|date:'Y-m-d' }}",
+            "relationship": "{{ p.quan_he_chu_ho }}",
+            "status": "{{ p.trang_thai }}",
+            "gender": "{{ p.gioi_tinh }}",
+            "idCard": "{{ p.cccd|default:'' }}",
+            "phone": "{{ p.so_dien_thoai|default:'-' }}",
+            "occupation": "{{ p.nghe_nghiep|default:'-' }}",
+            "workplace": "{{ p.noi_lam_viec|default:'-' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
+<script id="person-changes-data" type="application/json">
+    [
+        {% for c in person_changes %}
+        {
+            "date": "{{ c.ngay_thay_doi|date:'Y-m-d' }}",
+            "id": "{{ c.ma_nhan_khau }}",
+            "type": "{{ c.loai_thay_doi }}",
+            "note": "{{ c.ghi_chu }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
+<script id="household-changes-data" type="application/json">
+    [
+        {% for c in household_changes %}
+        {
+            "date": "{{ c.ngay_thay_doi|date:'Y-m-d' }}",
+            "field": "{{ c.truong_thay_doi }}",
+            "content": "{{ c.noi_dung_thay_doi }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
+<script id="temp-residents-data" type="application/json">
+    [
+        {% for r in temp_residents %}
+        {
+            "name": "{{ r.ho_ten }}",
+            "cccd": "{{ r.cccd }}",
+            "start": "{{ r.ngay_bat_dau|date:'Y-m-d' }}",
+            "end": "{{ r.ngay_ket_thuc|date:'Y-m-d' }}"
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ]
+</script>
+
 <script src="{% static 'js/chitiet_hk.js' %}"></script>
 {% endblock %}

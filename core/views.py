@@ -308,6 +308,11 @@ def suahk(request, household_id):
         "members": members
     })
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from .models import Household, Person, TemporaryResidence, Person_Change, HouseholdChange
+
 @login_required
 def chitiet_hk(request, household_id):
     # 1. Kiểm tra quyền
@@ -319,21 +324,30 @@ def chitiet_hk(request, household_id):
     household = get_object_or_404(Household, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
-    # 3. Lấy dữ liệu tạm trú cho hộ này
-    # Lưu ý: Model của bạn dùng ma_ho_khau_tam_tru
+    # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
+    person_ids = persons.values_list('ma_nhan_khau', flat=True)
+    person_changes = Person_Change.objects.filter(ma_nhan_khau__in=person_ids).order_by('-ngay_thay_doi')
+    
+    # 4. Lấy lịch sử thay đổi hộ khẩu
+    household_changes = HouseholdChange.objects.filter(ma_ho_khau=household_id).order_by('-ngay_thay_doi')
+    
+    # 5. Lấy dữ liệu tạm trú
     temp_residents = TemporaryResidence.objects.filter(ma_ho_khau_tam_tru=household_id)
     
-    # 4. Xác định tên chủ hộ cho phần Header
+    # 6. Xác định tên chủ hộ
     head_of_household = persons.filter(quan_he_chu_ho="Chủ hộ").first()
     head_name = head_of_household.ho_ten if head_of_household else "Chưa xác định"
 
-    return render(request, "chitiet_hk.html", {
+    context = {
         "household": household,
         "persons": persons,
+        "person_changes": person_changes,
+        "household_changes": household_changes,
         "temp_residents": temp_residents,
         "head_name": head_name,
         "ma_ho_khau": household_id
-    })
+    }
+    return render(request, "chitiet_hk.html", context)
 
 @login_required
 def tachhk(request, household_id):
