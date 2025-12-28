@@ -975,7 +975,122 @@ def thongke_baocao(request):
 
     return render(request, "thongke_baocao.html", context)
 
+    # --- 1. THỐNG KÊ NHÂN KHẨU THEO ĐỘ TUỔI ---
+    def get_stats(qs):
+        return {
+            'total': qs.count(),
+            'nam': qs.filter(gioi_tinh__iexact='Nam').count(),
+            'nu': qs.filter(gioi_tinh__iexact='Nữ').count()
+        }
 
+    stats_nk = [
+        {'label': 'Mầm non (0-5 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__gt=today.year-6))},
+        {'label': 'Cấp 1 (6-10 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-6, ngay_sinh__year__gt=today.year-11))},
+        {'label': 'Cấp 2 (11-14 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-11, ngay_sinh__year__gt=today.year-15))},
+        {'label': 'Cấp 3 (15-17 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-15, ngay_sinh__year__gt=today.year-18))},
+        {'label': 'Lao động (18-60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-18, ngay_sinh__year__gt=today.year-60))},
+        {'label': 'Nghỉ hưu (>60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-60))},
+    ]
+
+    # LOGIC TÍNH TỔNG CỘNG CHO DÒNG CUỐI BẢNG NHÂN KHẨU
+    tong_tat_ca = sum(item['data']['total'] for item in stats_nk)
+    tong_nam = sum(item['data']['nam'] for item in stats_nk)
+    tong_nu = sum(item['data']['nu'] for item in stats_nk)
+
+    # --- 2. TẠM TRÚ ---
+    tamtru_list = TemporaryResidence.objects.all().order_by('-ngay_bat_dau')
+
+    # --- 3. TẠM VẮNG ---
+    tamvang_qs = TemporaryAbsence.objects.filter(trang_thai_hoan_thanh=False)
+    list_dang_vang = []
+    list_qua_han = []
+
+    for tv in tamvang_qs:
+        person = Person.objects.filter(ma_nhan_khau=tv.ma_nhan_khau).first()
+        item = {
+            'ma_ho': person.ma_ho_khau if person else "N/A",
+            'ho_ten': person.ho_ten if person else "Ẩn danh",
+            'tu_ngay': tv.ngay_bat_dau,
+            'den_ngay': tv.ngay_ket_thuc,
+            'ly_do': tv.ly_do
+        }
+        if tv.ngay_ket_thuc < today:
+            list_qua_han.append(item)
+        else:
+            list_dang_vang.append(item)
+
+    # --- 4. ĐÓNG GÓP (TỔNG QUÁT) ---
+    campaigns = ContributionCampaign.objects.all()
+    campaign_stats = []
+    for camp in campaigns:
+        contributions = Contribution.objects.filter(ma_dot_dong_gop=camp.ma_dot_dong_gop)
+        da_nop = contributions.count()
+        tong_tien = contributions.aggregate(Sum('so_tien'))['so_tien__sum'] or 0
+        ty_le = round((da_nop / total_hokhau * 100), 1) if total_hokhau > 0 else 0
+        
+        campaign_stats.append({
+            'ten': camp.ten_dot_dong_gop,
+            'bat_dau': camp.ngay_bat_dau,
+            'ket_thuc': camp.ngay_ket_thuc,
+            'da_nop': da_nop,
+            'chua_nop': max(0, total_hokhau - da_nop),
+            'ty_le': ty_le,
+            'tong_tien': tong_tien
+        })
+
+    context = {
+        'stats_nk': stats_nk,
+        'tong_tat_ca': tong_tat_ca,
+        'tong_nam': tong_nam,
+        'tong_nu': tong_nu,
+        'tamtru_list': tamtru_list,
+        'list_dang_vang': list_dang_vang,
+        'list_qua_han': list_qua_han,
+        'campaigns': campaigns,
+        'campaign_stats': campaign_stats,
+        'today': today,
+    }
+    return render(request, "thongke_baocao.html", context)
+
+# --- API: CHI TIẾT ĐÓNG GÓP THEO ĐỢT ---
+def get_contribution_detail(request):
+    camp_id = request.GET.get('id')
+    contributions = Contribution.objects.filter(ma_dot_dong_gop=camp_id)
+    
+    results = []
+    total_money = 0
+    for idx, c in enumerate(contributions):
+        chu_ho = HouseholdDetail.objects.filter(ma_ho_khau=c.ma_ho_khau).first()
+        results.append({
+            'stt': idx + 1,
+            'ma_ho': c.ma_ho_khau,
+            'ten_chu_ho': chu_ho.ten_chu_ho if chu_ho else "N/A",
+            'so_tien': f"{int(c.so_tien):,}đ"
+        })
+        total_money += int(c.so_tien)
+
+    return JsonResponse({
+        'details': results,
+        'total_count': len(results),
+        'total_money': f"{total_money:,}đ"
+    })
+
+# --- API: TÌM KIẾM ĐÓNG GÓP THEO HỘ ---
+def search_household_contribution(request):
+    query = request.GET.get('query', '').strip()
+    contributions = Contribution.objects.filter(ma_ho_khau__icontains=query)
+    
+    results = []
+    for c in contributions:
+        chu_ho = HouseholdDetail.objects.filter(ma_ho_khau=c.ma_ho_khau).first()
+        camp = ContributionCampaign.objects.filter(ma_dot_dong_gop=c.ma_dot_dong_gop).first()
+        results.append({
+            'ma_ho': c.ma_ho_khau,
+            'ten_chu_ho': chu_ho.ten_chu_ho if chu_ho else "N/A",
+            'ten_dot': camp.ten_dot_dong_gop if camp else "N/A",
+            'so_tien': f"{int(c.so_tien):,}đ"
+        })
+    return JsonResponse({'details': results})
 # ==================================================
 # QUẢN LÝ TRUY CẬP
 @login_required
