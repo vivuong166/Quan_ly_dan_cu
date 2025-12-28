@@ -56,8 +56,8 @@ urlpatterns = [
     path("qltv_tt/", views.qltv_tt, name="qltv_tt"),
     # path("tamvang/", views.tamvang, name="tamvang"),
     # path("tamtru/", views.tamtru, name="tamtru"),
-    path("tamtru/", views.TamTru.as_view(), name="tamtru"),
-    path("tamvang/", views.TamVang.as_view(), name="tamvang"),
+    path("qltv_tt/tamtru/", views.TamTru.as_view(), name="tamtru"),
+    path("qltv_tt/tamvang/", views.TamVang.as_view(), name="tamvang"),
 
     # =====================
     # BIẾN ĐỘNG NHÂN KHẨU
