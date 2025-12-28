@@ -26,9 +26,8 @@
                             <th>Hộ khẩu</th>
                             <th>Ngày sinh</th>
                             <th>Giới tính</th>
-                            <th>CMND/CCCD</th>
                             <!-- <th>Quan hệ</th> -->
-                            <th>Nghề nghiệp</th>
+                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
@@ -57,9 +56,8 @@
                             <td>{{ person.ma_ho_khau }}</td>
                             <td>{{ person.ngay_sinh|date:"d/m/Y" }}</td>
                             <td>{{ person.gioi_tinh }}</td>
-                            <td>{{ person.cccd|default:"-" }}</td>
                             <!-- <td>{{ person.quan_he_chu_ho }}</td> -->
-                            <td>{{ person.nghe_nghiep|default:"-" }}</td>
+                            <td>{{ person.trang_thai|default:"Thường trú" }}</td>
                             <td>
                                 <button class="btn-sm" onclick="viewPerson(this)">
                                     <i class="fas fa-eye"></i> Xem

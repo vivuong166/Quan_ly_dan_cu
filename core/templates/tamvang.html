@@ -13,26 +13,16 @@
   <section id="tab-tv" class="tvtt-panel active">
     <form id="formTv" class="tvtt-form">
       <div class="row">
-        <label class="required">Họ tên</label>
-        <input id="tv_ho_ten" placeholder="Họ tên" required />
-        <label class="required">Ngày sinh</label>
-        <input id="tv_ngay_sinh" type="date" required />  
-      </div>
-      <div class="row">
-        <label class="required">CMND/CCCD</label>
-        <input id="tv_cmnd" placeholder="Số CMND/CCCD" required />
-      </div>
-      <div class="row">
-        <label class="required">Chọn hộ khẩu</label>
-        <select id="tv_ma_hk" name="person" class="row" required>
-          <option value="">-- Chọn nhân khẩu--</option>
-          {% for hokhau in hokhau_list %}
-            <option value="{{ hokhau.ma_ho_khau }}">{{ hokhau.ma_ho_khau }} - {{ hokhau.ten_chu_ho }}</option>
+        <label class="required">Chọn nhân khẩu</label>
+        <select id="tv_ma_nk" name="ma_nhan_khau" required>
+          <option value="">-- Chọn nhân khẩu --</option>
+          {% for nk in nhankhau_list %}
+          <option value="{{ nk.ma_nhan_khau }}">
+            {{ nk.ho_ten }} - 
+            ({{ nk.ngay_sinh|date:"d/m/Y" }}) - 
+            HK {{ nk.ma_ho_khau }}
+          </option>
           {% endfor %}
-          <!-- <option value="1">HK-001 - Nguyễn Văn A</option>
-          <option value="2">HK-002 - Trần Thị B</option>
-          <option value="3">HK-003 - Lê Văn C</option>
-          <option value="4">37</option> -->
         </select>
       </div>
       <div class="row">
