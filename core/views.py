@@ -835,9 +835,121 @@ def thuphi(request):
         "recent_contributions": recent_contributions
     })
 
+from django.shortcuts import render
+from django.utils import timezone
+from django.db.models import Count, Sum
+from datetime import date
+
+from .models import (
+    Person, TemporaryResidence, TemporaryAbsence,
+    ContributionCampaign, Contribution, Household
+)
+
 @login_required
 def thongke_baocao(request):
-    return render(request, "thongke_baocao.html")
+    today = date.today()
+    current_year = today.year
+
+    # ======================
+    # 1. THỐNG KÊ NHÂN KHẨU
+    # ======================
+    persons = Person.objects.exclude(ngay_sinh__isnull=True)
+
+    def count_by_age(min_age=None, max_age=None):
+        qs = persons
+        if min_age is not None:
+            qs = qs.filter(ngay_sinh__lte=date(current_year - min_age, 12, 31))
+        if max_age is not None:
+            qs = qs.filter(ngay_sinh__gte=date(current_year - max_age, 1, 1))
+        return qs
+
+    def gender_stat(qs):
+        return {
+            "total": qs.count(),
+            "nam": qs.filter(gioi_tinh__iexact="Nam").count(),
+            "nu": qs.filter(gioi_tinh__iexact="Nữ").count(),
+        }
+
+    nhankhau_stats = [
+        ("Mầm non", gender_stat(count_by_age(0, 5))),
+        ("Cấp 1", gender_stat(count_by_age(6, 10))),
+        ("Cấp 2", gender_stat(count_by_age(11, 14))),
+        ("Cấp 3", gender_stat(count_by_age(15, 17))),
+        ("Độ tuổi lao động", gender_stat(count_by_age(18, 60))),
+        ("Nghỉ hưu", gender_stat(count_by_age(61, None))),
+    ]
+
+    tong_nk = {
+        "total": persons.count(),
+        "nam": persons.filter(gioi_tinh__iexact="Nam").count(),
+        "nu": persons.filter(gioi_tinh__iexact="Nữ").count(),
+    }
+
+    # ======================
+    # 2. TẠM TRÚ
+    # ======================
+    tamtru_dang_o = TemporaryResidence.objects.filter(
+        ngay_bat_dau__lte=today,
+        ngay_ket_thuc__gte=today
+    )
+
+    tamtru_qua_han = TemporaryResidence.objects.filter(
+        ngay_ket_thuc__lt=today,
+        trang_thai_hoan_thanh=False
+    )
+
+    # ======================
+    # 3. TẠM VẮNG
+    # ======================
+    tamvang_dang_o = TemporaryAbsence.objects.filter(
+        ngay_bat_dau__lte=today,
+        ngay_ket_thuc__gte=today
+    )
+
+    tamvang_qua_han = TemporaryAbsence.objects.filter(
+        ngay_ket_thuc__lt=today,
+        trang_thai_hoan_thanh=False
+    )
+
+    # ======================
+    # 4. ĐÓNG GÓP
+    # ======================
+    total_households = Household.objects.count()
+    campaigns_data = []
+
+    campaigns = ContributionCampaign.objects.all()
+
+    for c in campaigns:
+        contributions = Contribution.objects.filter(ma_dot_dong_gop=c.ma_dot_dong_gop)
+        so_ho_da_dong = contributions.values("ma_ho_khau").distinct().count()
+        tong_tien = contributions.aggregate(total=Sum("so_tien"))["total"] or 0
+        chua_dong = total_households - so_ho_da_dong
+        ti_le = round((so_ho_da_dong / total_households * 100), 1) if total_households else 0
+
+        campaigns_data.append({
+            "ten": c.ten_dot_dong_gop,
+            "bat_dau": c.ngay_bat_dau,
+            "ket_thuc": c.ngay_ket_thuc,
+            "da_dong": so_ho_da_dong,
+            "chua_dong": chua_dong,
+            "ti_le": ti_le,
+            "tong_tien": tong_tien
+        })
+
+    context = {
+        "nhankhau_stats": nhankhau_stats,
+        "tong_nk": tong_nk,
+
+        "tamtru_dang_o": tamtru_dang_o,
+        "tamtru_qua_han": tamtru_qua_han,
+
+        "tamvang_dang_o": tamvang_dang_o,
+        "tamvang_qua_han": tamvang_qua_han,
+
+        "campaigns": campaigns_data,
+    }
+
+    return render(request, "thongke_baocao.html", context)
 
 
 # ==================================================
