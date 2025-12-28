@@ -238,7 +238,7 @@ def suahk(request, household_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
     household = get_object_or_404(Household, ma_ho_khau=household_id) #lấy ra hộ khẩu có mã hộ khẩu
-    person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
+    # person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
     loai_thay_doi=request.POST.get("edit_type")#chọn loại thay đổi
     if(loai_thay_doi=="address"):
         if request.method == "POST":
