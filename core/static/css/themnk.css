@@ -481,3 +481,37 @@ button.primary-1:hover {
         font-size: 13px;
     }
 }
+
+.input-wrapper {
+    position: relative; /* QUAN TRỌNG */
+    width: 100%;
+}
+
+.dropdown {
+    position: absolute;
+    top: 100%;          /* hiện NGAY DƯỚI input */
+    left: 0;
+    width: 100%;
+    margin-top: 4px;    /* cách input một chút */
+    background: #fff;
+    border: 1px solid #ccc;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 1000;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdown-item:hover {
+    background: #f0f0f0;
+}
+
+.hidden {
+    display: none;
+}
+

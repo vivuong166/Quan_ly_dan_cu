@@ -8,7 +8,7 @@ urlpatterns = [
     # =====================
     # AUTH
     # =====================
-    path("login/", views.login_view, name="login"),
+    path("", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("home/", views.home, name="home"),
 
@@ -54,8 +54,10 @@ urlpatterns = [
     # TẠM TRÚ – TẠM VẮNG
     # =====================
     path("qltv_tt/", views.qltv_tt, name="qltv_tt"),
-    path("tamvang/", views.tamvang, name="tamvang"),
-    path("tamtru/", views.tamtru, name="tamtru"),
+    # path("tamvang/", views.tamvang, name="tamvang"),
+    # path("tamtru/", views.tamtru, name="tamtru"),
+    path("qltv_tt/tamtru/", views.TamTru.as_view(), name="tamtru"),
+    path("qltv_tt/tamvang/", views.TamVang.as_view(), name="tamvang"),
 
     # =====================
     # BIẾN ĐỘNG NHÂN KHẨU

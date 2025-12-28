@@ -23,27 +23,43 @@
                     <thead>
                         <tr>
                             <th>Họ và tên</th>
+                            <th>Hộ khẩu</th>
                             <th>Ngày sinh</th>
                             <th>Giới tính</th>
-                            <th>CMND/CCCD</th>
-                            <th>Hộ khẩu</th>
-                            <th>Quan hệ</th>
-                            <th>Nghề nghiệp</th>
+                            <!-- <th>Quan hệ</th> -->
+                            <th>Trạng thái</th>
                             <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody id="personList">
                         {% for person in nhankhau_list %}
-                        <tr>
+                        <tr
+                            data-ma-nk="{{ person.ma_nhan_khau }}"
+                            data-ho-ten="{{ person.ho_ten }}"
+                            data-ma-hk="{{ person.ma_ho_khau }}"
+                            data-ngay-sinh="{{ person.ngay_sinh|date:'d/m/Y' }}"
+                            data-gioi-tinh="{{ person.gioi_tinh }}"
+                            data-quan-he="{{ person.quan_he_chu_ho|default:'-' }}"
+                            data-nghe-nghiep="{{ person.nghe_nghiep|default:'-' }}"
+                            data-noi-sinh = "{{ person.noi_sinh|default:'-' }}"
+                            data-nguyen-quan="{{ person.nguyen_quan|default:'-'}}"
+                            data-dan-toc="{{ person.dan_toc|default:'-' }}"
+                            data-noi-lam-viec="{{ person.noi_lam_viec|default:'-' }}"
+                            data-cccd="{{ person.cccd|default:'-' }}"
+                            data-ngay-cap-cccd="{{ person.ngay_cap_cccd|date:'d/m/Y'|default:'-' }}"
+                            data-noi-cap-cccd="{{ person.noi_cap_cccd|default:'-' }}"
+                            data-ngay-dk-thuong-tru="{{ person.ngay_dang_ky_thuong_tru|date:'d/m/Y'|default:'-' }}"
+                            data-dia-chi-truoc-chuyen="{{ person.dia_chi_truoc_khi_chuyen|default:'-' }}"
+                            data-trang-thai="{{ person.trang_thai|default:'Thường trú' }}"
+                        >
                             <td><strong>{{ person.ho_ten }}</strong></td>
+                            <td>{{ person.ma_ho_khau }}</td>
                             <td>{{ person.ngay_sinh|date:"d/m/Y" }}</td>
                             <td>{{ person.gioi_tinh }}</td>
-                            <td>{{ person.cccd|default:"-" }}</td>
-                            <td>{{ person.ma_ho_khau }}</td>
-                            <td>{{ person.quan_he_chu_ho }}</td>
-                            <td>{{ person.nghe_nghiep|default:"-" }}</td>
+                            <!-- <td>{{ person.quan_he_chu_ho }}</td> -->
+                            <td>{{ person.trang_thai|default:"Thường trú" }}</td>
                             <td>
-                                <button class="btn-sm" onclick="viewPerson('{{ person.ma_nhan_khau }}')">
+                                <button class="btn-sm" onclick="viewPerson(this)">
                                     <i class="fas fa-eye"></i> Xem
                                 </button>
                                 <a href="{% url 'suank' person.ma_nhan_khau %}" class="btn-sm">
@@ -63,7 +79,7 @@
                 </table>
             </div>
             
-            <div class="pagination-container" style="margin-top: 16px; display: flex; justify-content: center; gap: 8px; align-items: center;">
+            <!-- <div class="pagination-container" style="margin-top: 16px; display: flex; justify-content: center; gap: 8px; align-items: center;">
                 <button class="btn-sm" id="prevPage">
                     <i class="fas fa-chevron-left"></i> Trước
                 </button>
@@ -71,7 +87,7 @@
                 <button class="btn-sm" id="nextPage">
                     Sau <i class="fas fa-chevron-right"></i>
                 </button>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

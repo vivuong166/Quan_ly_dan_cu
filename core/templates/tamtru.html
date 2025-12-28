@@ -30,14 +30,14 @@
                 <label>Hộ khẩu tạm trú</label>
                 <select id="tt_ma_hk">
                     <option value="">-- Chọn mã hộ khẩu --</option>
-                    <option value="HK-001">HK-001 - Nguyễn Văn A</option>
-                    <option value="HK-002">HK-002 - Trần Thị B</option>
-                    <option value="HK-003">HK-003 - Lê Văn C</option>
+                    {% for hokhau in hokhau_list %}
+                        <option value="{{ hokhau.ma_ho_khau }}">{{ hokhau.ma_ho_khau }} - {{ hokhau.ten_chu_ho }}</option>
+                    {% endfor %}
                 </select>
             </div>
             <div class="row">
-                <label>Ngày đến</label>
-                <input id="tt_ngay_den" type="date">
+                <label>Ngày bắt đầu</label>
+                <input id="tt_bat_dau" type="date">
                 <label>Thời hạn</label>
                 <input id="tt_han" type="date">
             </div>
@@ -48,11 +48,7 @@
 
         <div class="list-panel">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-                <h3 style="margin: 0;">Bảng đang tạm trú</h3>
-                <div>
-                    <button type="button" id="saveTamTruList" class="btn btn-save-fee">Lưu</button>
-                    <button type="button" id="reloadTamTruList" class="btn btn-reload-fee">Reload</button>
-                </div>
+                <h3 style="margin: 5px;">Bảng đang tạm trú</h3>
             </div>
             <div class="table-container">
                 <table class="table-basic">
@@ -64,12 +60,34 @@
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody id="ttList">
+                        {% for tamtru in records %}
+                        <tr data-id="{{ tamtru.ma_tam_tru }}">
+                            <td><strong>{{ tamtru.ho_ten }}</strong></td>
+                            <td>{{ tamtru.ngay_sinh|date:"d/m/Y" }}</td>
+                            <td>{{ tamtru.ma_ho_khau_tam_tru }}</td>
+                            <td>{{ tamtru.ngay_bat_dau|date:"d/m/Y" }}</td>
+                            <td>{{ tamtru.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if tamtru.trang_thai_hoan_thanh %}
+                                <span class="status-badge status-completed">Đã kết thúc</span>
+                                {% else %}
+                                <span class="status-badge status-active">Chưa kết thúc</span>
+                                {% endif %}
+                            </td>
+                            <!-- <td>
+                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus({{ tamtru.ma_tam_tru }})">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                            </td> -->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
                         <!-- Dữ liệu mẫu -->
-                        <tr data-id="1">
+                        <!-- <tr data-id="1">
                             <td><strong>Nguyễn Văn C</strong></td>
                             <td>12/05/2001</td>
                             <td>HK-001</td>
@@ -89,19 +107,18 @@
                             <td>10/11/2025</td>
                             <td>20/11/2025</td>
                             <td><span class="status-badge status-active">Chưa kết thúc</span></td>
-                            <td>
-                                <button class="btn-sm btn-action" onclick="toggleTamTruStatus(2)">
+                            <td> -->
+                                <!-- <button class="btn-sm btn-action" onclick="toggleTamTruStatus(2)">
                                     <i class="fas fa-check"></i> Kết thúc
-                                </button>
-                            </td>
+                                </button> -->
+                            <!-- </td>
                         </tr>
-                    </tbody>
+                    </tbody> -->
                 </table>
             </div>
         </div>
     </section>
 </div>
-
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">

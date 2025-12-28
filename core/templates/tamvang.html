@@ -13,17 +13,17 @@
   <section id="tab-tv" class="tvtt-panel active">
     <form id="formTv" class="tvtt-form">
       <div class="row">
-        <label class="required">Chọn hộ khẩu</label>
-        <select
-          id="tv_person"
-          name="person"
-          class="row"
-          required
-        >
-          <option value="">-- Chọn nhân khẩu--</option>
-          <option value="1">HK-001 - Nguyễn Văn A</option>
-          <option value="2">HK-002 - Trần Thị B</option>
-          <option value="3">HK-003 - Lê Văn C</option>
+        <label class="required">Chọn nhân khẩu</label>
+        <select id="tv_ma_nk" name="ma_nhan_khau" required>
+          <option value="">-- Chọn nhân khẩu --</option>
+          {% for nk in nhankhauthuongtru_list %}
+          <option value="{{ nk.ma_nhan_khau }}">
+            {{ nk.ho_ten }} - 
+            ({{ nk.ngay_sinh|date:"d/m/Y" }}) - 
+            Hộ khẩu: {{ nk.ma_ho_khau }} -
+            {{ nk.dia_chi }}
+          </option>
+          {% endfor %}
         </select>
       </div>
       <div class="row">
@@ -45,11 +45,7 @@
 
         <div class="list-panel">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-              <h3 style="margin: 0;">Bảng đang tạm vắng</h3>
-              <div>
-                <button type="button" id="saveTamVangList" class="btn btn-save-fee">Lưu</button>
-                <button type="button" id="reloadTamVangList" class="btn btn-reload-fee">Reload</button>
-              </div>
+              <h3 style="margin: 5px;">Bảng đang tạm vắng</h3>
             </div>
             <div class="table-container">
                 <table class="table-basic">
@@ -60,11 +56,39 @@
                             <th>Ngày bắt đầu</th>
                             <th>Ngày kết thúc</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody id="tvList">
-                        <!-- Dữ liệu mẫu -->
+                        {% for tamvang in records %}
+                        <tr data-id="{{ tamvang.ma_tam_vang }}">
+                            <td><strong>{{ tamvang.ho_ten }}</strong></td>
+                            <td>{{ tamvang.ngay_sinh|date:"d/m/Y" }}</td>
+                            <td>{{ tamvang.ngay_bat_dau|date:"d/m/Y" }}</td>
+                            <td>{{ tamvang.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if tamvang.trang_thai_hoan_thanh %}
+                                    <span class="status-badge status-overdue">Đã kết thúc</span>
+                                {% else %}
+                                    <span class="status-badge status-active">Chưa kết thúc</span>
+                                {% endif %}
+                            </td>
+                            <!-- <td>
+                                {% if tamvang.trang_thai_hoan_thanh %}
+                                <button class="btn-sm btn-action" onclick="toggleStatus(1, false)">
+                                    <i class="fas fa-undo"></i> Hoàn tác
+                                </button>
+                                {% else %}
+                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                                    <i class="fas fa-check"></i> Kết thúc
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>-->
+                        {% endfor %}
+                    </tbody>
+
+                        <!-- Dữ liệu mẫu
                         <tr data-id="1">
                             <td><strong>Nguyễn Văn A</strong></td>
                             <td>15/03/1985</td>
@@ -83,10 +107,10 @@
                             <td>05/10/2025</td>
                             <td>12/10/2025</td>
                             <td><span class="status-badge status-active">Chưa kết thúc</span></td>
-                            <td>
-                                <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
+                            <td> -->
+                                <!-- <button class="btn-sm btn-action" onclick="toggleStatus(2, true)">
                                     <i class="fas fa-check"></i> Kết thúc
-                                </button>
+                                </button> -->
                             </td>
                         </tr>
                     </tbody>
@@ -95,7 +119,6 @@
         </div>
     </section>
 </div>
-
 <!-- external JS -->
 <script src="{% static 'js/tv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}" />

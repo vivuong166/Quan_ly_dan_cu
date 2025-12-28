@@ -47,7 +47,7 @@ body {
 .logo {
     display: flex;
     align-items: center;
-    padding: 0 20px 30px;
+    padding: 15px 20px 30px;
     font-size: 20px;
     font-weight: bold;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -250,16 +250,24 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.stat-card .content {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-start; /* căn trái */
+    text-align: left;
 }
 
 .stat-card .icon {
-    font-size: 24px;
-    padding: 8px;
+    font-size: 28px;
+    padding: 10px;
     border-radius: 50%;
-    margin-bottom: 10px;
+    flex-shrink: 0;
 }
 
 .stat-card .number {
@@ -278,6 +286,7 @@ body {
 .stat-card.green .icon { background-color: #e8f5e8; color: #388e3c; }
 .stat-card.yellow .icon { background-color: #fff3e0; color: #f57c00; }
 .stat-card.purple .icon { background-color: #f3e5f5; color: #7b1fa2; }
+.stat-card.default .icon { background-color: #e3f2fd; color: #007aff; }
 
 /* --- Main Sections (Phần dưới) --- */
 .main-sections {
@@ -447,7 +456,6 @@ body {
 .panel {
     background: #fff;
     border-radius: 12px;
-    padding: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 

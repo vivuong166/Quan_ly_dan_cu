@@ -15,7 +15,13 @@
     <p class="error-message">
         Chúng tôi không biết bạn đã đến đây như thế nào, nhưng bạn nên quay lại ngay bây giờ.
     </p>
-    <p><a href="{% url 'login' %}">Quay lại trang đăng nhập</a></p>
+    <!-- <p><a href="/">Quay lại trang đăng nhập</a></p> -->
+    <form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+        <button type="submit" class="return-button">
+            Quay lại trang đăng nhập
+        </button>
+    </form>
 
 </body>
 </html>

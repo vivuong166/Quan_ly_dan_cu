@@ -75,9 +75,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredHouseholds = households.filter(
       (household) =>
-        household.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.head_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.address.toLowerCase().includes(searchTerm.toLowerCase())
+        household.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.so_nha.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.duong_pho.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.phuong.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.quan.toLowerCase().includes(searchTerm.toLowerCase())        
     );
 
     displayHouseholdResults(filteredHouseholds);
@@ -91,9 +94,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredPersons = persons.filter(
       (person) =>
-        person.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.id_number.includes(searchTerm) ||
-        person.household_code.toLowerCase().includes(searchTerm.toLowerCase())
+        person.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.cccd && person.cccd.includes(searchTerm)
     );
 
     displayPersonResults(filteredPersons);
@@ -110,10 +113,10 @@ document.addEventListener("DOMContentLoaded", function () {
       results.forEach((household) => {
         const resultItem = document.createElement("a");
         resultItem.className = "res";
-        resultItem.href = `/ho-khau/${household.id}/`;
+        resultItem.href = `hokhau/chitiet/${household.ma_ho_khau}/`;
         resultItem.innerHTML = `
-                    <div class="res-main">${household.code} — ${household.head_name}</div>
-                    <div class="res-sub">${household.address}</div>
+                    <div class="res-main">${household.ma_ho_khau} — ${household.ho_ten}</div>
+                    <div class="res-sub">${household.so_nha}, ${household.duong_pho}, ${household.phuong}, ${household.quan}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });
@@ -138,8 +141,8 @@ document.addEventListener("DOMContentLoaded", function () {
           showPersonDetail(person);
         };
         resultItem.innerHTML = `
-                    <div class="res-main">${person.full_name}</div>
-                    <div class="res-sub">CCCD: ${person.id_number} | Hộ khẩu: ${person.household_code}</div>
+                    <div class="res-main">${person.ho_ten}</div>
+                    <div class="res-sub">CCCD: ${person.cccd} | Hộ khẩu: ${person.ma_ho_khau}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });
@@ -179,31 +182,49 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Show person detail modal
 function showPersonDetail(person) {
-  const modal = document.getElementById("personDetailModal");
-  
-  // Fill in the details
-  document.getElementById("detail-fullname").textContent = person.full_name || "N/A";
-  document.getElementById("detail-dob").textContent = person.dob || "N/A";
-  document.getElementById("detail-gender").textContent = person.gender === "M" ? "Nam" : person.gender === "F" ? "Nữ" : "Khác";
-  document.getElementById("detail-idnumber").textContent = person.id_number || "N/A";
-  document.getElementById("detail-household").textContent = person.household_code || "N/A";
-  document.getElementById("detail-relation").textContent = person.relation_to_head || "N/A";
-  document.getElementById("detail-occupation").textContent = person.occupation || "N/A";
-  document.getElementById("detail-ethnicity").textContent = person.ethnicity || "N/A";
-  
-  // Show modal
-  modal.style.display = "flex";
+  const viewModal = document.getElementById('viewPersonModal');
+  const viewContent = document.getElementById('viewPersonContent');
+
+  viewContent.innerHTML = `
+            <div class="person-details" style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+                <div style="grid-column:span 2;border-bottom:2px solid #2563eb;padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h4 style="margin:0;color:#1e3a8a;font-size:1.2rem;">${person.ho_ten}</h4>
+                        <p style="margin:5px 0 0;font-size:0.8rem;color:#666;">Mã hộ khẩu: ${person.ma_ho_khau}</p>
+                    </div>
+                    <a class="edit-button" href="nhankhau/suank/${person.ma_nhan_khau}/">
+                        <i class="fas fa-edit"></i>
+                        Sửa
+                    </a>
+                </div>
+                <div><strong>Ngày sinh:</strong> ${person.ngay_sinh}</div>
+                <div><strong>Giới tính:</strong> ${person.gioi_tinh}</div>
+                <div><strong>Quan hệ với chủ hộ:</strong> ${person.quan_he_chu_ho}</div>
+                <div><strong>Ngày đăng ký thường trú:</strong> ${person.ngay_dang_ky_thuong_tru}</div>
+                <div><strong>Nghề nghiệp:</strong> ${person.nghe_nghiep}</div>
+                <div><strong>Nơi sinh:</strong> ${person.noi_sinh}</div>
+                <div><strong>Quê quán:</strong> ${person.nguyen_quan}</div>
+                <div><strong>Dân tộc:</strong> ${person.dan_toc}</div>
+                <div style="grid-column:span 2;"><strong>Nơi làm việc:</strong> ${person.noi_lam_viec}</div>
+                <div><strong>CMND/CCCD:</strong> ${person.cccd}</div>
+                <div><strong>Ngày cấp CCCD:</strong> ${person.ngay_cap_cccd}</div>
+                <div style="grid-column:span 2;"><strong>Nơi cấp CCCD:</strong> ${person.noi_cap_cccd}</div>
+                <div style="grid-column:span 2;"><strong>Địa chỉ trước khi chuyển:</strong> ${person.dia_chi_truoc_khi_chuyen}</div>
+                <div style="grid-column:span 2;"><strong>Trạng thái:</strong> ${person.trang_thai}</div>
+            </div>
+        `;
+  viewModal.style.display = 'flex';
 }
 
 // Close person detail modal
-function closePersonDetailModal() {
-  const modal = document.getElementById("personDetailModal");
-  modal.style.display = "none";
+function closeViewModal() {
+  const viewModal = document.getElementById('viewPersonModal');
+  viewModal.style.display = "none";
 }
 
 // Close modal when clicking outside
 window.onclick = function(event) {
-  const modal = document.getElementById("personDetailModal");
+  const modal = document.getElementById("viewPersonModal");
   if (event.target === modal) {
     closePersonDetailModal();
   }

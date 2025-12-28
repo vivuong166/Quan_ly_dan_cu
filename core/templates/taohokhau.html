@@ -31,7 +31,7 @@
 
 <!-- Main Form Container -->
 <div class="form-container">
-    <form id="householdForm" class="household-form">
+    <form id="householdForm" class="household-form" novalidate>
         <!-- Step 1: Basic Information & Address -->
         <div class="form-step active" id="step-1">
             <div class="step-header">
@@ -60,7 +60,7 @@
                     <div class="form-group">
                         <label for="streetName" class="required">Tên đường / ngõ / phố</label>
                         <input type="text" id="streetName" class="form-input" 
-                               placeholder="Đường Lạc Long Quân, Ngõ 123..." required>
+                               placeholder="Ngách 12, Ngõ 1, Đường Lê Lợi..." required>
                     </div>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                     <div class="form-group">
                         <label for="headFullName" class="required">Họ và tên</label>
                         <input type="text" id="headFullName" class="form-input" 
-                               placeholder="Nguyễn Văn An" required>
+                               placeholder="Nguyễn Văn An..." required>
                     </div>
                     <div class="form-group">
                         <label for="headAlias">Bí danh</label>
@@ -98,6 +98,7 @@
                             <option value="">-- Chọn giới tính --</option>
                             <option value="Nam">Nam</option>
                             <option value="Nữ">Nữ</option>
+                            <option value="Khác">Khác</option>
                         </select>
                     </div>
                 </div>
@@ -106,12 +107,12 @@
                     <div class="form-group">
                         <label for="headBirthPlace">Nơi sinh</label>
                         <input type="text" id="headBirthPlace" class="form-input" 
-                               placeholder="Bệnh viện Hoàng Long, Hà Nội...">
+                               placeholder="Bệnh viện...">
                     </div>
                     <div class="form-group">
                         <label for="headHometown">Quê quán</label>
                         <input type="text" id="headHometown" class="form-input" 
-                               placeholder="Xã Thanh Xuân, Huyện Soc Sơn, Tỉnh Bắc Kạn...">
+                               placeholder="Hà Đông, Hà Nội...">
                     </div>
                 </div>
                 
@@ -119,9 +120,8 @@
                     <div class="form-group">
                         <label for="headIdNumber">Số CMND/CCCD</label>
                         <input type="text" id="headIdNumber" class="form-input" 
-                               placeholder="001234567890"
+                               placeholder="001234567890..."
                                pattern="[0-9]{9,12}" maxlength="12">
-                        <small class="form-help">Nhập 9-12 số của CMND hoặc CCCD</small>
                     </div>
                     <div class="form-group">
                         <label for="headIdIssueDate">Ngày cấp CMND/CCCD</label>
@@ -132,7 +132,7 @@
                 <div class="form-group">
                     <label for="headIdIssuePlace">Nơi cấp CMND/CCCD</label>
                     <input type="text" id="headIdIssuePlace" class="form-input" 
-                           placeholder="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư">
+                           placeholder="Cục Quản lý...">
                 </div>
                 
                 <hr style="margin: 24px 0; border: none; border-top: 1px solid #e5e7eb;">
@@ -142,12 +142,12 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="headResidenceRegDate">Ngày đăng ký thường trú</label>
-                        <input type="date" id="headResidenceRegDate" class="form-input">
+                        <input type="date" id="headResidenceRegDate" class="form-input" value="{{ today }}">
                     </div>
                     <div class="form-group">
                         <label for="headPreviousResidence">Địa chỉ nơi thường trú trước khi chuyển đến</label>
                         <input type="text" id="headPreviousResidence" class="form-input" 
-                               placeholder="Số 10, Phố Trần Phú, Quận Ba Đình, Hà Nội...">
+                               placeholder="Ba Đình, Hà Nội...">
                     </div>
                 </div>
                 
@@ -156,19 +156,7 @@
                 <h4 style="margin-bottom: 16px; color: #1f2937;">Thông tin khác</h4>
                 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label for="headOccupation">Nghề nghiệp</label>
-                        <input type="text" id="headOccupation" class="form-input" 
-                               placeholder="Kỹ sư, Giáo viên, Công nhân...">
-                    </div>
-                    <div class="form-group">
-                        <label for="headWorkplace">Nơi làm việc</label>
-                        <input type="text" id="headWorkplace" class="form-input" 
-                               placeholder="Tên công ty, cơ quan...">
-                    </div>
-                </div>
-                
-                <div class="form-row">
+                    
                     <div class="form-group">
                         <label for="headEthnicity">Dân tộc</label>
                         <select id="headEthnicity" class="form-input">
@@ -195,7 +183,20 @@
                             <option value="Khác">Khác</option>
                         </select>
                     </div>
+                    
                     <div class="form-group">
+                        <label for="headOccupation">Nghề nghiệp</label>
+                        <input type="text" id="headOccupation" class="form-input" 
+                               placeholder="Kỹ sư, Giáo viên, Công nhân...">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="headWorkplace">Nơi làm việc</label>
+                    <input type="text" id="headWorkplace" class="form-input" 
+                            placeholder="Tên công ty, cơ quan...">
+                </div>
+                    <!-- <div class="form-group">
                         <label for="headReligion">Tôn giáo</label>
                         <select id="headReligion" class="form-input">
                             <option value="">Không</option>
@@ -207,8 +208,7 @@
                             <option value="Hồi giáo">Hồi giáo</option>
                             <option value="Khác">Khác</option>
                         </select>
-                    </div>
-                </div>
+                    </div> -->
             </div>
         </div>
 
@@ -261,7 +261,7 @@
             <button type="button" class="btn nav-btn primary" id="nextBtn" onclick="nextStep()">
                 Bước tiếp <i class="fas fa-chevron-right"></i>
             </button>
-            <button type="submit" class="btn nav-btn primary" id="submitBtn" style="display: none;" onclick="submitForm()">
+            <button type="button" class="btn nav-btn primary" id="submitBtn" style="display: none;" onclick="submitForm()">
                 <i class="fas fa-save"></i> Lưu hộ khẩu
             </button>
         </div>

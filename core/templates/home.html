@@ -2,22 +2,27 @@
 {% load static %}
 {% block content %}
 <div class="stats-grid">
-    <div class="stat-card blue">
+    <div class="stat-card default">
+        <div class="content">
+            <span class="number">{{ household_count }}</span>
+            <span class="label">Hộ khẩu</span>
+        </div>
         <i class="fas fa-id-card icon"></i>
-        <span class="number">358</span>
-        <span class="label">Hộ khẩu</span>
     </div>
-    <div class="stat-card green">
+    <div class="stat-card default">
+        <div class="content">
+            <span class="number">{{ person_count }}</span>
+            <span class="label">Nhân khẩu</span>
+        </div>
         <i class="fas fa-users icon"></i>
-        <span class="number">1,210</span>
-        <span class="label">Nhân khẩu</span>
     </div>
-    <div class="stat-card yellow">
+    <div class="stat-card default">
+        <div class="content">
+            <span class="number">{{ fee_count }}</span>
+            <span class="label">Thu phí dịch vụ</span>
+        </div>
         <i class="fas fa-file-invoice-dollar icon"></i>
-        <span class="number">6,120</span>
-        <span class="label">Thu phí dịch vụ</span>
     </div>
-
 </div>
 
 <div class="main-sections">
