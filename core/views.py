@@ -157,61 +157,68 @@ def empty_to_none(value):
         return None
     return value
 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from datetime import date
+from .models import Household, Person
+
+def empty_to_none(value):
+    if value is None or str(value).strip() == "":
+        return None
+    return value.strip()
+
 @login_required
-def taohokhau(request, household_id=None):
-    # Kiểm tra quyền (giữ nguyên logic của bạn)
+def taohokhau(request):
+    # Check quyền
     role = getattr(request.user.role, 'role', None)
-    if role not in ["TO_TRUONG", "TO_PHO"]:
+    if role not in ["TO_TRUONG", "TO_PHO", "ADMIN"]:
         return JsonResponse({"status": "error", "message": "Bạn không có quyền!"}, status=403)
 
     if request.method == "POST":
         ma_ho = request.POST.get("ma_ho_khau", "").strip()
 
-        # 1. Kiểm tra tồn tại mã hộ khẩu
+        # Check trùng mã hộ khẩu (Quan trọng nhất)
         if Household.objects.filter(ma_ho_khau=ma_ho).exists():
-            return JsonResponse({
-                "status": "error", 
-                "message": f"Mã hộ khẩu '{ma_ho}' đã tồn tại trong hệ thống!"
-            }, status=400)
+            return JsonResponse({"status": "error", "message": f"Mã hộ khẩu {ma_ho} đã tồn tại!"}, status=400)
 
         try:
-            # 2. Tạo Hộ Khẩu (Table: new_ho_khau)
-            Household.objects.create(
-                ma_ho_khau=ma_ho,
-                so_nha=request.POST.get("so_nha"),
-                duong_pho=request.POST.get("duong_pho"),
-                phuong="La Khê",
-                quan="Hà Đông"
-            )
+            with transaction.atomic():
+                # Tạo Hộ khẩu
+                Household.objects.create(
+                    ma_ho_khau=ma_ho,
+                    so_nha=request.POST.get("so_nha"),
+                    duong_pho=request.POST.get("duong_pho"),
+                    phuong="La Khê",
+                    quan="Hà Đông"
+                )
 
-            # 3. Tạo Nhân Khẩu cho Chủ hộ (Table: new_nhan_khau)
-            Person.objects.create(
-                ma_ho_khau=ma_ho,
-                ho_ten=empty_to_none(request.POST.get("ho_ten")),
-                bi_danh=empty_to_none(request.POST.get("bi_danh")),
-                ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
-                gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
-                noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
-                nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
-                dan_toc=empty_to_none(request.POST.get("dan_toc")),
-                nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
-                noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
-                cccd=empty_to_none(request.POST.get("cccd")),
-                ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
-                noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
-                ngay_dang_ky_thuong_tru=empty_to_none(request.POST.get("ngay_dang_ky_thuong_tru")),
-                dia_chi_truoc_khi_chuyen=empty_to_none(request.POST.get("dia_chi_truoc_khi_chuyen")),
-                quan_he_chu_ho="Chủ hộ",
-                trang_thai="Thường trú",
-            )
+                # Tạo Nhân khẩu (Chủ hộ)
+                Person.objects.create(
+                    ma_ho_khau=ma_ho,
+                    ho_ten=empty_to_none(request.POST.get("ho_ten")),
+                    bi_danh=empty_to_none(request.POST.get("bi_danh")),
+                    ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
+                    gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
+                    noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
+                    nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
+                    dan_toc=empty_to_none(request.POST.get("dan_toc")),
+                    nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
+                    noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
+                    cccd=empty_to_none(request.POST.get("cccd")),
+                    ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
+                    noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
+                    ngay_dang_ky_thuong_tru=empty_to_none(request.POST.get("ngay_dang_ky_thuong_tru")),
+                    dia_chi_truoc_khi_chuyen=empty_to_none(request.POST.get("dia_chi_truoc_khi_chuyen")),
+                    quan_he_chu_ho="Chủ hộ",
+                    trang_thai="Thường trú",
+                )
             return JsonResponse({"status": "success", "message": "Tạo hộ khẩu thành công!"})
-
         except Exception as e:
-            return JsonResponse({"status": "error", "message": f"Lỗi Database: {str(e)}"}, status=500)
+            return JsonResponse({"status": "error", "message": f"Lỗi lưu dữ liệu: {str(e)}"}, status=500)
 
-    return render(request, "taohokhau.html", {
-        "today": date.today().isoformat()
-    })
+    return render(request, "taohokhau.html", {"today": date.today().isoformat()})
 
 @login_required
 def quan_ly_ho_khau(request):
