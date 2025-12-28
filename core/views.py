@@ -232,28 +232,74 @@ def quan_ly_ho_khau(request):
 
     return render(request, 'sohokhau.html', {'households': households})
 
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.db import transaction
+from .models import Household, Person
+
+from datetime import date
+from .models import HouseholdChange
 @login_required
 def suahk(request, household_id):
-    if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
+    if request.user.role.role not in ["TO_TRUONG", "TO_PHO"]:
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    household = get_object_or_404(Household, ma_ho_khau=household_id) #lấy ra hộ khẩu có mã hộ khẩu
-    # person=get_object_or_404(Person, ma_ho_khau=household_id)#lấy danh sách nhân khẩu trong hộ khẩu
-    loai_thay_doi=request.POST.get("edit_type")#chọn loại thay đổi
-    if(loai_thay_doi=="address"):
-        if request.method == "POST":
-            household.so_nha = request.POST.get("so_nha")
-            household.duong_pho = request.POST.get("duong_pho")
-            household.save()
-    else:
-        if request.method == "POST":
-            #chỉnh sửa thông tin nhân khẩu
-            messages.success(request, "Cập nhật hộ khẩu thành công")
-            return redirect("sohokhau")
 
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    members = Person.objects.filter(ma_ho_khau=household_id)
 
+    if request.method == "POST":
+        loai_thay_doi = request.POST.get("edit_type")
 
-    return render(request, "form_sua_hk.html", {"household": household})
+        try:
+            with transaction.atomic():
+                if loai_thay_doi == "address":
+                    old_addr = f"{household.so_nha}, {household.duong_pho}"
+                    household.so_nha = request.POST.get("house_number")
+                    household.duong_pho = request.POST.get("street_name")
+                    household.save()
+
+                    # Ghi lịch sử thay đổi hộ khẩu
+                    new_addr = f"{household.so_nha}, {household.duong_pho}"
+                    HouseholdChange.objects.create(
+                        ma_ho_khau=household_id,
+                        truong_thay_doi="Địa chỉ",
+                        noi_dung_thay_doi=f"Thay đổi từ '{old_addr}' sang '{new_addr}'"
+                    )
+                    messages.success(request, "Cập nhật địa chỉ thành công")
+
+                elif loai_thay_doi == "head":
+                    new_head_id = request.POST.get("new_head")
+                    new_head_person = get_object_or_404(Person, ma_nhan_khau=new_head_id)
+                    
+                    # Ghi lịch sử thay đổi chủ hộ
+                    HouseholdChange.objects.create(
+                        ma_ho_khau=household_id,
+                        truong_thay_doi="Chủ hộ",
+                        noi_dung_thay_doi=f"Chủ hộ mới: {new_head_person.ho_ten}"
+                    )
+
+                    # Cập nhật quan hệ cho tất cả thành viên
+                    for member in members:
+                        if str(member.ma_nhan_khau) == str(new_head_id):
+                            member.quan_he_chu_ho = "Chủ hộ"
+                        else:
+                            new_rel = request.POST.get(f"relation_{member.ma_nhan_khau}")
+                            if new_rel:
+                                member.quan_he_chu_ho = new_rel
+                        member.save()
+                    
+                    messages.success(request, "Thay đổi chủ hộ thành công")
+
+                return redirect("sohokhau")
+        except Exception as e:
+            messages.error(request, f"Lỗi: {str(e)}")
+
+    return render(request, "form_sua_hk.html", {
+        "household": household,
+        "members": members
+    })
 
 @login_required
 def chitiet_hk(request, household_id):
