@@ -316,24 +316,15 @@ def chitiet_hk(request, household_id):
         return redirect("home")
     
     # 2. Lấy dữ liệu hộ khẩu và nhân khẩu
-    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    #lấy thông tin cơ bản
+    household_detail=get_object_or_404(HouseholdDetail, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
-    
+    danhsach_manhankhau=persons.ma_nhan_khau# lấy nhân khẩu của hộ
+    person_change=Person_Change.objects.filter(ma_nhan_khau=danhsach_manhankhau)# danh sách thay đổi nhân khẩu
+    household_change=HouseholdChange.objects.filter(ma_ho_khau=household_id) #danh sách thay đổi hộ khẩu
     # 3. Lấy dữ liệu tạm trú cho hộ này
-    # Lưu ý: Model của bạn dùng ma_ho_khau_tam_tru
     temp_residents = TemporaryResidence.objects.filter(ma_ho_khau_tam_tru=household_id)
-    
-    # 4. Xác định tên chủ hộ cho phần Header
-    head_of_household = persons.filter(quan_he_chu_ho="Chủ hộ").first()
-    head_name = head_of_household.ho_ten if head_of_household else "Chưa xác định"
-
-    return render(request, "chitiet_hk.html", {
-        "household": household,
-        "persons": persons,
-        "temp_residents": temp_residents,
-        "head_name": head_name,
-        "ma_ho_khau": household_id
-    })
+    return render(request, "chitiet_hk.html")
 
 @login_required
 def tachhk(request, household_id):
