@@ -14,9 +14,10 @@ from django.views import View
 from django.http import JsonResponse
 from django.db import transaction
 from django.utils import timezone
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Subquery, Exists
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.timezone import now
 
 
 from .models import (
@@ -99,7 +100,13 @@ def qlnk(request):
         ma_ho_khau=OuterRef('ma_ho_khau'),
         quan_he_chu_ho__icontains='Chủ hộ'
     ).values('ho_ten')[:1]
-    households = Household.objects.annotate(ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau", "ho_ten", "so_nha", "duong_pho", "phuong", "quan")
+    households = Household.objects.annotate(
+        ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau"
+                                                 , "ho_ten"
+                                                 , "so_nha"
+                                                 , "duong_pho"
+                                                 , "phuong"
+                                                 , "quan")
 
     data = []
     for p in Person.objects.all():
@@ -321,7 +328,8 @@ def chitiet_hk(request, household_id):
         return redirect("home")
     
     # 2. Lấy dữ liệu hộ khẩu và nhân khẩu
-    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    #lấy thông tin cơ bản
+    household_detail=get_object_or_404(HouseholdDetail, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
     # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
@@ -572,11 +580,44 @@ def qltv_tt(request):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý tạm trú tạm vắng")
         return redirect("home")
-    tamtru_list = list(TemporaryResidence.objects.all())
-    tamvang_list = list(TemporaryAbsence.objects.all())
+    tamtru_list = TemporaryResidence.objects.all().values("ho_ten", "cccd", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
+
+    # Format date fields to strings so json.dumps won't fail
+    tamtru_data = []
+    for tt in tamtru_list:
+        tt_ngay_bat_dau = tt.get("ngay_bat_dau")
+        tt_ngay_ket_thuc = tt.get("ngay_ket_thuc")
+        tt_trang_thai_hoan_thanh = tt.get("trang_thai_hoan_thanh")
+        
+        tt["trang_thai_hoan_thanh"] = "Đã kết thúc" if tt_trang_thai_hoan_thanh is True else "Chưa kết thúc"
+        tt["ngay_bat_dau"] = tt_ngay_bat_dau.strftime("%d/%m/%Y") if tt_ngay_bat_dau else None
+        tt["ngay_ket_thuc"] = tt_ngay_ket_thuc.strftime("%d/%m/%Y") if tt_ngay_ket_thuc else None
+
+        tamtru_data.append(tt)
+
+    nhan_khau_subquery = Person.objects.filter(
+        ma_nhan_khau=OuterRef("ma_nhan_khau")
+    )
+
+    tamvang_list = TemporaryAbsence.objects.annotate(
+        ho_ten=Subquery(nhan_khau_subquery.values("ho_ten")[:1]),
+        cccd=Subquery(nhan_khau_subquery.values("cccd")[:1]),
+    ).values("ho_ten", "cccd", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
+
+    tamvang_data = []
+    for tv in tamvang_list:
+        tv_ngay_bat_dau = tv.get("ngay_bat_dau")
+        tv_ngay_ket_thuc = tv.get("ngay_ket_thuc")
+        tv_trang_thai_hoan_thanh = tv.get("trang_thai_hoan_thanh")
+
+        tv["trang_thai_hoan_thanh"] = "Đã kết thúc" if tv_trang_thai_hoan_thanh is True else "Chưa kết thúc"
+        tv["ngay_bat_dau"] = tv_ngay_bat_dau.strftime("%d/%m/%Y") if tv_ngay_bat_dau else None
+        tv["ngay_ket_thuc"] = tv_ngay_ket_thuc.strftime("%d/%m/%Y") if tv_ngay_ket_thuc else None
+        tamvang_data.append(tv)
+
     context = {
-        "tamtru_list": tamtru_list,
-        "tamvang_list": tamvang_list,
+        "tamtru_json": json.dumps(tamtru_data, ensure_ascii=False),
+        "tamvang_json": json.dumps(tamvang_data, ensure_ascii=False),
     }
 
     return render(request, "qltv_tt.html", context)
@@ -590,6 +631,14 @@ class TamTru(LoginRequiredMixin, View):
         return True
           
     def get(self, request):
+        if not self.check_permission(request):
+            return redirect("home")
+        
+        TemporaryResidence.objects.filter(
+            trang_thai_hoan_thanh=False,
+            ngay_ket_thuc__lt=timezone.now().date()
+        ).update(trang_thai_hoan_thanh=True)
+        
         subquery = Person.objects.filter(
             ma_ho_khau=OuterRef("ma_ho_khau"),
             quan_he_chu_ho="Chủ hộ"
@@ -617,8 +666,7 @@ class TamTru(LoginRequiredMixin, View):
                 })
             return JsonResponse(data, safe=False)
 
-        if not self.check_permission(request):
-            return redirect("home")
+        
 
         context = {
             "hokhau_list": list(hokhau_list),
@@ -633,10 +681,10 @@ class TamTru(LoginRequiredMixin, View):
         tamtru_data = {
             "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
             "ho_ten": request.POST.get("ten"),
-            "ngay_sinh": request.POST.get("ns"),
-            "nghe_nghiep": request.POST.get("ngheNghiep"),
+            "ngay_sinh": request.POST.get("ngay_sinh"),
+            "nghe_nghiep": request.POST.get("nghe_nghiep"),
             "cccd": request.POST.get("cccd"),
-            "ngay_bat_dau": timezone.now().date(),
+            "ngay_bat_dau": request.POST.get("ngay_den"),
             "ngay_ket_thuc": request.POST.get("han")
         }
 
@@ -644,7 +692,7 @@ class TamTru(LoginRequiredMixin, View):
         if TemporaryResidence.objects.filter(
             ma_ho_khau_tam_tru=request.POST.get("ma_ho_khau"),
             ho_ten=request.POST.get("ten"),
-            ngay_sinh=request.POST.get("ns"),
+            ngay_sinh=request.POST.get("ngay_sinh"),
             ngay_ket_thuc=request.POST.get("han"),
             ).exists():  
                 
@@ -670,7 +718,22 @@ class TamVang(LoginRequiredMixin, View):
         if not self.check_permission(request):
             return redirect("home")
         
-        nhankhau_list = Person.objects.all().values("ma_nhan_khau", "ho_ten", "ngay_sinh", "ma_ho_khau")
+        TemporaryAbsence.objects.filter(
+            trang_thai_hoan_thanh=False,
+            ngay_ket_thuc__lt=timezone.now().date()
+        ).update(trang_thai_hoan_thanh=True)
+        
+        hoan_thanh_tam_vang_subquery=TemporaryAbsence.objects.filter(
+            ma_nhan_khau=OuterRef("ma_nhan_khau"),
+            trang_thai_hoan_thanh=True
+        )
+
+        Person.objects.annotate(
+            da_hoan_thanh_tam_vang=Exists(hoan_thanh_tam_vang_subquery)
+        ).filter(
+            da_hoan_thanh_tam_vang=True,
+            trang_thai="Tạm vắng"
+        ).update(trang_thai="Thường trú")
         
         nhan_khau_subquery = Person.objects.filter(
             ma_nhan_khau=OuterRef("ma_nhan_khau")
@@ -682,7 +745,7 @@ class TamVang(LoginRequiredMixin, View):
             ho_ten=Subquery(nhan_khau_subquery.values("ho_ten")[:1]),
             ngay_sinh=Subquery(nhan_khau_subquery.values("ngay_sinh")[:1]),
             ma_ho_khau=Subquery(nhan_khau_subquery.values("ma_ho_khau")[:1]),
-        ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc")
+        ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
 
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             tv_list = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
@@ -694,6 +757,7 @@ class TamVang(LoginRequiredMixin, View):
                     "ngay_sinh": person.ngay_sinh.strftime("%d/%m/%Y") if person and person.ngay_sinh else "",
                     "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
                     "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
+                    "trang_thai": tv.trang_thai_hoan_thanh
                 })
             return JsonResponse(data, safe=False)
         context = {
@@ -706,17 +770,21 @@ class TamVang(LoginRequiredMixin, View):
         if not self.check_permission(request):
             return JsonResponse({"error": "Không có quyền"}, status=403)
         
+        
+        
         TemporaryAbsence.objects.create(
             ma_nhan_khau=request.POST.get("ma_nhan_khau"),
             ngay_bat_dau=request.POST.get("ngayDi"),
             ngay_ket_thuc=request.POST.get("han"),
             ly_do=request.POST.get("lyDo"),
+            trang_thai_hoan_thanh=False
         )
 
-        # person = Person.objects.get(ma_nhan_khau=request.POST.get("ma_nhan_khau"))
-        # person.trang_thai = "Tạm vắng"
-        # person.save()
-        
+        Person.objects.filter(
+            ma_nhan_khau=request.POST.get("ma_nhan_khau"),
+            trang_thai="Thường trú"
+        ).update(trang_thai="Tạm vắng")
+                
         return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
 
 # ==================================================
@@ -791,9 +859,121 @@ def thuphi(request):
         "recent_contributions": recent_contributions
     })
 
+from django.shortcuts import render
+from django.utils import timezone
+from django.db.models import Count, Sum
+from datetime import date
+
+from .models import (
+    Person, TemporaryResidence, TemporaryAbsence,
+    ContributionCampaign, Contribution, Household
+)
+
 @login_required
 def thongke_baocao(request):
-    return render(request, "thongke_baocao.html")
+    today = date.today()
+    current_year = today.year
+
+    # ======================
+    # 1. THỐNG KÊ NHÂN KHẨU
+    # ======================
+    persons = Person.objects.exclude(ngay_sinh__isnull=True)
+
+    def count_by_age(min_age=None, max_age=None):
+        qs = persons
+        if min_age is not None:
+            qs = qs.filter(ngay_sinh__lte=date(current_year - min_age, 12, 31))
+        if max_age is not None:
+            qs = qs.filter(ngay_sinh__gte=date(current_year - max_age, 1, 1))
+        return qs
+
+    def gender_stat(qs):
+        return {
+            "total": qs.count(),
+            "nam": qs.filter(gioi_tinh__iexact="Nam").count(),
+            "nu": qs.filter(gioi_tinh__iexact="Nữ").count(),
+        }
+
+    nhankhau_stats = [
+        ("Mầm non", gender_stat(count_by_age(0, 5))),
+        ("Cấp 1", gender_stat(count_by_age(6, 10))),
+        ("Cấp 2", gender_stat(count_by_age(11, 14))),
+        ("Cấp 3", gender_stat(count_by_age(15, 17))),
+        ("Độ tuổi lao động", gender_stat(count_by_age(18, 60))),
+        ("Nghỉ hưu", gender_stat(count_by_age(61, None))),
+    ]
+
+    tong_nk = {
+        "total": persons.count(),
+        "nam": persons.filter(gioi_tinh__iexact="Nam").count(),
+        "nu": persons.filter(gioi_tinh__iexact="Nữ").count(),
+    }
+
+    # ======================
+    # 2. TẠM TRÚ
+    # ======================
+    tamtru_dang_o = TemporaryResidence.objects.filter(
+        ngay_bat_dau__lte=today,
+        ngay_ket_thuc__gte=today
+    )
+
+    tamtru_qua_han = TemporaryResidence.objects.filter(
+        ngay_ket_thuc__lt=today,
+        trang_thai_hoan_thanh=False
+    )
+
+    # ======================
+    # 3. TẠM VẮNG
+    # ======================
+    tamvang_dang_o = TemporaryAbsence.objects.filter(
+        ngay_bat_dau__lte=today,
+        ngay_ket_thuc__gte=today
+    )
+
+    tamvang_qua_han = TemporaryAbsence.objects.filter(
+        ngay_ket_thuc__lt=today,
+        trang_thai_hoan_thanh=False
+    )
+
+    # ======================
+    # 4. ĐÓNG GÓP
+    # ======================
+    total_households = Household.objects.count()
+    campaigns_data = []
+
+    campaigns = ContributionCampaign.objects.all()
+
+    for c in campaigns:
+        contributions = Contribution.objects.filter(ma_dot_dong_gop=c.ma_dot_dong_gop)
+        so_ho_da_dong = contributions.values("ma_ho_khau").distinct().count()
+        tong_tien = contributions.aggregate(total=Sum("so_tien"))["total"] or 0
+        chua_dong = total_households - so_ho_da_dong
+        ti_le = round((so_ho_da_dong / total_households * 100), 1) if total_households else 0
+
+        campaigns_data.append({
+            "ten": c.ten_dot_dong_gop,
+            "bat_dau": c.ngay_bat_dau,
+            "ket_thuc": c.ngay_ket_thuc,
+            "da_dong": so_ho_da_dong,
+            "chua_dong": chua_dong,
+            "ti_le": ti_le,
+            "tong_tien": tong_tien
+        })
+
+    context = {
+        "nhankhau_stats": nhankhau_stats,
+        "tong_nk": tong_nk,
+
+        "tamtru_dang_o": tamtru_dang_o,
+        "tamtru_qua_han": tamtru_qua_han,
+
+        "tamvang_dang_o": tamvang_dang_o,
+        "tamvang_qua_han": tamvang_qua_han,
+
+        "campaigns": campaigns_data,
+    }
+
+    return render(request, "thongke_baocao.html", context)
 
 
 # ==================================================
