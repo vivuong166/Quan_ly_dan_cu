@@ -82,8 +82,8 @@
     </div>
 </div>
 <script>
-    window.tamtruRecords = JSON.parse('{{ tamtru_list|safe|escapejs }}');
-    window.tamvangRecords = JSON.parse('{{ tamvang_list|safe|escapejs }}');
+    window.tamtrus = JSON.parse('{{ tamtru_json|escapejs }}');
+    window.tamvangs = JSON.parse('{{ tamvang_json|escapejs }}');
 </script>
 <script src="{% static 'js/qltv_tt.js' %}"></script>
 <link rel="stylesheet" href="{% static 'css/qltv_tt.css' %}">
