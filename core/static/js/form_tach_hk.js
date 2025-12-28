@@ -1,11 +1,3 @@
-
-// ================== DỮ LIỆU ĐỘNG TỪ BACKEND ==================
-// Cần truyền vào template:
-// <script>
-//   const HOUSEHOLD = {{ household|safe }};
-//   const PERSONS = {{ persons|safe }};
-// </script>
-
 let selectedMembers = [];
 let newHeadId = null;
 let memberRelationships = {};

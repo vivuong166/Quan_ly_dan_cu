@@ -330,7 +330,6 @@ def chitiet_hk(request, household_id):
     # 2. Lấy dữ liệu hộ khẩu và nhân khẩu
     # Lấy thông tin cơ bản
     household = get_object_or_404(Household, ma_ho_khau=household_id)
-    household_detail = get_object_or_404(HouseholdDetail, ma_ho_khau=household_id)
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
     # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
