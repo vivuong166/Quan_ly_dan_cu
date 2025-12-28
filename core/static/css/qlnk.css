@@ -394,6 +394,13 @@
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
 }
 
+.no-results {
+    padding: 16px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 /* Responsive modal */
 @media (max-width: 768px) {
     .modal-content {

@@ -101,12 +101,32 @@ def qlnk(request):
     ).values('ho_ten')[:1]
     households = Household.objects.annotate(ho_ten=Subquery(ho_ten_subquery)).values("ma_ho_khau", "ho_ten", "so_nha", "duong_pho", "phuong", "quan")
 
-    persons = Person.objects.values("ho_ten", "ma_ho_khau", "cccd")
+    data = []
+    for p in Person.objects.all():
+        data.append({
+            "ho_ten": p.ho_ten,
+            "bi_danh": p.bi_danh,
+            "ngay_sinh": p.ngay_sinh.strftime("%d/%m/%Y") if p.ngay_sinh else None,
+            "ma_nhan_khau": p.ma_nhan_khau,
+            "ma_ho_khau": p.ma_ho_khau,
+            "gioi_tinh": p.gioi_tinh,
+            "nguyen_quan": p.nguyen_quan,
+            "noi_sinh": p.noi_sinh,
+            "dan_toc": p.dan_toc,
+            "nghe_nghiep": p.nghe_nghiep,
+            "noi_lam_viec": p.noi_lam_viec,
+            "cccd": p.cccd,
+            "noi_cap_cccd": p.noi_cap_cccd,
+            "ngay_cap_cccd": p.ngay_cap_cccd.strftime("%d/%m/%Y") if p.ngay_cap_cccd else None,
+            "dia_chi_truoc_khi_chuyen": p.dia_chi_truoc_khi_chuyen,
+            "ngay_dang_ky_thuong_tru": p.ngay_dang_ky_thuong_tru.strftime("%d/%m/%Y") if p.ngay_dang_ky_thuong_tru else None,
+            "quan_he_chu_ho": p.quan_he_chu_ho,
+            "trang_thai": p.trang_thai,
+        })
     return render(request, "qlnk.html", {
         "households_json": json.dumps(list(households), ensure_ascii=False),
-        "persons_json": json.dumps(list(persons), ensure_ascii=False),
+        "persons_json": json.dumps(list(data), ensure_ascii=False),
     })
-
 
 # ================= HỘ KHẨU =================
 @login_required
@@ -404,54 +424,23 @@ def suank(request, person_id):
         
         try:
             # --- PHẦN 1: XỬ LÝ DỮ LIỆU PERSON ---
-            FIELD_LABELS = {
-                "ho_ten": "Họ tên",
-                "bi_danh": "Bí danh",
-                "ngay_sinh": "Ngày sinh",
-                "gioi_tinh": "Giới tính",
-                "noi_sinh": "Nơi sinh",
-                "nguyen_quan": "Nguyên quán",
-                "quan_he_chu_ho": "Quan hệ với chủ hộ",
-                "cccd": "CCCD",
-                "ngay_cap_cccd": "Ngày cấp CCCD",
-                "noi_cap_cccd": "Nơi cấp CCCD",
-                "ngay_dang_ky_thuong_tru": "Ngày đăng ký thường trú",
-                "dia_chi_truoc_khi_chuyen": "Địa chỉ trước khi chuyển",
-                "nghe_nghiep": "Nghề nghiệp",
-                "noi_lam_viec": "Nơi làm việc",
-            }
             if move_type == "update":
-                changed_fields = []
-
-                def check_change(field_name, new_value):
-                    old_value = getattr(person, field_name)
-                    if old_value != new_value:
-                        changed_fields.append(FIELD_LABELS[field_name])
-                        setattr(person, field_name, new_value)
-
-                check_change("ho_ten", request.POST.get("ho_ten"))
-                check_change("bi_danh", request.POST.get("bi_danh"))
-                check_change("ngay_sinh", request.POST.get("ngay_sinh") or None)
-                check_change("gioi_tinh", request.POST.get("gioi_tinh"))
-                check_change("noi_sinh", request.POST.get("noi_sinh"))
-                check_change("nguyen_quan", request.POST.get("nguyen_quan"))
-                check_change("quan_he_chu_ho", request.POST.get("quan_he_voi_chu_ho"))
-                check_change("cccd", request.POST.get("cccd"))
-                check_change("ngay_cap_cccd", request.POST.get("ngay_cap_cccd") or None)
-                check_change("noi_cap_cccd", request.POST.get("noi_cap_cccd"))
-                check_change("ngay_dang_ky_thuong_tru", request.POST.get("ngay_dang_ky_thuong_tru") or None)
-                check_change("dia_chi_truoc_khi_chuyen", request.POST.get("dia_chi_truoc_khi_chuyen"))
-                check_change("nghe_nghiep", request.POST.get("nghe_nghiep"))
-                check_change("noi_lam_viec", request.POST.get("noi_lam_viec"))
-
-                person.save()
-
-                ten_loai = "Cập nhật thông tin"
-
-                if changed_fields:
-                    ghi_chu_log = "Thay đổi thông tin: " + ", ".join(changed_fields)
-                else:
-                    ghi_chu_log = "Không có thay đổi thông tin"
+                person.ho_ten = request.POST.get("ho_ten")
+                person.bi_danh = request.POST.get("bi_danh")
+                person.ngay_sinh = request.POST.get("ngay_sinh") or None
+                person.gioi_tinh = request.POST.get("gioi_tinh")
+                person.noi_sinh = request.POST.get("noi_sinh")
+                person.nguyen_quan = request.POST.get("nguyen_quan")
+                person.quan_he_chu_ho = request.POST.get("quan_he_voi_chu_ho")
+                person.cccd = request.POST.get("cccd")
+                person.ngay_cap_cccd = request.POST.get("ngay_cap_cccd") or None
+                person.noi_cap_cccd = request.POST.get("noi_cap_cccd")
+                person.nghe_nghiep = request.POST.get("nghe_nghiep")
+                person.noi_lam_viec = request.POST.get("noi_lam_viec")
+                person.dan_toc = request.POST.get("dan_toc")
+                
+                # ten_loai = "Cập nhật thông tin"
+                # ghi_chu_log = "Thay đổi thông tin nhân khẩu"
 
             elif move_type == "transfer":
                 dest_type = request.POST.get("transfer_destination_type")
@@ -471,18 +460,26 @@ def suank(request, person_id):
             elif move_type == "past":
                 person.trang_thai = "Đã qua đời"
                 ten_loai = "Qua đời"
-                noi_den = "Đã qua đời"
+                # noi_den = "Đã qua đời"
                 ghi_chu_log = request.POST.get("ghi_chu")
 
             # Lưu bảng Person trước
             person.save()
+            if move_type == "update":
+                # Nếu chỉ cập nhật thông tin, không cần lưu lịch sử thay đổi
+                messages.success(request, f"Đã cập nhật thông tin cho {person.ho_ten}!")
+                return redirect("nhankhau")
 
             # --- PHẦN 2: LƯU VÀO PERSON_CHANGE ---
             # Sử dụng .create() để Django tự xử lý việc INSERT vào bảng ma_thay_doi
+            noi_den = noi_den if 'noi_den' in locals() else None
+            ngay_thay_doi = ngay_thay_doi if 'ngay_thay_doi' in locals() else None
+            
             Person_Change.objects.create(
                 ma_nhan_khau=int(person.ma_nhan_khau),
                 loai_thay_doi=ten_loai,
                 noi_chuyen_di=noi_den,
+                ngay_thay_doi=ngay_thay_doi,
                 ghi_chu=ghi_chu_log
                 # ngay_chuyen_di tự động lấy theo auto_now_add
             )
@@ -649,9 +646,9 @@ class TamVang(LoginRequiredMixin, View):
             ly_do=request.POST.get("lyDo"),
         )
 
-        person = Person.objects.get(ma_nhan_khau=request.POST.get("ma_nhan_khau"))
-        person.trang_thai = "Tạm vắng"
-        person.save()
+        # person = Person.objects.get(ma_nhan_khau=request.POST.get("ma_nhan_khau"))
+        # person.trang_thai = "Tạm vắng"
+        # person.save()
         
         return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
 
