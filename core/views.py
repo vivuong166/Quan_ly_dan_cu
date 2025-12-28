@@ -785,7 +785,7 @@ class TamVang(LoginRequiredMixin, View):
             trang_thai="Thường trú"
         ).update(trang_thai="Tạm vắng")
                 
-        return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
+        return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công", "redirect_url": "/qltv_tt/tamvang"})
 
 # ==================================================
 # BIẾN ĐỘNG NHÂN KHẨU
