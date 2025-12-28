@@ -16,12 +16,11 @@
         <label class="required">Chọn nhân khẩu</label>
         <select id="tv_ma_nk" name="ma_nhan_khau" required>
           <option value="">-- Chọn nhân khẩu --</option>
-          {% for nk in nhankhauthuongtru_list %}
+          {% for nk in nhankhau_list %}
           <option value="{{ nk.ma_nhan_khau }}">
             {{ nk.ho_ten }} - 
             ({{ nk.ngay_sinh|date:"d/m/Y" }}) - 
-            Hộ khẩu: {{ nk.ma_ho_khau }} -
-            {{ nk.dia_chi }}
+            HK {{ nk.ma_ho_khau }}
           </option>
           {% endfor %}
         </select>

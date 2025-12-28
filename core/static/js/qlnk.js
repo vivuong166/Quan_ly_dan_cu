@@ -75,12 +75,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredHouseholds = households.filter(
       (household) =>
-        household.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.so_nha.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.duong_pho.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.phuong.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        household.quan.toLowerCase().includes(searchTerm.toLowerCase())        
+        household.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.head_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        household.address.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     displayHouseholdResults(filteredHouseholds);
@@ -94,9 +91,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const filteredPersons = persons.filter(
       (person) =>
-        person.ho_ten.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.ma_ho_khau.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        person.cccd && person.cccd.includes(searchTerm)
+        person.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        person.id_number.includes(searchTerm) ||
+        person.household_code.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     displayPersonResults(filteredPersons);
@@ -115,8 +112,8 @@ document.addEventListener("DOMContentLoaded", function () {
         resultItem.className = "res";
         resultItem.href = `hokhau/chitiet/${household.ma_ho_khau}/`;
         resultItem.innerHTML = `
-                    <div class="res-main">${household.ma_ho_khau} — ${household.ho_ten}</div>
-                    <div class="res-sub">${household.so_nha}, ${household.duong_pho}, ${household.phuong}, ${household.quan}</div>
+                    <div class="res-main">${household.code} — ${household.head_name}</div>
+                    <div class="res-sub">${household.address}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });
@@ -141,8 +138,8 @@ document.addEventListener("DOMContentLoaded", function () {
           showPersonDetail(person);
         };
         resultItem.innerHTML = `
-                    <div class="res-main">${person.ho_ten}</div>
-                    <div class="res-sub">CCCD: ${person.cccd} | Hộ khẩu: ${person.ma_ho_khau}</div>
+                    <div class="res-main">${person.full_name}</div>
+                    <div class="res-sub">CCCD: ${person.id_number} | Hộ khẩu: ${person.household_code}</div>
                 `;
         resultsBody.appendChild(resultItem);
       });

@@ -29,23 +29,36 @@
                 <!-- Các mục dành cho CÁN BỘ + TỔ TRƯỞNG -->
                 {% if request.session.user_role == "TO_PHO" or request.session.user_role == "TO_TRUONG" or request.session.user_role == "ADMIN"%}
 
-                    <a href="{% url 'qlnk' %}" class="menu-item {% if '/qlhk_nk/' in request.path %}active{% endif %}">
+                    <a href="{% url 'qlnk' %}" class="menu-item {% if request.resolver_match.url_name == 'qlnk' %}active{% endif %}">
                         <i class="fas fa-users"></i>
                         <span>Hộ khẩu - Nhân khẩu</span>
                     </a>
 
-                    <a href="{% url 'qltv_tt' %}" class="menu-item {% if '/qltv_tt/' in request.path %}active{% endif %}">
+                    <a href="{% url 'qltv_tt' %}" class="menu-item {% if request.resolver_match.url_name == 'qltv_tt' %}active{% endif %}">
                         <i class="fas fa-receipt"></i>
                         <span>Tạm trú - Tạm vắng</span>
                     </a>
 
+                    <!-- <a href="{% url 'thuphi' %}" class="menu-item">
+                        <span>Thu phí đóng góp</span> -->
+                    <!-- </a> -->
+
                 {% endif %}
                 {% if request.session.user_role == "CAN_BO" or request.session.user_role == "ADMIN" %}
+
+                    <!-- <a href="{% url 'qlnk' %}" class="menu-item">
+                        <span>Quản lý nhân khẩu</span>
+                    </a>
+
+                    <a href="{% url 'qltv_tt' %}" class="menu-item">
+                        <span>Quản lý tạm vắng / trú</span>
+                    </a> -->
 
                      <a href="{% url 'thuphi' %}" class="menu-item {% if request.resolver_match.url_name == 'thuphi' %}active{% endif %}">
                         <i class="fas fa-file-invoice-dollar"></i>
                         <span>Thu phí - Đóng góp</span> 
                     </a>
+
 
                 {% endif %}
 
@@ -59,7 +72,7 @@
 
                 <a href="{% url 'quanly_truycap' %}" class="menu-item {% if request.resolver_match.url_name == 'quanly_truycap' %}active{% endif %}">
                     <i class="fas fa-user"></i>
-                    <span>Tài khoản truy cập</span>
+                    <span>Tạo tài khoản mới</span>
                 </a>
 
                 {% endif %}
