@@ -45,7 +45,9 @@ document.addEventListener('DOMContentLoaded', function(){
     // add tạm vắng
     const addTvBtn = document.getElementById('addTv');
     if(addTvBtn){
-        addTvBtn.addEventListener('click', async function(){
+        addTvBtn.addEventListener('click', async function(e){
+            e.preventDefault();
+            
             // const ten = document.getElementById('tv_ho_ten').value.trim();
             // const ns = document.getElementById('tv_ngay_sinh').value;
             // const cmnd = document.getElementById('tv_cmnd').value.trim();
@@ -88,7 +90,8 @@ document.addEventListener('DOMContentLoaded', function(){
                 });
                 if(response.ok){
                     alert('Dang ky tam vang thanh cong!');
-                    document.getElementById('formTv').reset();
+                    window.location.reload();
+                    
                 }else{
                     console.log(response);
                     console.log(error)
@@ -106,7 +109,9 @@ document.addEventListener('DOMContentLoaded', function(){
     // add tạm trú
     const addTtBtn = document.getElementById('addTt');
     if(addTtBtn){
-        addTtBtn.addEventListener('click', async function(){
+        addTtBtn.addEventListener('click', async function(e){
+            e.preventDefault();
+
             const ma_ho_khau = document.getElementById('tt_ma_hk').value;
             const ten = document.getElementById('tt_ho_ten').value.trim();
             const ngay_sinh = document.getElementById('tt_ngay_sinh').value;
@@ -148,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
                 if(response.ok){
                     alert('Dang li tam tru thanh cong!');
-                    document.getElementById('formTt').reset();
+                    window.location.reload();
                 }else{
                     alert('Dang ky tam tru that bai!');
                 }
