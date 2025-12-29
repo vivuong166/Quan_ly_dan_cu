@@ -122,6 +122,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
+        // Kiểm tra quan hệ với chủ hộ không phải chủ hộ
+        const relationField = document.getElementById('personRelation');
+        if (relationField && relationField.value.trim().toLowerCase() === 'chủ hộ') {
+            relationField.classList.add('error');
+            showMessage('Không thể thêm chủ hộ!', 'error');
+            isValid = false;
+        }
+
         // if (!isValid) {
         //     showMessage('Vui lòng kiểm tra lại các thông tin bắt buộc!', 'error');
         // }

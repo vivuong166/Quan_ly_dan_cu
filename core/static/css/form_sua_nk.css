@@ -156,6 +156,13 @@
     color: #94a3b8;
 }
 
+.form-input-read-only {
+    background: #f1f5f9;
+    cursor: not-allowed;
+    pointer-events: none;
+    color: #64748b;
+}
+
 /* Select Inputs */
 select.form-input {
     cursor: pointer;

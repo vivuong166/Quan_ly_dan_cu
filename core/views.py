@@ -197,20 +197,20 @@ def taohokhau(request):
                 # Tạo Nhân khẩu (Chủ hộ)
                 Person.objects.create(
                     ma_ho_khau=ma_ho,
-                    ho_ten=empty_to_none(request.POST.get("ho_ten")),
-                    bi_danh=empty_to_none(request.POST.get("bi_danh")),
+                    ho_ten=request.POST.get("ho_ten"),
+                    bi_danh=request.POST.get("bi_danh"),
                     ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
-                    gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
-                    noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
-                    nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
-                    dan_toc=empty_to_none(request.POST.get("dan_toc")),
-                    nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
-                    noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
-                    cccd=empty_to_none(request.POST.get("cccd")),
+                    gioi_tinh=request.POST.get("gioi_tinh"),
+                    noi_sinh=request.POST.get("noi_sinh"),
+                    nguyen_quan=request.POST.get("nguyen_quan"),
+                    dan_toc=request.POST.get("dan_toc"),
+                    nghe_nghiep=request.POST.get("nghe_nghiep"),
+                    noi_lam_viec=request.POST.get("noi_lam_viec"),
+                    cccd=request.POST.get("cccd"),
                     ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
-                    noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
+                    noi_cap_cccd=request.POST.get("noi_cap_cccd"),
                     ngay_dang_ky_thuong_tru=empty_to_none(request.POST.get("ngay_dang_ky_thuong_tru")),
-                    dia_chi_truoc_khi_chuyen=empty_to_none(request.POST.get("dia_chi_truoc_khi_chuyen")),
+                    dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
                     quan_he_chu_ho="Chủ hộ",
                     trang_thai="Thường trú",
                 )
@@ -312,7 +312,8 @@ def suahk(request, household_id):
 
     return render(request, "form_sua_hk.html", {
         "household": household,
-        "members": members
+        "members": members,
+        "head": members.filter(quan_he_chu_ho="Chủ hộ").first()
     })
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -419,12 +420,11 @@ def themnk(request):
     if request.method == "POST":
         # Hàm xử lý giá trị ngày tháng và CCCD (nếu để trống thì lưu NULL)
         def clean_val(field):
-            val = request.POST.get(field, "").strip()
-            return val if val != "" else None
+            return request.POST.get(field, "").strip()
 
         try:
             cccd_val = clean_val("cccd")
-            if cccd_val is not None:
+            if cccd_val != "":
                 trung_cccd = Person.objects.filter(cccd=cccd_val).exists()
                 if trung_cccd:
                     messages.error(
@@ -441,7 +441,7 @@ def themnk(request):
                 ma_ho_khau=request.POST.get("ma_ho_khau"), # Model Person dùng CharField cho ma_ho_khau
                 ho_ten=request.POST.get("ho_ten"),
                 bi_danh=request.POST.get("bi_danh"),
-                ngay_sinh=clean_val("ngay_sinh"),
+                ngay_sinh=empty_to_none(clean_val("ngay_sinh")),
                 gioi_tinh=request.POST.get("gioi_tinh"),
                 noi_sinh=request.POST.get("noi_sinh"),
                 nguyen_quan=request.POST.get("nguyen_quan"),
@@ -449,16 +449,16 @@ def themnk(request):
                 nghe_nghiep=request.POST.get("nghe_nghiep"),
                 noi_lam_viec=request.POST.get("noi_lam_viec"),
                 cccd=cccd_val,
-                ngay_cap_cccd=clean_val("ngay_cap_cccd"),
+                ngay_cap_cccd=empty_to_none(clean_val("ngay_cap_cccd")),
                 noi_cap_cccd=request.POST.get("noi_cap_cccd"),
-                ngay_dang_ky_thuong_tru=clean_val("ngay_dang_ky_thuong_tru"),
+                ngay_dang_ky_thuong_tru=empty_to_none(clean_val("ngay_dang_ky_thuong_tru")),
                 dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
                 quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
                 trang_thai="Thường trú"
             )
             messages.success(request, "Thêm nhân khẩu thành công!")
             danh_sach_hk = Household.objects.all().values('ma_ho_khau', 'so_nha', 'duong_pho')
-            return render(request, "themnk.html", {"danh_sach_hk": danh_sach_hk})
+            return redirect('nhankhau')
             
         except Exception as e:
             messages.error(request, f"Lỗi: {e}")
@@ -492,6 +492,7 @@ def suank(request, person_id):
 
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
     households = HouseholdDetail.objects.exclude(ma_ho_khau=person.ma_ho_khau)
+    old_person_household = person.ma_ho_khau  # Lưu mã hộ khẩu cũ để kiểm tra chuyển hộ
 
     if request.method == "POST":
         move_type = request.POST.get("move_type")
@@ -505,7 +506,7 @@ def suank(request, person_id):
                 person.gioi_tinh = request.POST.get("gioi_tinh")
                 person.noi_sinh = request.POST.get("noi_sinh")
                 person.nguyen_quan = request.POST.get("nguyen_quan")
-                person.quan_he_chu_ho = request.POST.get("quan_he_voi_chu_ho")
+                person.quan_he_chu_ho = request.POST.get("quan_he_chu_ho")
                 person.cccd = request.POST.get("cccd")
                 person.ngay_cap_cccd = request.POST.get("ngay_cap_cccd") or None
                 person.noi_cap_cccd = request.POST.get("noi_cap_cccd")
@@ -551,12 +552,21 @@ def suank(request, person_id):
             
             Person_Change.objects.create(
                 ma_nhan_khau=int(person.ma_nhan_khau),
+                ma_ho_khau=old_person_household,
                 loai_thay_doi=ten_loai,
                 noi_chuyen_di=noi_den,
                 ngay_thay_doi=ngay_thay_doi,
                 ghi_chu=ghi_chu_log
-                # ngay_chuyen_di tự động lấy theo auto_now_add
             )
+            if(move_type == "transfer" and dest_type == "household"):
+                Person_Change.objects.create(
+                    ma_nhan_khau=int(person.ma_nhan_khau),
+                    ma_ho_khau=ma_ho_moi,
+                    loai_thay_doi="Chuyển đến",
+                    noi_chuyen_di=None,
+                    ngay_thay_doi=ngay_thay_doi,
+                    ghi_chu="Tự động thêm khi chuyển hộ"
+                )
 
             messages.success(request, f"Đã cập nhật thông tin và lưu lịch sử cho {person.ho_ten}!")
             return redirect("nhankhau")
