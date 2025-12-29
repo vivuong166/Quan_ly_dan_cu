@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block content %}
 <div class="page-header">
-    <h2 class="page-title">Thống kê - báo cáo</h2>
+    <h2 class="page-title">Thống kê - báo cáo cư trú & đóng góp</h2>
 </div>
 
-<!-- Tabs Navigation -->
 <div class="tabs-container">
     <div class="tabs-nav">
         <button class="tab-btn active" data-tab="nhankhau">Nhân khẩu</button>
@@ -14,235 +14,81 @@
         <button class="tab-btn" data-tab="donggop">Đóng góp</button>
     </div>
 
-    <!-- Tab Nhân khẩu -->
     <div class="tab-content active" id="tab-nhankhau">
-        <div class="report-controls">
-            <div class="filter-row">
-                <label>Tháng thống kê
-                    <input type="month" id="monthFilter">
-                </label>
-                <button id="applyBtn" class="btn primary">Áp dụng</button>
-            </div>
-        </div>
-
         <div class="reports-container">
             <div class="report-section">
-                <h3>Thống kê tổng quan nhân khẩu</h3>
+                <h3>Tổng hợp nhân khẩu theo độ tuổi</h3>
                 <div class="excel-table">
-                    <table id="populationOverviewTable">
+                    <table>
                         <thead>
                             <tr>
                                 <th>STT</th>
-                                <th>Chỉ tiêu</th>
+                                <th>Chỉ tiêu thống kê</th>
                                 <th>Tổng số</th>
                                 <th>Nam</th>
                                 <th>Nữ</th>
                             </tr>
                         </thead>
-                        <!-- <tbody>
-                            
-                            <tr>                                
-                                <td>1</td>
-                                <td>Mầm non</td>
-                                <td>42</td>
-                                <td>22</td>
-                                <td>20</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Cấp 1</td>
-                                <td>38</td>
-                                <td>20</td>
-                                <td>18</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Cấp 2</td>
-                                <td>32</td>
-                                <td>16</td>
-                                <td>16</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Cấp 3</td>
-                                <td>23</td>
-                                <td>12</td>
-                                <td>11</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>Độ tuổi lao động</td>
-                                <td>277</td>
-                                <td>140</td>
-                                <td>137</td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td>Nghỉ hưu</td>
-                                <td>78</td>
-                                <td>35</td>
-                                <td>43</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="2"><strong>Tổng cộng khu vực</strong></td>
-                                <td><strong>490</strong></td>
-                                <td><strong>245</strong></td>
-                                <td><strong>245</strong></td>
-                            </tr>
-                        </tbody> -->
                         <tbody>
-                            {% for ten, stat in nhankhau_stats %}
+                            {% for item in stats_nk %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ ten }}</td>
-                                <td>{{ stat.total }}</td>
-                                <td>{{ stat.nam }}</td>
-                                <td>{{ stat.nu }}</td>
+                                <td>{{ item.label }}</td>
+                                <td style="font-weight: bold;">{{ item.data.total }}</td>
+                                <td>{{ item.data.nam }}</td>
+                                <td>{{ item.data.nu }}</td>
                             </tr>
                             {% endfor %}
-
-                            <tr class="total-row">
-                                <td colspan="2"><strong>Tổng cộng khu vực</strong></td>
-                                <td><strong>{{ tong_nk.total }}</strong></td>
-                                <td><strong>{{ tong_nk.nam }}</strong></td>
-                                <td><strong>{{ tong_nk.nu }}</strong></td>
-                            </tr>
                         </tbody>
+                        <tfoot>
+                            <tr class="total-row" style="background-color: #f8f9fa; font-weight: bold;">
+                                <td colspan="2" style="text-align: center;">TỔNG CỘNG</td>
+                                <td>{{ tong_tat_ca }}</td>
+                                <td>{{ tong_nam }}</td>
+                                <td>{{ tong_nu }}</td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Tab Tạm trú -->
     <div class="tab-content" id="tab-tamtru">
         <div class="reports-container">
             <div class="report-section">
-                <h3>Danh sách đang tạm trú</h3>
+                <h3>Danh sách nhân khẩu tạm trú</h3>
                 <div class="excel-table">
-                    <table id="temporaryResidenceTable">
+                    <table>
                         <thead>
                             <tr>
-                                <th>STT</th>
-                                <th>Số hộ khẩu</th>
-                                <th>Họ tên</th>
-                                <th>Từ ngày</th>
-                                <th>Đến ngày</th>
-                                <th>Lý do</th>
+                                <th>Mã hộ tạm trú</th>
+                                <th>Họ và tên</th>
+                                <th>CCCD</th>
+                                <th>Bắt đầu</th>
+                                <th>Kết thúc</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
-                        <!-- <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>HK-089</td>
-                                <td>Nguyễn Thị Hoa</td>
-                                <td>01/08/2025</td>
-                                <td>01/02/2026</td>
-                                <td>Công tác dài hạn</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>HK-125</td>
-                                <td>Trần Văn Bình</td>
-                                <td>15/09/2025</td>
-                                <td>15/03/2026</td>
-                                <td>Chuyển công tác</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>HK-134</td>
-                                <td>Lê Thị Mai</td>
-                                <td>10/10/2025</td>
-                                <td>10/01/2026</td>
-                                <td>Thuê nhà tạm</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
-                                <td><strong>3 người</strong></td>
-                            </tr>
-                        </tbody> -->
-
                         <tbody>
-                            {% for tt in tamtru_dang_o %}
+                            {% for item in tamtru_list %}
                             <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ tt.ma_ho_khau.ma_ho_khau }}</td>
-                                <td>{{ tt.nhan_khau.ho_ten }}</td>
-                                <td>{{ tt.ngay_bat_dau|date:"d/m/Y" }}</td>
-                                <td>{{ tt.ngay_ket_thuc|date:"d/m/Y" }}</td>
-                                <td>{{ tt.ly_do }}</td>
+                                <td>{{ item.ma_ho_khau_tam_tru }}</td>
+                                <td>{{ item.ho_ten }}</td>
+                                <td>{{ item.cccd }}</td>
+                                <td>{{ item.ngay_bat_dau|date:"d/m/Y" }}</td>
+                                <td>{{ item.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if item.trang_thai_hoan_thanh %} 
+                                        <span style="color: gray;">Đã kết thúc</span> 
+                                    {% else %} 
+                                        <strong style="color: green;">Đang tạm trú</strong> 
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">Không có người tạm trú</td>
-                            </tr>
+                            <tr><td colspan="6" style="text-align: center;">Không có dữ liệu tạm trú</td></tr>
                             {% endfor %}
-                            <tr class="total-row">
-                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
-                                <td><strong>{{ tamtru_dang_o.count }} người</strong></td>
-                            </tr>
-                        </tbody>                        
-                    </table>
-                </div>
-            </div>
-
-            <div class="report-section">
-                <h3>Danh sách tạm trú quá hạn</h3>
-                <div class="excel-table">
-                    <table id="overdueResidenceTable">
-                        <thead>
-                            <tr>
-                                <th>STT</th>
-                                <th>Số hộ khẩu</th>
-                                <th>Họ tên</th>
-                                <th>Từ ngày</th>
-                                <th>Đến ngày</th>
-                                <th>Lý do</th>
-                            </tr>
-                        </thead>
-                        <!-- <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>HK-142</td>
-                                <td>Phạm Minh Tuấn</td>
-                                <td>20/05/2025</td>
-                                <td>20/11/2025</td>
-                                <td>Học tập</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>HK-151</td>
-                                <td>Hoàng Thị Lan</td>
-                                <td>05/03/2025</td>
-                                <td>05/12/2025</td>
-                                <td>Chăm sóc người thân</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
-                                <td><strong>2 người</strong></td>
-                            </tr>
-                        </tbody> -->
-
-                        <tbody>
-                            {% for tt in tamtru_qua_han %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
-                                <td>{{ tt.ma_ho_khau.ma_ho_khau }}</td>
-                                <td>{{ tt.nhan_khau.ho_ten }}</td>
-                                <td>{{ tt.ngay_bat_dau|date:"d/m/Y" }}</td>
-                                <td>{{ tt.ngay_ket_thuc|date:"d/m/Y" }}</td>
-                                <td>{{ tt.ly_do }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center">Không có người tạm trú quá hạn</td>
-                            </tr>
-                            {% endfor %}
-
-                            <tr class="total-row">
-                                <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
-                                <td><strong>{{ tamtru_qua_han.count }} người</strong></td>
-                            </tr>
                         </tbody>
 
                     </table>
@@ -251,7 +97,6 @@
         </div>
     </div>
 
-    <!-- Tab Tạm vắng -->
     <div class="tab-content" id="tab-tamvang">
         <div class="reports-container">
             <div class="report-section">
@@ -269,33 +114,21 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {% for item in list_dang_vang %}
                             <tr>
-                                <td>1</td>
-                                <td>HK-015</td>
-                                <td>Nguyễn Văn Hùng</td>
-                                <td>15/09/2025</td>
-                                <td>15/12/2025</td>
-                                <td>Công tác</td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.ma_ho }}</td>
+                                <td>{{ item.ho_ten }}</td>
+                                <td>{{ item.tu_ngay|date:"d/m/Y" }}</td>
+                                <td>{{ item.den_ngay|date:"d/m/Y" }}</td>
+                                <td>{{ item.ly_do }}</td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>HK-028</td>
-                                <td>Trần Thị Mai</td>
-                                <td>01/10/2025</td>
-                                <td>01/02/2026</td>
-                                <td>Học tập</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>HK-042</td>
-                                <td>Lê Minh Tuấn</td>
-                                <td>20/11/2025</td>
-                                <td>20/01/2026</td>
-                                <td>Thăm người thân</td>
-                            </tr>
+                            {% empty %}
+                            <tr><td colspan="6" class="no-data" style="text-align: center;">Không có dữ liệu tạm vắng</td></tr>
+                            {% endfor %}
                             <tr class="total-row">
                                 <td colspan="5"><strong>Tổng số người tạm vắng</strong></td>
-                                <td><strong>3 người</strong></td>
+                                <td><strong>{{ list_dang_vang|length }} người</strong></td>
                             </tr>
                         </tbody>
                     </table>
@@ -317,17 +150,21 @@
                             </tr>
                         </thead>
                         <tbody>
+                            {% for item in list_qua_han %}
                             <tr>
-                                <td>1</td>
-                                <td>HK-067</td>
-                                <td>Phạm Văn Đức</td>
-                                <td>05/05/2025</td>
-                                <td>05/11/2025</td>
-                                <td>Làm việc</td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.ma_ho }}</td>
+                                <td>{{ item.ho_ten }}</td>
+                                <td>{{ item.tu_ngay|date:"d/m/Y" }}</td>
+                                <td>{{ item.den_ngay|date:"d/m/Y" }}</td>
+                                <td>{{ item.ly_do }}</td>
                             </tr>
+                            {% empty %}
+                            <tr><td colspan="6" style="text-align: center;">Không có dữ liệu quá hạn</td></tr>
+                            {% endfor %}
                             <tr class="total-row">
                                 <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
-                                <td><strong>1 người</strong></td>
+                                <td><strong>{{ list_qua_han|length }} người</strong></td>
                             </tr>
                         </tbody>
                     </table>
@@ -336,7 +173,6 @@
         </div>
     </div>
 
-    <!-- Tab Đóng góp -->
     <div class="tab-content" id="tab-donggop">
         <div class="reports-container">
             <div class="report-section">
@@ -351,51 +187,23 @@
                                 <th>Kết thúc</th>
                                 <th>Hộ đã tham gia</th>
                                 <th>Hộ chưa tham gia</th>
-                                <th>Tỷ lệ tham gia (%)</th>
-                                <th>Tổng tiền thu được</th>
+                                <th>Tỷ lệ (%)</th>
+                                <th>Tổng thu</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {% for item in campaign_stats %}
                             <tr>
-                                <td>1</td>
-                                <td>Ủng hộ ngày thương binh-liệt sỹ 27/07</td>
-                                <td>01/07/2025</td>
-                                <td>31/07/2025</td>
-                                <td>115</td>
-                                <td>5</td>
-                                <td>95.8%</td>
-                                <td>12.500.000đ</td>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ item.ten }}</td>
+                                <td>{{ item.bat_dau|date:"d/m/Y" }}</td>
+                                <td>{{ item.ket_thuc|date:"d/m/Y" }}</td>
+                                <td>{{ item.da_nop }}</td>
+                                <td>{{ item.chua_nop }}</td>
+                                <td>{{ item.ty_le }}%</td>
+                                <td style="font-weight: bold;">{{ item.tong_tien|floatformat:0 }}đ</td>
                             </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>Quỹ từ thiện trẻ em</td>
-                                <td>01/09/2025</td>
-                                <td>30/09/2025</td>
-                                <td>98</td>
-                                <td>22</td>
-                                <td>81.7%</td>
-                                <td>8.750.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>Xây dựng khu vui chơi trẻ em</td>
-                                <td>01/10/2025</td>
-                                <td>31/10/2025</td>
-                                <td>87</td>
-                                <td>33</td>
-                                <td>72.5%</td>
-                                <td>22.300.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>Ủng hộ người nghèo cuối năm</td>
-                                <td>01/11/2025</td>
-                                <td>30/11/2025</td>
-                                <td>105</td>
-                                <td>15</td>
-                                <td>87.5%</td>
-                                <td>15.750.000đ</td>
-                            </tr>
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>
@@ -403,13 +211,13 @@
 
             <div class="report-section">
                 <h3>Chi tiết đóng góp từng hộ</h3>
-                <div class="filter-row">
+                <div class="filter-row" style="margin-bottom: 15px;">
                     <label style="margin-left: 15px; margin-right: 10px;">Chọn đợt đóng góp</label>
                     <select id="donationCampaign">
-                        <option value="thuongbinh">Ủng hộ ngày thương binh-liệt sỹ 27/07</option>
-                        <option value="treem">Quỹ từ thiện trẻ em</option>
-                        <option value="khuivui">Xây dựng khu vui chơi trẻ em</option>
-                        <option value="nguoingheo">Ủng hộ người nghèo cuối năm</option>
+                        <option value="">-- Chọn đợt --</option>
+                        {% for camp in campaigns %}
+                        <option value="{{ camp.ma_dot_dong_gop }}">{{ camp.ten_dot_dong_gop }}</option>
+                        {% endfor %}
                     </select>
                 </div>
                 <div class="excel-table">
@@ -423,54 +231,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>1</td>
-                                <td>HK-001</td>
-                                <td>Nguyễn Văn A</td>
-                                <td>200.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>HK-002</td>
-                                <td>Trần Thị B</td>
-                                <td>150.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>HK-003</td>
-                                <td>Lê Văn C</td>
-                                <td>100.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>HK-004</td>
-                                <td>Phạm Thị D</td>
-                                <td>300.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>5</td>
-                                <td>HK-005</td>
-                                <td>Hoàng Văn E</td>
-                                <td>250.000đ</td>
-                            </tr>
-                            <tr>
-                                <td>6</td>
-                                <td>HK-007</td>
-                                <td>Đặng Văn G</td>
-                                <td>180.000đ</td>
-                            </tr>
-                            <tr class="total-row">
-                                <td colspan="2"><strong>Tổng số hộ đã nộp: 6 hộ</strong></td>
-                                <td colspan="2"><strong>Tổng tiền: 1.180.000đ</strong></td>
-                            </tr>
-                        </tbody>
+                            </tbody>
                     </table>
                 </div>
             </div>
 
             <div class="report-section">
                 <h3>Tra cứu đóng góp theo hộ khẩu</h3>
-                <div class="filter-row">
+                <div class="filter-row" style="margin-bottom: 15px;">
                     <label style="margin-left: 15px; margin-right: 10px;">Nhập</label>
                     <input type="text" id="householdSearch" placeholder="VD: HK-001 hoặc Nguyễn Văn A" style="width: 227px;">
                     <button id="searchHouseholdBtn" class="btn primary">Tìm kiếm</button>
@@ -487,7 +255,7 @@
                         </thead>
                         <tbody>
                             <tr>
-                                <td colspan="4" class="no-data">Nhập thông tin để tra cứu</td>
+                                <td colspan="4" class="no-data" style="text-align: center;">Nhập thông tin để tra cứu</td>
                             </tr>
                         </tbody>
                     </table>
@@ -497,6 +265,6 @@
     </div>
 </div>
 
-<script src="{% static 'js/thongke_baocao.js' %}" defer></script>
 <link rel="stylesheet" href="{% static 'css/thongke_baocao.css' %}">
+<script src="{% static 'js/thongke_baocao.js' %}" defer></script>
 {% endblock %}
