@@ -1,109 +1,27 @@
-// Sample data - hộ khẩu để tách
-const sampleHouseholds = {
-    1: {
-        id: 1,
-        code: "HK-001",
-        headName: "Nguyễn Văn An",
-        address: "Số 123, Đường Láng, Phường Láng Thượng, Quận Đống Đa, Hà Nội",
-        members: [
-            {
-                id: 1,
-                name: "Nguyễn Văn An",
-                isHead: true,
-                relationship: "Chủ hộ"
-            },
-            {
-                id: 2,
-                name: "Trần Thị Bình",
-                isHead: false,
-                relationship: "Vợ"
-            },
-            {
-                id: 3,
-                name: "Nguyễn Văn Cường",
-                isHead: false,
-                relationship: "Con trai"
-            },
-            {
-                id: 4,
-                name: "Nguyễn Thị Dung",
-                isHead: false,
-                relationship: "Con gái"
-            },
-            {
-                id: 5,
-                name: "Nguyễn Văn Em",
-                isHead: false,
-                relationship: "Con trai"
-            },
-            {
-                id: 6,
-                name: "Hoàng Thị Phương",
-                isHead: false,
-                relationship: "Mẹ vợ"
-            }
-        ]
-    },
-    2: {
-        id: 2,
-        code: "HK-002",
-        headName: "Lê Văn Minh",
-        address: "Số 456, Đường Giải Phóng, Phường Đồng Tâm, Quận Hai Bà Trưng, Hà Nội",
-        members: [
-            {
-                id: 7,
-                name: "Lê Văn Minh",
-                isHead: true,
-                relationship: "Chủ hộ"
-            },
-            {
-                id: 8,
-                name: "Trần Thị Nga",
-                isHead: false,
-                relationship: "Vợ"
-            },
-            {
-                id: 9,
-                name: "Lê Văn Oanh",
-                isHead: false,
-                relationship: "Con trai"
-            }
-        ]
-    }
-};
-
-// State management
 let selectedMembers = [];
 let newHeadId = null;
 let memberRelationships = {};
 
-// Load household data
-function loadHouseholdData(householdId) {
-    const household = sampleHouseholds[householdId];
-    
-    if (!household) {
+function loadHouseholdData() {
+    if (!window.HOUSEHOLD) {
         alert('Không tìm thấy thông tin hộ khẩu!');
         window.location.href = '/qlhk_nk/hokhau/';
         return;
     }
-
-    // Load basic info
-    document.getElementById('originalHouseholdCode').value = household.code;
-    document.getElementById('originalHeadName').value = household.headName;
-    document.getElementById('originalAddress').value = household.address;
-
-    // Render members table
-    renderMembersTable(household.members);
-
-    // Set default split date to today
+    document.getElementById('originalHouseholdCode').value = HOUSEHOLD.ma_ho_khau || '';
+    document.getElementById('originalHeadName').value = HOUSEHOLD.ten_chu_ho || '';
+    document.getElementById('originalAddress').value = 
+        (HOUSEHOLD.so_nha || '') + ', ' + 
+        (HOUSEHOLD.duong_pho || '') + ', ' + 
+        (HOUSEHOLD.phuong || '') + ', ' + 
+        (HOUSEHOLD.quan || '');
+    renderMembersTable(window.PERSONS || []);
     const today = new Date().toISOString().split('T')[0];
     document.getElementById('splitDate').value = today;
 }
 
-// Render members table
 function renderMembersTable(members) {
     const tbody = document.getElementById('membersTableBody');
-    
     if (!members || members.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -115,33 +33,18 @@ function renderMembersTable(members) {
         `;
         return;
     }
-
-    // Lọc bỏ chủ hộ hiện tại khỏi danh sách
-    const filteredMembers = members.filter(member => !member.isHead);
-    
-    if (filteredMembers.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="4" class="empty-state">
-                    <p>Không có nhân khẩu nào để tách</p>
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    tbody.innerHTML = filteredMembers.map(member => {
+    tbody.innerHTML = members.map(member => {
         return `
-            <tr data-member-id="${member.id}">
+            <tr data-member-id="${member.ma_nhan_khau}">
                 <td>
-                    ${member.name}
+                    ${member.ho_ten}
                 </td>
                 <td class="text-center">
                     <input 
                         type="checkbox" 
                         class="member-checkbox" 
-                        data-member-id="${member.id}"
-                        onchange="handleMemberSelection(${member.id}, this.checked)"
+                        data-member-id="${member.ma_nhan_khau}"
+                        onchange="handleMemberSelection(${member.ma_nhan_khau}, this.checked)"
                     >
                 </td>
                 <td class="text-center">
@@ -149,15 +52,15 @@ function renderMembersTable(members) {
                         type="radio" 
                         name="newHead" 
                         class="new-head-radio"
-                        data-member-id="${member.id}"
-                        onchange="handleNewHeadSelection(${member.id})"
+                        data-member-id="${member.ma_nhan_khau}"
+                        onchange="handleNewHeadSelection(${member.ma_nhan_khau})"
                     >
                 </td>
                 <td>
                     <input 
                         type="text" 
                         class="relationship-input"
-                        data-member-id="${member.id}"
+                        data-member-id="${member.ma_nhan_khau}"
                         placeholder="VD: con"
                         disabled
                     >
@@ -167,30 +70,61 @@ function renderMembersTable(members) {
     }).join('');
 }
 
-// Handle member selection for splitting
-function handleMemberSelection(memberId, isSelected) {
-    const row = document.querySelector(`tr[data-member-id="${memberId}"]`);
-    
-    if (isSelected) {
+// ...giữ nguyên các hàm handleMemberSelection, handleNewHeadSelection, updateRelationshipInputs, updateFormState, validateSelection, form submit...
+
+// Handle member selection (checkbox)
+function handleMemberSelection(memberId, checked) {
+    memberId = parseInt(memberId);
+    if (checked) {
         if (!selectedMembers.includes(memberId)) {
             selectedMembers.push(memberId);
-            row.classList.add('selected-for-split');
         }
     } else {
         selectedMembers = selectedMembers.filter(id => id !== memberId);
-        row.classList.remove('selected-for-split');
-        
-        // If this was the new head, unselect it
+        // If the unchecked member was the new head, reset newHeadId
         if (newHeadId === memberId) {
             newHeadId = null;
-            const radio = row.querySelector('.new-head-radio');
+            // Uncheck the radio button as well
+            const radio = document.querySelector(`.new-head-radio[data-member-id="${memberId}"]`);
             if (radio) radio.checked = false;
         }
     }
-    
     updateFormState();
     validateSelection();
 }
+
+// Attach event listeners to checkboxes and radios after rendering table
+function attachMemberEventListeners() {
+    document.querySelectorAll('.member-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            handleMemberSelection(this.dataset.memberId, this.checked);
+        });
+    });
+    document.querySelectorAll('.new-head-radio').forEach(rb => {
+        rb.addEventListener('change', function() {
+            handleNewHeadSelection(parseInt(this.dataset.memberId));
+        });
+    });
+}
+
+// Patch renderMembersTable to call attachMemberEventListeners
+const _renderMembersTable = renderMembersTable;
+renderMembersTable = function(members) {
+    _renderMembersTable(members);
+    attachMemberEventListeners();
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadHouseholdData();
+});
+
+document.getElementById('originalHouseholdCode').addEventListener('input', function() {
+    // Bỏ tự động sinh mã hộ khẩu mới
+    // const originalCode = this.value;
+    // if (originalCode) {
+    //     document.getElementById('newHouseholdCode').value = `${originalCode}-T1`;
+    // }
+});
 
 // Handle new head selection
 function handleNewHeadSelection(memberId) {
@@ -215,11 +149,8 @@ function updateRelationshipInputs() {
         const memberId = parseInt(input.dataset.memberId);
         const isSelected = selectedMembers.includes(memberId);
         const isNewHead = memberId === newHeadId;
-        
-        // Enable input for selected members who are not the new head
+        // Always enable for selected members except new head
         input.disabled = !isSelected || isNewHead;
-        
-        // Clear value if disabled
         if (input.disabled) {
             input.value = '';
         }
@@ -229,13 +160,19 @@ function updateRelationshipInputs() {
 // Update form state
 function updateFormState() {
     const newHouseholdSection = document.getElementById('newHouseholdSection');
-    
-    if (selectedMembers.length > 0) {
+    if (selectedMembers.length > 0 && newHeadId) {
         newHouseholdSection.style.display = 'block';
+        // Không tự động gợi ý mã hộ khẩu mới nữa
+        const newHead = window.PERSONS.find(m => m.ma_nhan_khau === newHeadId);
+        if (newHead) {
+            const newHeadNameInput = document.getElementById('newHeadName');
+            if (newHeadNameInput) {
+                newHeadNameInput.value = newHead.ho_ten;
+            }
+        }
     } else {
         newHouseholdSection.style.display = 'none';
     }
-    
     updateRelationshipInputs();
 }
 
@@ -261,7 +198,7 @@ function validateSelection() {
         if (memberId !== newHeadId) {
             const input = document.querySelector(`.relationship-input[data-member-id="${memberId}"]`);
             if (input && !input.value.trim()) {
-                warnings.push(`Chưa điền quan hệ với chủ hộ mới cho thành viên có ID ${memberId}`);
+                warnings.push(`Chưa điền quan hệ với chủ hộ mới`);
             }
         }
     });
@@ -301,18 +238,15 @@ function validateSelection() {
 // Handle form submission
 document.getElementById('splitHouseholdForm').addEventListener('submit', function(e) {
     e.preventDefault();
-    
     // Validate
     if (selectedMembers.length === 0) {
         alert('Vui lòng chọn ít nhất một nhân khẩu để tách!');
         return;
     }
-    
     if (!newHeadId) {
         alert('Vui lòng chọn chủ hộ mới!');
         return;
     }
-    
     // Collect relationship data
     memberRelationships = {};
     selectedMembers.forEach(memberId => {
@@ -323,73 +257,91 @@ document.getElementById('splitHouseholdForm').addEventListener('submit', functio
             }
         }
     });
-    
     // Check if all relationships are filled
     const missingRelationships = selectedMembers.filter(id => 
         id !== newHeadId && !memberRelationships[id]
     );
-    
     if (missingRelationships.length > 0) {
         alert('Vui lòng điền đầy đủ quan hệ với chủ hộ mới cho tất cả thành viên!');
         return;
     }
-    
     // Get form data
+    const newHouseholdCode = document.getElementById('newHouseholdCode').value.trim();
+    // Check mã hộ khẩu định dạng HK-XXX
+    if (!/^HK-\d{3}$/.test(newHouseholdCode)) {
+        alert('Mã hộ khẩu mới phải theo định dạng HK-XXX');
+        return;
+    }
     const formData = {
-        originalHouseholdId: HOUSEHOLD_ID,
+        originalHouseholdId: window.HOUSEHOLD.ma_ho_khau,
         selectedMembers: selectedMembers,
         newHeadId: newHeadId,
         memberRelationships: memberRelationships,
-        newAddress: document.getElementById('newAddress').value.trim(),
-        splitDate: document.getElementById('splitDate').value,
-        splitReason: document.getElementById('splitReason').value.trim()
+        newHouseholdCode: newHouseholdCode,
+        newSoNha: document.getElementById('newSoNha').value.trim(),
+        newDuongPho: document.getElementById('newDuongPho').value.trim()
     };
-    
-    // Validate required fields
-    if (!formData.newAddress) {
-        alert('Vui lòng nhập địa chỉ hộ khẩu mới!');
+    if (!formData.newHouseholdCode || !formData.newSoNha || !formData.newDuongPho) {
+        alert('Vui lòng nhập đầy đủ thông tin hộ khẩu mới!');
         return;
     }
-    
-    if (!formData.splitDate) {
-        alert('Vui lòng chọn ngày tách hộ!');
-        return;
-    }
-    
     // Confirmation
-    const household = sampleHouseholds[HOUSEHOLD_ID];
-    const newHeadMember = household.members.find(m => m.id === newHeadId);
-    
-    const confirmMessage = `
-Xác nhận tách hộ?
-
-Hộ khẩu gốc: ${household.code}
-Số nhân khẩu tách ra: ${selectedMembers.length} người
-Chủ hộ mới: ${newHeadMember ? newHeadMember.name : 'N/A'}
-Địa chỉ mới: ${formData.newAddress}
-
-Bạn có chắc chắn muốn thực hiện?
-    `.trim();
-    
+    let confirmMessage = `Xác nhận tách hộ?\n\nHộ khẩu gốc: ${formData.originalHouseholdId}\nSố nhân khẩu tách ra: ${selectedMembers.length} người\nChủ hộ mới: ${window.PERSONS.find(m => m.ma_nhan_khau === newHeadId)?.ho_ten || 'N/A'}`;
+    // Nếu có địa chỉ mới thì hiển thị, không thì bỏ qua dòng này
+    if (formData.newSoNha || formData.newDuongPho) {
+        let diaChi = '';
+        if (formData.newSoNha) diaChi += formData.newSoNha;
+        if (formData.newDuongPho) diaChi += (diaChi ? ', ' : '') + formData.newDuongPho;
+        confirmMessage += `\nĐịa chỉ mới: ${diaChi}`;
+    }
+    confirmMessage += `\n\nBạn có chắc chắn muốn thực hiện?`;
     if (confirm(confirmMessage)) {
-        console.log('Form data to submit:', formData);
-        
-        // TODO: Send to backend API
-        alert('Tách hộ thành công! (Demo - chưa kết nối API)');
-        
-        // Redirect back to household list
-        setTimeout(() => {
-            window.location.href = '/qlhk_nk/hokhau/';
-        }, 1000);
+        // Send to backend via AJAX
+        fetch(window.location.pathname, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                alert('Tách hộ thành công!');
+                window.location.href = '/qlhk_nk/hokhau/';
+            } else {
+                alert(data.message || 'Có lỗi xảy ra!');
+            }
+        })
+        .catch(err => {
+            alert('Có lỗi xảy ra khi gửi dữ liệu!');
+        });
     }
 });
 
+// Helper to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Load data when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    if (HOUSEHOLD_ID) {
-        loadHouseholdData(HOUSEHOLD_ID);
+    if (window.HOUSEHOLD && typeof window.HOUSEHOLD === 'object' && Object.keys(window.HOUSEHOLD).length > 0) {
+        loadHouseholdData();
     } else {
-        alert('Không tìm thấy mã hộ khẩu!');
+        alert('Không tìm thấy thông tin hộ khẩu!');
         window.location.href = '/qlhk_nk/hokhau/';
     }
 });

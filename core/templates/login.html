@@ -1,51 +1,46 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <title>Đăng nhập</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script defer src="{% static 'js/login.js' %}"></script>
 </head>
-
-<body>
-    <section class="vh-100" style="background-color: #508bfc;">
-        <div class="container py-5 h-100">
-            <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col-12 col-md-8 col-lg-6 col-xl-5">
-                    <div class="card shadow-2-strong" style="border-radius: 1rem;">
-                        <div class="card-body p-5 text-center">
-
-                            <h3 class="mb-5">Đăng nhập</h3>
-
-                            <!-- FORM LOGIN -->
-                            <form method="POST" action="">
-                                {% csrf_token %}
-
-                                <div class="form-outline mb-4">
-                                    <input type="text" name="username" class="form-control form-control-lg" placeholder="username" required>
-                                </div>
-
-                                <div class="form-outline mb-4">
-                                    <input type="password" name="password" class="form-control form-control-lg" placeholder="Password" required>
-                                </div>
-
-                                <button class="btn btn-primary btn-lg btn-block" type="submit">
-                                    Login
-                                </button>
-
-                            </form>
-
-                            <hr class="my-4">
-
-                            {% if error %}
-                                <div class="alert alert-danger mt-3">{{ error }}</div>
-                            {% endif %}
-
-                        </div>
-                    </div>
+<body class="login-body">
+    <div class="login-main-container">
+        <div class="login-card" id="loginCard">
+            <div class="login-left">
+                <h2 class="login-title">Đăng nhập</h2>
+                <div class="login-social">
+                    <a href="#" class="login-social-btn"><i class="fab fa-google"></i></a>
+                    <a href="#" class="login-social-btn"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="login-social-btn"><i class="fab fa-github"></i></a>
+                    <a href="#" class="login-social-btn"><i class="fab fa-linkedin-in"></i></a>
                 </div>
+                <form class="login-form" method="POST" action="">
+                    {% csrf_token %}
+                    <div class="login-input-group">
+                        <input type="text" name="username" placeholder="Email" required autocomplete="username">
+                        <i class="fa fa-user"></i>
+                    </div>
+                    <div class="login-input-group">
+                        <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+                        <i class="fa fa-lock"></i>
+                    </div>
+                    <button class="login-btn" type="submit">ĐĂNG NHẬP</button>
+                    {% if error %}
+                        <div class="login-error">{{ error }}</div>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="login-right">
+                <h2>Xin chào</h2>
+                <p>Hệ thống dành cho cán bộ quản lý.Theo dõi thông tin cư dân, căn hộ, phương tiện và các khoản phí.</p>
             </div>
         </div>
-    </section>
+    </div>
 </body>
 </html>

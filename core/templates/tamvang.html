@@ -28,13 +28,13 @@
       </div>
       <div class="row">
         <label>Ngày bắt đầu</label>
-        <input id="tv_ngay_bat_dau" type="date" />
+        <input id="tv_ngay_bat_dau" type="date" required/>
         <label>Ngày kết thúc</label>
-        <input id="tv_ngay_ket_thuc" type="date" />
+        <input id="tv_ngay_ket_thuc" type="date" required/>
       </div>
       <div class="row">
         <label>Lý do</label>
-        <input id="tv_ly_do" placeholder="Lý do tạm vắng" />
+        <input id="tv_ly_do" placeholder="Lý do tạm vắng" required/>
       </div>
       <div class="form-actions">
         <button type="button" id="addTv" class="btn primary">
@@ -45,11 +45,7 @@
 
         <div class="list-panel">
             <div style="display: flex; align-items: center; justify-content: space-between;">
-              <h3 style="margin: 0;">Bảng đang tạm vắng</h3>
-              <div>
-                <button type="button" id="saveTamVangList" class="btn btn-save-fee">Lưu</button>
-                <button type="button" id="reloadTamVangList" class="btn btn-reload-fee">Reload</button>
-              </div>
+              <h3 style="margin: 5px;">Bảng đang tạm vắng</h3>
             </div>
             <div class="table-container">
                 <table class="table-basic">
