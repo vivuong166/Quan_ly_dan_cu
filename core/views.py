@@ -524,11 +524,11 @@ def suank(request, person_id):
                     person.ma_ho_khau = ma_ho_moi
                     person.quan_he_chu_ho = request.POST.get("newHouseholdRelation")
                     noi_den = f"Chuyển sang hộ {ma_ho_moi}"
+                    ten_loai = "Chuyển hộ"
                 else:
                     noi_den = request.POST.get("noi_chuyen_den") or "Chuyển vùng khác"
                     person.trang_thai = "Đã chuyển đi"
-                
-                ten_loai = "Chuyển đi"
+                    ten_loai = "Chuyển đi"
                 ghi_chu_log = request.POST.get("transfer_note") or "Thay đổi nơi cư trú"
                 ngay_thay_doi = request.POST.get("ngay_chuyen_di")
 
