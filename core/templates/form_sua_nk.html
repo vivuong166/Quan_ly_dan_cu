@@ -13,17 +13,18 @@
 <div class="dashboard-panels">
     <div class="panel">
         <div class="panel-body">
-            <form id="editPersonForm" method="post">
+            <form id="editPersonForm" method="post" data-relation="{{ person.quan_he_chu_ho }}">
                 {% csrf_token %}
                 
                 <div class="form-section">
                     <h4><i class="fas fa-exchange-alt"></i> Nội dung thay đổi</h4>
                     <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px; border-left: 4px solid #007bff;">
                         <p style="margin: 0; font-weight: bold;">Đang thực hiện cho: 
-                            <span style="color: #007bff;">{{ person.ho_ten }}</span> 
+                            <span style="color: #007bff;">{{ person.ho_ten }}</span>
                         </p>
                         <p style="margin: 5px 0 0 0; font-size: 0.9em; color: #666;">Hộ khẩu hiện tại: 
                             <strong>{{ person.ma_ho_khau }}</strong>
+                            {% if person.quan_he_chu_ho == 'Chủ hộ' %}<span> ({{ person.quan_he_chu_ho }})</span>{% endif %}
                         </p>
                     </div>
                     <div class="form-group">
@@ -122,8 +123,15 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label class="required">Quan hệ với chủ hộ</label>
-                                <input type="text" id="personRelation" name="quan_he_chu_ho" class="form-input" placeholder="Vợ, Chồng, Con trai..." value="{{ person.quan_he_chu_ho }}" required 
-                                        {% if person.quan_he_chu_ho == "Chủ hộ" %} readonly {% endif %}>
+                                <input 
+                                    type="text" 
+                                    id="personRelation" 
+                                    name="quan_he_chu_ho" 
+                                    class="form-input {% if person.quan_he_chu_ho == 'Chủ hộ' %} form-input-read-only {% endif %}" 
+                                    placeholder="Vợ, Chồng, Con trai..." 
+                                    value="{{ person.quan_he_chu_ho }}" 
+                                    required 
+                                >
                                 <small class="help-text">Chỉ có thể đổi chủ hộ bằng cách thay sửa hộ khẩu</small>
                             </div>
                             <div class="form-group">
@@ -161,13 +169,13 @@
                             </div>
                             <div class="form-group">
                                 <label>Ngày cấp CMND/CCCD</label>
-                                <input type="date" name="ngay_cap_cccd" class="form-input" value="{{ person.ngay_cap_cccd|date:'Y-m-d' }}">
+                                <input type="date" name="ngay_cap_cccd" class="form-input" value="{{ person.ngay_cap_cccd|date:'Y-m-d' }}" id="personIdIssueDate">
                             </div>
                         </div>
                         
                         <div class="form-group">
                             <label>Nơi cấp CMND/CCCD</label>
-                            <input type="text" name="noi_cap_cccd" class="form-input" placeholder="Nơi cấp" value="{{ person.noi_cap_cccd }}">
+                            <input type="text" name="noi_cap_cccd" class="form-input" placeholder="Nơi cấp" value="{{ person.noi_cap_cccd }}" id="personIdIssuePlace">
                         </div>
                     </div>
                 </div>
