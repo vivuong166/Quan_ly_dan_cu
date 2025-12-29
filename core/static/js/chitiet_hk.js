@@ -16,7 +16,7 @@ function renderMembers() {
     tbody.innerHTML = members.map((m, index) => `
         <tr onclick="showPersonPopup(${m.id})">
             <td>${index + 1}</td>
-            <td>**${m.name}**</td>
+            <td>${m.name}</td>
             <td>${formatDate(m.birthDate)}</td>
             <td>${m.relationship}</td>
             <td><span class="status-badge ${m.status === 'Thường trú' ? 'status-active' : 'status-moved'}">${m.status}</span></td>
