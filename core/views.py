@@ -18,6 +18,7 @@ from django.db.models import OuterRef, Subquery, Exists
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.timezone import now
+from datetime import datetime
 
 
 
@@ -225,20 +226,20 @@ def taohokhau(request):
                 # Tạo Nhân khẩu (Chủ hộ)
                 Person.objects.create(
                     ma_ho_khau=ma_ho,
-                    ho_ten=empty_to_none(request.POST.get("ho_ten")),
-                    bi_danh=empty_to_none(request.POST.get("bi_danh")),
+                    ho_ten=request.POST.get("ho_ten"),
+                    bi_danh=request.POST.get("bi_danh"),
                     ngay_sinh=empty_to_none(request.POST.get("ngay_sinh")),
-                    gioi_tinh=empty_to_none(request.POST.get("gioi_tinh")),
-                    noi_sinh=empty_to_none(request.POST.get("noi_sinh")),
-                    nguyen_quan=empty_to_none(request.POST.get("nguyen_quan")),
-                    dan_toc=empty_to_none(request.POST.get("dan_toc")),
-                    nghe_nghiep=empty_to_none(request.POST.get("nghe_nghiep")),
-                    noi_lam_viec=empty_to_none(request.POST.get("noi_lam_viec")),
-                    cccd=empty_to_none(request.POST.get("cccd")),
+                    gioi_tinh=request.POST.get("gioi_tinh"),
+                    noi_sinh=request.POST.get("noi_sinh"),
+                    nguyen_quan=request.POST.get("nguyen_quan"),
+                    dan_toc=request.POST.get("dan_toc"),
+                    nghe_nghiep=request.POST.get("nghe_nghiep"),
+                    noi_lam_viec=request.POST.get("noi_lam_viec"),
+                    cccd=request.POST.get("cccd"),
                     ngay_cap_cccd=empty_to_none(request.POST.get("ngay_cap_cccd")),
-                    noi_cap_cccd=empty_to_none(request.POST.get("noi_cap_cccd")),
+                    noi_cap_cccd=request.POST.get("noi_cap_cccd"),
                     ngay_dang_ky_thuong_tru=empty_to_none(request.POST.get("ngay_dang_ky_thuong_tru")),
-                    dia_chi_truoc_khi_chuyen=empty_to_none(request.POST.get("dia_chi_truoc_khi_chuyen")),
+                    dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
                     quan_he_chu_ho="Chủ hộ",
                     trang_thai="Thường trú",
                 )
@@ -354,7 +355,8 @@ def suahk(request, household_id):
 
     return render(request, "form_sua_hk.html", {
         "household": household,
-        "members": members
+        "members": members,
+        "head": members.filter(quan_he_chu_ho="Chủ hộ").first()
     })
 
 
@@ -412,11 +414,10 @@ def tachhk(request, household_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
     #lấy toàn bộ nk của toàn bộ hk
-    household_detail=HouseholdDetail.objects.filter(ma_ho_khau=household_id) # hiển thị thông tin mhk, chủ hộ hiện , địa chỉ
-    person=get_object_or_404(Person, ma_ho_khau=household_id) #CHỌN NHÂN KHẨU TRONG CHỦ HỘ
-    person=person.objects.exclude(quan_he_chu_ho__in="Chủ hộ")# lấy trừ chủ hộ
-    household = get_object_or_404(Household, ma_ho_khau=household_id)# CHỌN HỘ KHẨU
-    return render(request, "form_tach_hk.html", {"household": household})
+    household_detail = HouseholdDetail.objects.filter(ma_ho_khau=household_id)
+    persons = Person.objects.filter(ma_ho_khau=household_id).exclude(quan_he_chu_ho__in=["Chủ hộ"])
+    household = get_object_or_404(Household, ma_ho_khau=household_id) 
+    return render(request, "form_tach_hk.html", {"household": household, "persons": persons, "household_detail": household_detail})
 
 
 
@@ -476,13 +477,12 @@ def themnk(request):
     if request.method == "POST":
         # Hàm xử lý giá trị ngày tháng và CCCD (nếu để trống thì lưu NULL)
         def clean_val(field):
-            val = request.POST.get(field, "").strip()
-            return val if val != "" else None
+            return request.POST.get(field, "").strip()
 
 
         try:
             cccd_val = clean_val("cccd")
-            if cccd_val is not None:
+            if cccd_val != "":
                 trung_cccd = Person.objects.filter(cccd=cccd_val).exists()
                 if trung_cccd:
                     messages.error(
@@ -499,7 +499,7 @@ def themnk(request):
                 ma_ho_khau=request.POST.get("ma_ho_khau"), # Model Person dùng CharField cho ma_ho_khau
                 ho_ten=request.POST.get("ho_ten"),
                 bi_danh=request.POST.get("bi_danh"),
-                ngay_sinh=clean_val("ngay_sinh"),
+                ngay_sinh=empty_to_none(clean_val("ngay_sinh")),
                 gioi_tinh=request.POST.get("gioi_tinh"),
                 noi_sinh=request.POST.get("noi_sinh"),
                 nguyen_quan=request.POST.get("nguyen_quan"),
@@ -507,9 +507,9 @@ def themnk(request):
                 nghe_nghiep=request.POST.get("nghe_nghiep"),
                 noi_lam_viec=request.POST.get("noi_lam_viec"),
                 cccd=cccd_val,
-                ngay_cap_cccd=clean_val("ngay_cap_cccd"),
+                ngay_cap_cccd=empty_to_none(clean_val("ngay_cap_cccd")),
                 noi_cap_cccd=request.POST.get("noi_cap_cccd"),
-                ngay_dang_ky_thuong_tru=clean_val("ngay_dang_ky_thuong_tru"),
+                ngay_dang_ky_thuong_tru=empty_to_none(clean_val("ngay_dang_ky_thuong_tru")),
                 dia_chi_truoc_khi_chuyen=request.POST.get("dia_chi_truoc_khi_chuyen"),
                 quan_he_chu_ho=request.POST.get("quan_he_chu_ho"),
                 trang_thai="Thường trú"
@@ -554,6 +554,7 @@ def suank(request, person_id):
 
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
     households = HouseholdDetail.objects.exclude(ma_ho_khau=person.ma_ho_khau)
+    old_person_household = person.ma_ho_khau  # Lưu mã hộ khẩu cũ để kiểm tra chuyển hộ
 
 
     if request.method == "POST":
@@ -568,7 +569,7 @@ def suank(request, person_id):
                 person.gioi_tinh = request.POST.get("gioi_tinh")
                 person.noi_sinh = request.POST.get("noi_sinh")
                 person.nguyen_quan = request.POST.get("nguyen_quan")
-                person.quan_he_chu_ho = request.POST.get("quan_he_voi_chu_ho")
+                person.quan_he_chu_ho = request.POST.get("quan_he_chu_ho")
                 person.cccd = request.POST.get("cccd")
                 person.ngay_cap_cccd = request.POST.get("ngay_cap_cccd") or None
                 person.noi_cap_cccd = request.POST.get("noi_cap_cccd")
@@ -587,11 +588,11 @@ def suank(request, person_id):
                     person.ma_ho_khau = ma_ho_moi
                     person.quan_he_chu_ho = request.POST.get("newHouseholdRelation")
                     noi_den = f"Chuyển sang hộ {ma_ho_moi}"
+                    ten_loai = "Chuyển hộ"
                 else:
                     noi_den = request.POST.get("noi_chuyen_den") or "Chuyển vùng khác"
                     person.trang_thai = "Đã chuyển đi"
-               
-                ten_loai = "Chuyển đi"
+                    ten_loai = "Chuyển đi"
                 ghi_chu_log = request.POST.get("transfer_note") or "Thay đổi nơi cư trú"
                 ngay_thay_doi = request.POST.get("ngay_chuyen_di")
 
@@ -618,12 +619,21 @@ def suank(request, person_id):
            
             Person_Change.objects.create(
                 ma_nhan_khau=int(person.ma_nhan_khau),
+                ma_ho_khau=old_person_household,
                 loai_thay_doi=ten_loai,
                 noi_chuyen_di=noi_den,
                 ngay_thay_doi=ngay_thay_doi,
                 ghi_chu=ghi_chu_log
-                # ngay_chuyen_di tự động lấy theo auto_now_add
             )
+            if(move_type == "transfer" and dest_type == "household"):
+                Person_Change.objects.create(
+                    ma_nhan_khau=int(person.ma_nhan_khau),
+                    ma_ho_khau=ma_ho_moi,
+                    loai_thay_doi="Chuyển đến",
+                    noi_chuyen_di=None,
+                    ngay_thay_doi=ngay_thay_doi,
+                    ghi_chu="Tự động thêm khi chuyển hộ"
+                )
 
 
             messages.success(request, f"Đã cập nhật thông tin và lưu lịch sử cho {person.ho_ten}!")
@@ -717,35 +727,33 @@ class TamTru(LoginRequiredMixin, View):
             trang_thai_hoan_thanh=False,
             ngay_ket_thuc__lt=timezone.now().date()
         ).update(trang_thai_hoan_thanh=True)
-       
-        subquery = Person.objects.filter(
+        
+        chu_ho_subquery = Person.objects.filter(
             ma_ho_khau=OuterRef("ma_ho_khau"),
             quan_he_chu_ho="Chủ hộ"
             ).values("ho_ten")[:1]
        
         hokhau_list = Household.objects.annotate(
-            ten_chu_ho=Subquery(subquery)
+            ten_chu_ho=Subquery(chu_ho_subquery)
             ).values("ma_ho_khau", "ten_chu_ho")
        
         tamtru_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
+        # if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        #     tt_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            tt_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
-
-
-            data = []
-            for tt in tt_list:
-                data.append({
-                    "id": tt.ma_tam_tru,
-                    "ho_ten": tt.ho_ten,
-                    "ngay_sinh": tt.ngay_sinh.strftime("%d/%m/%Y") if tt.ngay_sinh else "",
-                    "ma_ho_khau": tt.ma_ho_khau_tam_tru,
-                    "ngay_bat_dau": tt.ngay_bat_dau.strftime("%d/%m/%Y"),
-                    "ngay_ket_thuc": tt.ngay_ket_thuc.strftime("%d/%m/%Y"),
-                    "trang_thai": tt.trang_thai_hoan_thanh
-                })
-            return JsonResponse(data, safe=False)
+        #     data = []
+        #     for tt in tt_list:
+        #         data.append({
+        #             "id": tt.ma_tam_tru,
+        #             "ho_ten": tt.ho_ten,
+        #             "ngay_sinh": tt.ngay_sinh.strftime("%d/%m/%Y") if tt.ngay_sinh else "",
+        #             "ma_ho_khau": tt.ma_ho_khau_tam_tru,
+        #             "ngay_bat_dau": tt.ngay_bat_dau.strftime("%d/%m/%Y"),
+        #             "ngay_ket_thuc": tt.ngay_ket_thuc.strftime("%d/%m/%Y"),
+        #             "trang_thai": tt.trang_thai_hoan_thanh
+        #         })
+        #     return JsonResponse(data, safe=False)
 
 
        
@@ -760,7 +768,15 @@ class TamTru(LoginRequiredMixin, View):
     def post(self, request):
         if not self.check_permission(request):
             return redirect("home")
-       
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < datetime.strptime(request.POST.get("ngay_den"), "%Y-%m-%d").date():
+            return JsonResponse({"message":"Ngày kết thúc phải sau ngày bắt đầu"})
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < timezone.now().date():
+            tt_trang_thai_hoan_thanh=True
+        else:
+            tt_trang_thai_hoan_thanh=False   
+        
         tamtru_data = {
             "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
             "ho_ten": request.POST.get("ten"),
@@ -768,7 +784,8 @@ class TamTru(LoginRequiredMixin, View):
             "nghe_nghiep": request.POST.get("nghe_nghiep"),
             "cccd": request.POST.get("cccd"),
             "ngay_bat_dau": request.POST.get("ngay_den"),
-            "ngay_ket_thuc": request.POST.get("han")
+            "ngay_ket_thuc": request.POST.get("han"),
+            "trang_thai_hoan_thanh": tt_trang_thai_hoan_thanh            
         }
 
 
@@ -836,20 +853,7 @@ class TamVang(LoginRequiredMixin, View):
             ma_ho_khau=Subquery(nhan_khau_subquery.values("ma_ho_khau")[:1]),
         ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
 
-
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            tv_list = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
-            data = []
-            for tv in tv_list:
-                person = Person.objects.filter(ma_nhan_khau=tv.ma_nhan_khau).first()
-                data.append({
-                    "ho_ten": person.ho_ten if person else "",
-                    "ngay_sinh": person.ngay_sinh.strftime("%d/%m/%Y") if person and person.ngay_sinh else "",
-                    "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
-                    "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
-                    "trang_thai": tv.trang_thai_hoan_thanh
-                })
-            return JsonResponse(data, safe=False)
+        
         context = {
             "nhankhauthuongtru_list": list(nhankhauthuongtru_list),
             "records": tamvang_list,
@@ -860,15 +864,22 @@ class TamVang(LoginRequiredMixin, View):
     def post(self, request):
         if not self.check_permission(request):
             return JsonResponse({"error": "Không có quyền"}, status=403)
-       
-       
-       
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < datetime.strptime(request.POST.get("ngayDi"), "%Y-%m-%d").date():
+            return JsonResponse({"message":"Ngày kết thúc phải sau ngày bắt đầu"})
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < timezone.now().date():
+            tv_trang_thai_hoan_thanh=True
+        else:
+            tv_trang_thai_hoan_thanh=False       
+        
+        
         TemporaryAbsence.objects.create(
             ma_nhan_khau=request.POST.get("ma_nhan_khau"),
             ngay_bat_dau=request.POST.get("ngayDi"),
             ngay_ket_thuc=request.POST.get("han"),
             ly_do=request.POST.get("lyDo"),
-            trang_thai_hoan_thanh=False
+            trang_thai_hoan_thanh=tv_trang_thai_hoan_thanh
         )
 
 
@@ -876,8 +887,8 @@ class TamVang(LoginRequiredMixin, View):
             ma_nhan_khau=request.POST.get("ma_nhan_khau"),
             trang_thai="Thường trú"
         ).update(trang_thai="Tạm vắng")
-               
-        return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công"})
+                
+        return JsonResponse({"success": True, "message": "Đăng ký tạm vắng thành công", "redirect_url": "/qltv_tt/tamvang"})
 
 
 # ==================================================

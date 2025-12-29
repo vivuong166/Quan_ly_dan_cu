@@ -238,6 +238,7 @@ class Person_Change(models.Model):
     ma_thay_doi = models.AutoField(primary_key=True) 
     ma_nhan_khau = models.IntegerField()
     loai_thay_doi = models.CharField(max_length=100)
+    ma_ho_khau = models.CharField(max_length=10)
     # Khớp với DEFAULT CURRENT_DATE trong DB
     ngay_thay_doi = models.DateField(
         null=True,
