@@ -64,10 +64,10 @@ document.addEventListener('DOMContentLoaded', function(){
             if(!ma_nhan_khau || !ngayDi || !han || !lyDo){
                 alert('Vui lòng điền đầy đủ thông tin tạm vắng.');
                 return;
-            }
+            }            
 
-            if((new Date(ngayDi) > new Date(han)) || (new Date(han) <= new Date())) {
-                alert("Ngay bat dau va ngay di khong hop le")
+            if(new Date(ngayDi) > new Date(han)) {
+                alert("Ngày bắt đầu không được sau ngày kết thúc")
                 return;
             }
 
@@ -89,19 +89,19 @@ document.addEventListener('DOMContentLoaded', function(){
                     body: dataForm
                 });
                 if(response.ok){
-                    alert('Dang ky tam vang thanh cong!');
+                    alert('Đăng kí tạm vắng thành công!');
                     window.location.reload();
                     
                 }else{
                     console.log(response);
                     console.log(error)
-                    alert('Dang ky tam vang that bai!');
+                    alert('Đăng kí tạm vắng thất bại!');
                 }
                 //appendList(document.getElementById('tvList'), html);
                 // clear minimal
                 
             } catch{
-                alert('Co loi xay ra khi dang ky tam vang.');
+                alert('Có lỗi xảy ra khi đăng kí tạm vắng!\nVui lòng thử lại sau hoặc liên hệ với người phụ trách để được hỗ trợ');
             }
         });
     }
@@ -128,7 +128,12 @@ document.addEventListener('DOMContentLoaded', function(){
                 return;
             }
 
-            if((new Date(ngay_den) > new Date(han)) || (new Date(han) <= new Date())){
+            if(new Date(ngay_sinh) > new Date()){
+                alert("Ngày sinh của bạn không thể ở tương lai")
+                return;
+            }
+
+            if((new Date(ngay_den) > new Date(han))){
                 alert('Ngày hết hạn không hợp lệ.');
                 return;
             }
@@ -152,16 +157,15 @@ document.addEventListener('DOMContentLoaded', function(){
                 });
 
                 if(response.ok){
-                    alert('Dang li tam tru thanh cong!');
+                    alert('Đăng kí tạm trú thành công!');
                     window.location.reload();
                 }else{
-                    alert('Dang ky tam tru that bai!');
+                    alert('Đăng kí tạm trú thất bại!');
                 }
                 //appendList(document.getElementById('ttList'), html);
-                // clear minimal
-                
+                // clear minimal                
             } catch{
-                alert('Co loi xay ra khi dang ky tam tru.');
+                alert('Có lỗi xảy ra khi đăng kí tạm trú!\nvui lòng thử lại sau hoặc liên hệ với người phụ trách để được hỗ trợ.');
 
             }
         });
@@ -204,51 +208,51 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 // Global function to toggle tạm vắng status (similar to handleFeeAction in thuphi.js)
-function toggleStatus(id, isCompleting) {
-    const record = tamVangData.find(r => r.id === id);
-    if (!record) return;
+// function toggleStatus(id, isCompleting) {
+//     const record = tamVangData.find(r => r.id === id);
+//     if (!record) return;
     
-    // Toggle completed status
-    record.completed = !record.completed;
+//     // Toggle completed status
+//     record.completed = !record.completed;
     
-    // Find the row
-    const row = document.querySelector(`tr[data-id="${id}"]`);
-    if (!row) return;
+//     // Find the row
+//     const row = document.querySelector(`tr[data-id="${id}"]`);
+//     if (!row) return;
     
-    const statusCell = row.querySelector('.status-badge');
-    const actionBtn = row.querySelector('.btn-action');
+//     const statusCell = row.querySelector('.status-badge');
+//     const actionBtn = row.querySelector('.btn-action');
     
-    // Update status badge
-    if (record.completed) {
-        statusCell.classList.remove('status-active', 'status-overdue');
-        statusCell.classList.add('status-completed');
-        statusCell.textContent = 'Đã kết thúc';
-        actionBtn.innerHTML = '<i class="fas fa-undo"></i> Hoàn tác';
-        actionBtn.setAttribute('onclick', `toggleStatus(${id}, false)`);
-        row.classList.remove('overdue-row');
-    } else {
-        statusCell.classList.remove('status-completed');
-        statusCell.classList.add('status-active');
-        statusCell.textContent = 'Chưa kết thúc';
-        actionBtn.innerHTML = '<i class="fas fa-check"></i> Kết thúc';
-        actionBtn.setAttribute('onclick', `toggleStatus(${id}, true)`);
+//     // Update status badge
+//     if (record.completed) {
+//         statusCell.classList.remove('status-active', 'status-overdue');
+//         statusCell.classList.add('status-completed');
+//         statusCell.textContent = 'Đã kết thúc';
+//         actionBtn.innerHTML = '<i class="fas fa-undo"></i> Hoàn tác';
+//         actionBtn.setAttribute('onclick', `toggleStatus(${id}, false)`);
+//         row.classList.remove('overdue-row');
+//     } else {
+//         statusCell.classList.remove('status-completed');
+//         statusCell.classList.add('status-active');
+//         statusCell.textContent = 'Chưa kết thúc';
+//         actionBtn.innerHTML = '<i class="fas fa-check"></i> Kết thúc';
+//         actionBtn.setAttribute('onclick', `toggleStatus(${id}, true)`);
         
-        // Check if overdue
-        const today = new Date();
-        const endDate = parseDate(record.endDate);
-        if (endDate < today) {
-            statusCell.classList.add('status-overdue');
-            statusCell.textContent = 'Quá hạn';
-            row.classList.add('overdue-row');
-        }
-    }
+//         // Check if overdue
+//         const today = new Date();
+//         const endDate = parseDate(record.endDate);
+//         if (endDate < today) {
+//             statusCell.classList.add('status-overdue');
+//             statusCell.textContent = 'Quá hạn';
+//             row.classList.add('overdue-row');
+//         }
+//     }
     
-    // Visual feedback (like thuphi)
-    statusCell.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-        statusCell.style.transform = 'scale(1)';
-    }, 150);
-}
+//     // Visual feedback (like thuphi)
+//     statusCell.style.transform = 'scale(1.1)';
+//     setTimeout(() => {
+//         statusCell.style.transform = 'scale(1)';
+//     }, 150);
+// }
 
 // Helper function for date parsing
 function parseDate(dateStr) {
@@ -279,49 +283,49 @@ function parseDate(dateStr) {
 // ];
 
 // Global function to toggle tạm trú status (similar to toggleStatus for tạm vắng)
-function toggleTamTruStatus(id) {
-    const record = tamTruData.find(r => r.id === id);
-    if (!record) return;
+// function toggleTamTruStatus(id) {
+//     const record = tamTruData.find(r => r.id === id);
+//     if (!record) return;
     
-    // Toggle completed status
-    record.completed = !record.completed;
+//     // Toggle completed status
+//     record.completed = !record.completed;
     
-    // Find the row
-    const row = document.querySelector(`tr[data-id="${id}"]`);
-    if (!row) return;
+//     // Find the row
+//     const row = document.querySelector(`tr[data-id="${id}"]`);
+//     if (!row) return;
     
-    const statusCell = row.querySelector('.status-badge');
-    const actionBtn = row.querySelector('.btn-action');
+//     const statusCell = row.querySelector('.status-badge');
+//     const actionBtn = row.querySelector('.btn-action');
     
-    // Update status badge
-    if (record.completed) {
-        statusCell.classList.remove('status-active', 'status-overdue');
-        statusCell.classList.add('status-completed');
-        statusCell.textContent = 'Đã kết thúc';
-        actionBtn.innerHTML = '<i class="fas fa-undo"></i> Hoàn tác';
-        row.classList.remove('overdue-row');
-    } else {
-        statusCell.classList.remove('status-completed');
-        statusCell.classList.add('status-active');
-        statusCell.textContent = 'Chưa kết thúc';
-        actionBtn.innerHTML = '<i class="fas fa-check"></i> Kết thúc';
+//     // Update status badge
+//     if (record.completed) {
+//         statusCell.classList.remove('status-active', 'status-overdue');
+//         statusCell.classList.add('status-completed');
+//         statusCell.textContent = 'Đã kết thúc';
+//         actionBtn.innerHTML = '<i class="fas fa-undo"></i> Hoàn tác';
+//         row.classList.remove('overdue-row');
+//     } else {
+//         statusCell.classList.remove('status-completed');
+//         statusCell.classList.add('status-active');
+//         statusCell.textContent = 'Chưa kết thúc';
+//         actionBtn.innerHTML = '<i class="fas fa-check"></i> Kết thúc';
         
-        // Check if overdue
-        const today = new Date();
-        const endDate = parseDate(record.endDate);
-        if (endDate < today) {
-            statusCell.classList.add('status-overdue');
-            statusCell.textContent = 'Quá hạn';
-            row.classList.add('overdue-row');
-        }
-    }
+//         // Check if overdue
+//         const today = new Date();
+//         const endDate = parseDate(record.endDate);
+//         if (endDate < today) {
+//             statusCell.classList.add('status-overdue');
+//             statusCell.textContent = 'Quá hạn';
+//             row.classList.add('overdue-row');
+//         }
+//     }
     
-    // Visual feedback
-    statusCell.style.transform = 'scale(1.1)';
-    setTimeout(() => {
-        statusCell.style.transform = 'scale(1)';
-    }, 150);
-}
+//     // Visual feedback
+//     statusCell.style.transform = 'scale(1.1)';
+//     setTimeout(() => {
+//         statusCell.style.transform = 'scale(1)';
+//     }, 150);
+// }
 
 function getCookie(name){
     let cookieValue = null;
@@ -338,84 +342,84 @@ function getCookie(name){
     return cookieValue;
 }
 //Nhan xu ly reload danh sach tam tru
-document.addEventListener('DOMContentLoaded', function(){
-    const reloadBtn = document.getElementById('reloadTamTruList');
+// document.addEventListener('DOMContentLoaded', function(){
+//     const reloadBtn = document.getElementById('reloadTamTruList');
 
-if (reloadBtn) {
-    reloadBtn.addEventListener('click', async function () {
-        try {
-            const response = await fetch('/qltv_tt/tamtru/', {
-                method: 'GET',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
+// if (reloadBtn) {
+//     reloadBtn.addEventListener('click', async function () {
+//         try {
+//             const response = await fetch('/qltv_tt/tamtru/', {
+//                 method: 'GET',
+//                 headers: {
+//                     'X-Requested-With': 'XMLHttpRequest'
+//                 }
+//             });
 
-            const data = await response.json();
-            const tbody = document.getElementById('ttList');
-            tbody.innerHTML = '';
+//             const data = await response.json();
+//             const tbody = document.getElementById('ttList');
+//             tbody.innerHTML = '';
 
-            data.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><strong>${item.ho_ten}</strong></td>
-                    <td>${item.ngay_sinh}</td>
-                    <td>${item.ma_ho_khau}</td>
-                    <td>${item.ngay_bat_dau}</td>
-                    <td>${item.ngay_ket_thuc}</td>
-                    <td>
-                        ${item.trang_thai                  
-                            ? '<span class="status-badge status-completed">Đã kết thúc</span>'
-                            : '<span class="status-badge status-active">Chưa kết thúc</span>'}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+//             data.forEach(item => {
+//                 const tr = document.createElement('tr');
+//                 tr.innerHTML = `
+//                     <td><strong>${item.ho_ten}</strong></td>
+//                     <td>${item.ngay_sinh}</td>
+//                     <td>${item.ma_ho_khau}</td>
+//                     <td>${item.ngay_bat_dau}</td>
+//                     <td>${item.ngay_ket_thuc}</td>
+//                     <td>
+//                         ${item.trang_thai                  
+//                             ? '<span class="status-badge status-completed">Đã kết thúc</span>'
+//                             : '<span class="status-badge status-active">Chưa kết thúc</span>'}
+//                     </td>
+//                 `;
+//                 tbody.appendChild(tr);
+//             });
 
-        } catch (err) {
-            alert("Không thể reload danh sách");
+//         } catch (err) {
+//             alert("Không thể reload danh sách");
 
-        }
-    });
-}
+//         }
+//     });
+// }
 
-});
+// });
 
-//Nhan xu ly reload danh sach tam vang
-document.addEventListener('DOMContentLoaded', function(){
-    const reloadBtn = document.getElementById('reloadTamVangList');
-    if (reloadBtn) {
-        reloadBtn.addEventListener('click', async function () {
-            try {
-                const response = await fetch('/qltv_tt/tamvang/', {
-                    method: 'GET',
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-                const tbody = document.getElementById('tvList');
-                tbody.innerHTML = '';
+// //Nhan xu ly reload danh sach tam vang
+// document.addEventListener('DOMContentLoaded', function(){
+//     const reloadBtn = document.getElementById('reloadTamVangList');
+//     if (reloadBtn) {
+//         reloadBtn.addEventListener('click', async function () {
+//             try {
+//                 const response = await fetch('/qltv_tt/tamvang/', {
+//                     method: 'GET',
+//                     headers: {
+//                         'X-Requested-With': 'XMLHttpRequest'
+//                     }
+//                 });
+//                 const data = await response.json();
+//                 const tbody = document.getElementById('tvList');
+//                 tbody.innerHTML = '';
 
-                data.forEach(item => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td><strong>${item.ho_ten}</strong></td>
-                        <td>${item.ngay_sinh}</td>
-                        <td>${item.ngay_bat_dau}</td>
-                        <td>${item.ngay_ket_thuc}</td>
-                        <td>
-                            ${item.trang_thai
-                                ? '<span class="status-badge status-completed">Đã kết thúc</span>'
-                                : '<span class="status-badge status-active">Chưa kết thúc</span>'}
-                        </td>`;
+//                 data.forEach(item => {
+//                     const tr = document.createElement('tr');
+//                     tr.innerHTML = `
+//                         <td><strong>${item.ho_ten}</strong></td>
+//                         <td>${item.ngay_sinh}</td>
+//                         <td>${item.ngay_bat_dau}</td>
+//                         <td>${item.ngay_ket_thuc}</td>
+//                         <td>
+//                             ${item.trang_thai
+//                                 ? '<span class="status-badge status-completed">Đã kết thúc</span>'
+//                                 : '<span class="status-badge status-active">Chưa kết thúc</span>'}
+//                         </td>`;
                         
-                    tbody.appendChild(tr);
-                });
+//                     tbody.appendChild(tr);
+//                 });
 
-            } catch (err) {
-                alert("Không thể reload danh sách");        
-            }
-        });
-    }
-});
+//             } catch (err) {
+//                 alert("Không thể reload danh sách");        
+//             }
+//         });
+//     }
+// });

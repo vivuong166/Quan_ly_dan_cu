@@ -39,8 +39,9 @@
                                 <th>Nữ</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
+                        <!-- <tbody>
+                            
+                            <tr>                                
                                 <td>1</td>
                                 <td>Mầm non</td>
                                 <td>42</td>
@@ -88,6 +89,24 @@
                                 <td><strong>245</strong></td>
                                 <td><strong>245</strong></td>
                             </tr>
+                        </tbody> -->
+                        <tbody>
+                            {% for ten, stat in nhankhau_stats %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ ten }}</td>
+                                <td>{{ stat.total }}</td>
+                                <td>{{ stat.nam }}</td>
+                                <td>{{ stat.nu }}</td>
+                            </tr>
+                            {% endfor %}
+
+                            <tr class="total-row">
+                                <td colspan="2"><strong>Tổng cộng khu vực</strong></td>
+                                <td><strong>{{ tong_nk.total }}</strong></td>
+                                <td><strong>{{ tong_nk.nam }}</strong></td>
+                                <td><strong>{{ tong_nk.nu }}</strong></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -112,7 +131,7 @@
                                 <th>Lý do</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <!-- <tbody>
                             <tr>
                                 <td>1</td>
                                 <td>HK-089</td>
@@ -141,7 +160,28 @@
                                 <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
                                 <td><strong>3 người</strong></td>
                             </tr>
-                        </tbody>
+                        </tbody> -->
+
+                        <tbody>
+                            {% for tt in tamtru_dang_o %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ tt.ma_ho_khau.ma_ho_khau }}</td>
+                                <td>{{ tt.nhan_khau.ho_ten }}</td>
+                                <td>{{ tt.ngay_bat_dau|date:"d/m/Y" }}</td>
+                                <td>{{ tt.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                                <td>{{ tt.ly_do }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Không có người tạm trú</td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
+                                <td><strong>{{ tamtru_dang_o.count }} người</strong></td>
+                            </tr>
+                        </tbody>                        
                     </table>
                 </div>
             </div>
@@ -160,7 +200,7 @@
                                 <th>Lý do</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <!-- <tbody>
                             <tr>
                                 <td>1</td>
                                 <td>HK-142</td>
@@ -181,7 +221,30 @@
                                 <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
                                 <td><strong>2 người</strong></td>
                             </tr>
+                        </tbody> -->
+
+                        <tbody>
+                            {% for tt in tamtru_qua_han %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ tt.ma_ho_khau.ma_ho_khau }}</td>
+                                <td>{{ tt.nhan_khau.ho_ten }}</td>
+                                <td>{{ tt.ngay_bat_dau|date:"d/m/Y" }}</td>
+                                <td>{{ tt.ngay_ket_thuc|date:"d/m/Y" }}</td>
+                                <td>{{ tt.ly_do }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center">Không có người tạm trú quá hạn</td>
+                            </tr>
+                            {% endfor %}
+
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người quá hạn</strong></td>
+                                <td><strong>{{ tamtru_qua_han.count }} người</strong></td>
+                            </tr>
                         </tbody>
+
                     </table>
                 </div>
             </div>

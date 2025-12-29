@@ -18,6 +18,7 @@ from django.db.models import OuterRef, Subquery, Exists
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.timezone import now
+from datetime import datetime
 
 
 from .models import (
@@ -638,32 +639,32 @@ class TamTru(LoginRequiredMixin, View):
             ngay_ket_thuc__lt=timezone.now().date()
         ).update(trang_thai_hoan_thanh=True)
         
-        subquery = Person.objects.filter(
+        chu_ho_subquery = Person.objects.filter(
             ma_ho_khau=OuterRef("ma_ho_khau"),
             quan_he_chu_ho="Chủ hộ"
             ).values("ho_ten")[:1]
         
         hokhau_list = Household.objects.annotate(
-            ten_chu_ho=Subquery(subquery)
+            ten_chu_ho=Subquery(chu_ho_subquery)
             ).values("ma_ho_khau", "ten_chu_ho")
         
         tamtru_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            tt_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
+        # if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        #     tt_list = TemporaryResidence.objects.all().order_by("-ma_tam_tru")
 
-            data = []
-            for tt in tt_list:
-                data.append({
-                    "id": tt.ma_tam_tru,
-                    "ho_ten": tt.ho_ten,
-                    "ngay_sinh": tt.ngay_sinh.strftime("%d/%m/%Y") if tt.ngay_sinh else "",
-                    "ma_ho_khau": tt.ma_ho_khau_tam_tru,
-                    "ngay_bat_dau": tt.ngay_bat_dau.strftime("%d/%m/%Y"),
-                    "ngay_ket_thuc": tt.ngay_ket_thuc.strftime("%d/%m/%Y"),
-                    "trang_thai": tt.trang_thai_hoan_thanh
-                })
-            return JsonResponse(data, safe=False)
+        #     data = []
+        #     for tt in tt_list:
+        #         data.append({
+        #             "id": tt.ma_tam_tru,
+        #             "ho_ten": tt.ho_ten,
+        #             "ngay_sinh": tt.ngay_sinh.strftime("%d/%m/%Y") if tt.ngay_sinh else "",
+        #             "ma_ho_khau": tt.ma_ho_khau_tam_tru,
+        #             "ngay_bat_dau": tt.ngay_bat_dau.strftime("%d/%m/%Y"),
+        #             "ngay_ket_thuc": tt.ngay_ket_thuc.strftime("%d/%m/%Y"),
+        #             "trang_thai": tt.trang_thai_hoan_thanh
+        #         })
+        #     return JsonResponse(data, safe=False)
 
         
 
@@ -677,6 +678,14 @@ class TamTru(LoginRequiredMixin, View):
         if not self.check_permission(request):
             return redirect("home")
         
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < datetime.strptime(request.POST.get("ngay_den"), "%Y-%m-%d").date():
+            return JsonResponse({"message":"Ngày kết thúc phải sau ngày bắt đầu"})
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < timezone.now().date():
+            tt_trang_thai_hoan_thanh=True
+        else:
+            tt_trang_thai_hoan_thanh=False   
+        
         tamtru_data = {
             "ma_ho_khau_tam_tru": request.POST.get("ma_ho_khau"),
             "ho_ten": request.POST.get("ten"),
@@ -684,8 +693,10 @@ class TamTru(LoginRequiredMixin, View):
             "nghe_nghiep": request.POST.get("nghe_nghiep"),
             "cccd": request.POST.get("cccd"),
             "ngay_bat_dau": request.POST.get("ngay_den"),
-            "ngay_ket_thuc": request.POST.get("han")
+            "ngay_ket_thuc": request.POST.get("han"),
+            "trang_thai_hoan_thanh": tt_trang_thai_hoan_thanh            
         }
+
 
         #already registered check
         if TemporaryResidence.objects.filter(
@@ -746,19 +757,7 @@ class TamVang(LoginRequiredMixin, View):
             ma_ho_khau=Subquery(nhan_khau_subquery.values("ma_ho_khau")[:1]),
         ).values("ho_ten", "ngay_sinh", "ma_ho_khau", "ngay_bat_dau", "ngay_ket_thuc", "trang_thai_hoan_thanh")
 
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            tv_list = TemporaryAbsence.objects.all().order_by("-ma_tam_vang")
-            data = []
-            for tv in tv_list:
-                person = Person.objects.filter(ma_nhan_khau=tv.ma_nhan_khau).first()
-                data.append({
-                    "ho_ten": person.ho_ten if person else "",
-                    "ngay_sinh": person.ngay_sinh.strftime("%d/%m/%Y") if person and person.ngay_sinh else "",
-                    "ngay_bat_dau": tv.ngay_bat_dau.strftime("%d/%m/%Y"),
-                    "ngay_ket_thuc": tv.ngay_ket_thuc.strftime("%d/%m/%Y"),
-                    "trang_thai": tv.trang_thai_hoan_thanh
-                })
-            return JsonResponse(data, safe=False)
+        
         context = {
             "nhankhauthuongtru_list": list(nhankhauthuongtru_list),
             "records": tamvang_list,
@@ -769,6 +768,13 @@ class TamVang(LoginRequiredMixin, View):
         if not self.check_permission(request):
             return JsonResponse({"error": "Không có quyền"}, status=403)
         
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < datetime.strptime(request.POST.get("ngayDi"), "%Y-%m-%d").date():
+            return JsonResponse({"message":"Ngày kết thúc phải sau ngày bắt đầu"})
+        
+        if datetime.strptime(request.POST.get("han"), "%Y-%m-%d").date() < timezone.now().date():
+            tv_trang_thai_hoan_thanh=True
+        else:
+            tv_trang_thai_hoan_thanh=False       
         
         
         TemporaryAbsence.objects.create(
@@ -776,7 +782,7 @@ class TamVang(LoginRequiredMixin, View):
             ngay_bat_dau=request.POST.get("ngayDi"),
             ngay_ket_thuc=request.POST.get("han"),
             ly_do=request.POST.get("lyDo"),
-            trang_thai_hoan_thanh=False
+            trang_thai_hoan_thanh=tv_trang_thai_hoan_thanh
         )
 
         Person.objects.filter(
@@ -912,14 +918,15 @@ def thongke_baocao(request):
     # 2. TẠM TRÚ
     # ======================
     tamtru_dang_o = TemporaryResidence.objects.filter(
-        ngay_bat_dau__lte=today,
-        ngay_ket_thuc__gte=today
+        # ngay_bat_dau__lte=today,
+        # ngay_ket_thuc__gte=today
+        trang_thai_hoan_thanh=False
     )
 
     tamtru_qua_han = TemporaryResidence.objects.filter(
-        ngay_ket_thuc__lt=today,
-        trang_thai_hoan_thanh=False
-    )
+        # ngay_ket_thuc__lt=today,
+        trang_thai_hoan_thanh=True
+    ).values("ho_ten", "ma_ho_khau_tam_tru", "ngay_bat_dau", "ngay_ket_thuc")
 
     # ======================
     # 3. TẠM VẮNG
