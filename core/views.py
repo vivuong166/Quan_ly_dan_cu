@@ -312,7 +312,8 @@ def suahk(request, household_id):
 
     return render(request, "form_sua_hk.html", {
         "household": household,
-        "members": members
+        "members": members,
+        "head": members.filter(quan_he_chu_ho="Chủ hộ").first()
     })
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -491,6 +492,7 @@ def suank(request, person_id):
 
     person = get_object_or_404(Person, ma_nhan_khau=person_id)
     households = HouseholdDetail.objects.exclude(ma_ho_khau=person.ma_ho_khau)
+    old_person_household = person.ma_ho_khau  # Lưu mã hộ khẩu cũ để kiểm tra chuyển hộ
 
     if request.method == "POST":
         move_type = request.POST.get("move_type")
@@ -550,12 +552,21 @@ def suank(request, person_id):
             
             Person_Change.objects.create(
                 ma_nhan_khau=int(person.ma_nhan_khau),
+                ma_ho_khau=old_person_household,
                 loai_thay_doi=ten_loai,
                 noi_chuyen_di=noi_den,
                 ngay_thay_doi=ngay_thay_doi,
                 ghi_chu=ghi_chu_log
-                # ngay_chuyen_di tự động lấy theo auto_now_add
             )
+            if(move_type == "transfer" and dest_type == "household"):
+                Person_Change.objects.create(
+                    ma_nhan_khau=int(person.ma_nhan_khau),
+                    ma_ho_khau=ma_ho_moi,
+                    loai_thay_doi="Chuyển đến",
+                    noi_chuyen_di=None,
+                    ngay_thay_doi=ngay_thay_doi,
+                    ghi_chu="Tự động thêm khi chuyển hộ"
+                )
 
             messages.success(request, f"Đã cập nhật thông tin và lưu lịch sử cho {person.ho_ten}!")
             return redirect("nhankhau")

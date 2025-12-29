@@ -13,7 +13,7 @@
 <div class="dashboard-panels">
     <div class="panel">
         <div class="panel-body">
-            <form id="editPersonForm" method="post">
+            <form id="editPersonForm" method="post" data-relation="{{ person.quan_he_chu_ho }}">
                 {% csrf_token %}
                 
                 <div class="form-section">

@@ -64,6 +64,43 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Vui lòng chọn loại thao tác thay đổi!');
                 return;
             }
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // ---- 1. Validate ngày sinh ----
+            const dobInput = document.getElementById('personDob');
+            if (dobInput && dobInput.value) {
+                const dob = new Date(dobInput.value);
+                if (dob > today) {
+                    e.preventDefault();
+                    alert('Ngày sinh không được lớn hơn ngày hôm nay!');
+                    dobInput.focus();
+                    return;
+                }
+            }
+
+            // ---- 2. Validate ngày cấp CCCD ----
+            const idIssueInput = document.getElementById('personIdIssueDate');
+            if (idIssueInput && idIssueInput.value) {
+                const issueDate = new Date(idIssueInput.value);
+                if (issueDate > today) {
+                    e.preventDefault();
+                    alert('Ngày cấp giấy tờ không được lớn hơn ngày hôm nay!');
+                    idIssueInput.focus();
+                    return;
+                }
+            }
+
+            // ---- 3. Validate quan hệ chủ hộ ----
+            const currentRelation = form.dataset.relation;
+            const newRelation = document.getElementById('personRelation')?.value;
+
+            if (currentRelation !== 'Chủ hộ' && newRelation === 'Chủ hộ') {
+                e.preventDefault();
+                alert('Không thể chuyển quan hệ thành Chủ hộ vì nhân khẩu này hiện không phải Chủ hộ!');
+                document.getElementById('personRelation').focus();
+                return;
+            }
             // Hiển thị thông báo UX
             document.getElementById('successMessage').style.display = 'flex';
         });
