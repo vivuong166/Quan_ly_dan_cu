@@ -3,11 +3,11 @@ function handleMoveTypeChange() {
     const transferFields = document.getElementById('transferFields');
     const pastFields = document.getElementById('pastFields');
     const personalSection = document.getElementById('personalInfoSection');
-    const residenceSection = document.getElementById('residenceSection');
+    // const residenceSection = document.getElementById('residenceSection');
     const workSection = document.getElementById('workInfoSection');
 
     // Ẩn tất cả ban đầu
-    [transferFields, pastFields, personalSection, residenceSection, workSection].forEach(el => {
+    [transferFields, pastFields, personalSection, workSection].forEach(el => {
         if (el) el.style.display = 'none';
     });
 
@@ -20,7 +20,7 @@ function handleMoveTypeChange() {
         document.getElementById('transferDestinationType').required = true;
     } else if (moveType === 'update') {
         personalSection.style.display = 'block';
-        residenceSection.style.display = 'block';
+        // residenceSection.style.display = 'block';
         workSection.style.display = 'block';
         // Chỉ bắt buộc các trường cốt lõi khi update
         document.getElementById('personFullName').required = true;

@@ -180,6 +180,13 @@ document.addEventListener("DOMContentLoaded", function () {
   if (personResults) personResults.style.display = "none";
 });
 
+function showValue(val) {
+    if (val === null || val === undefined || val === '') {
+        return '-';
+    }
+    return val;
+}
+
 // Show person detail modal
 function showPersonDetail(person) {
   const viewModal = document.getElementById('viewPersonModal');
@@ -197,20 +204,20 @@ function showPersonDetail(person) {
                         Sửa
                     </a>
                 </div>
-                <div><strong>Ngày sinh:</strong> ${person.ngay_sinh}</div>
-                <div><strong>Giới tính:</strong> ${person.gioi_tinh}</div>
-                <div><strong>Quan hệ với chủ hộ:</strong> ${person.quan_he_chu_ho}</div>
-                <div><strong>Ngày đăng ký thường trú:</strong> ${person.ngay_dang_ky_thuong_tru}</div>
-                <div><strong>Nghề nghiệp:</strong> ${person.nghe_nghiep}</div>
-                <div><strong>Nơi sinh:</strong> ${person.noi_sinh}</div>
-                <div><strong>Quê quán:</strong> ${person.nguyen_quan}</div>
-                <div><strong>Dân tộc:</strong> ${person.dan_toc}</div>
-                <div style="grid-column:span 2;"><strong>Nơi làm việc:</strong> ${person.noi_lam_viec}</div>
-                <div><strong>CMND/CCCD:</strong> ${person.cccd}</div>
-                <div><strong>Ngày cấp CCCD:</strong> ${person.ngay_cap_cccd}</div>
-                <div style="grid-column:span 2;"><strong>Nơi cấp CCCD:</strong> ${person.noi_cap_cccd}</div>
-                <div style="grid-column:span 2;"><strong>Địa chỉ trước khi chuyển:</strong> ${person.dia_chi_truoc_khi_chuyen}</div>
-                <div style="grid-column:span 2;"><strong>Trạng thái:</strong> ${person.trang_thai}</div>
+                <div><strong>Ngày sinh:</strong> ${showValue(person.ngay_sinh)}</div>
+                <div><strong>Giới tính:</strong> ${showValue(person.gioi_tinh)}</div>
+                <div><strong>Quan hệ với chủ hộ:</strong> ${showValue(person.quan_he_chu_ho)}</div>
+                <div><strong>Ngày đăng ký thường trú:</strong> ${showValue(person.ngay_dang_ky_thuong_tru)}</div>
+                <div><strong>Nghề nghiệp:</strong> ${showValue(person.nghe_nghiep)}</div>
+                <div><strong>Nơi sinh:</strong> ${showValue(person.noi_sinh)}</div>
+                <div><strong>Quê quán:</strong> ${showValue(person.nguyen_quan)}</div>
+                <div><strong>Dân tộc:</strong> ${showValue(person.dan_toc)}</div>
+                <div style="grid-column:span 2;"><strong>Nơi làm việc:</strong> ${showValue(person.noi_lam_viec)}</div>
+                <div><strong>CMND/CCCD:</strong> ${showValue(person.cccd)}</div>
+                <div><strong>Ngày cấp CCCD:</strong> ${showValue(person.ngay_cap_cccd)}</div>
+                <div style="grid-column:span 2;"><strong>Nơi cấp CCCD:</strong> ${showValue(person.noi_cap_cccd)}</div>
+                <div style="grid-column:span 2;"><strong>Địa chỉ trước khi chuyển:</strong> ${showValue(person.dia_chi_truoc_khi_chuyen)}</div>
+                <div style="grid-column:span 2;"><strong>Trạng thái:</strong> ${showValue(person.trang_thai)}</div>
             </div>
         `;
   viewModal.style.display = 'flex';
