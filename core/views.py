@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.timezone import now
 from datetime import datetime
+from django.db import connection
 
 
 
@@ -34,7 +35,8 @@ from .models import (
     UserRole,
     HouseholdDetail,
     Person_Change,
-    PersonCurrent
+    PersonCurrent,
+    HouseholdPeopleMonth
 )
 
 
@@ -1017,6 +1019,59 @@ def thuphi(request):
                 messages.error(request, "Vui lòng nhập đầy đủ thông tin!")
             return redirect("thuphi")
 
+        elif action == "create_hygiene_fee":
+            year = request.POST.get("year")
+
+            if not year:
+                messages.error(request, "Vui lòng chọn năm!")
+                return redirect("thuphi")
+
+            households = HouseholdDetail.objects.all()
+
+            with connection.cursor() as cursor:
+                for h in households:
+                    cursor.execute(
+                        "SELECT insert_household_data(%s, %s)",
+                        [int(year), h.ma_ho_khau]
+                    )
+
+            messages.success(request, f"Đã lập phí vệ sinh cho năm {year}")
+            return redirect("thuphi")
+        
+        elif action == "save_hygiene_fee":
+            year = request.POST.get("year")
+            fees_json = request.POST.get("fees")
+
+            if not year or not fees_json:
+                messages.error(request, "Dữ liệu không hợp lệ")
+                return redirect("thuphi")
+
+            try:
+                fees = json.loads(fees_json)
+            except json.JSONDecodeError:
+                messages.error(request, "Dữ liệu gửi lên bị lỗi")
+                return redirect("thuphi")
+
+            # ===== GHI DB AN TOÀN =====
+            with transaction.atomic():
+                for item in fees:
+                    ma_ho = item.get("ma_ho_khau")
+                    trang_thai = item.get("trang_thai")
+
+                    if not ma_ho:
+                        continue
+
+                    HygieneFee.objects.filter(
+                        ma_ho_khau=ma_ho,
+                        nam_tinh_phi=year
+                    ).update(trang_thai=trang_thai)
+
+            messages.success(
+                request,
+                f"Đã lưu trạng thái thu phí vệ sinh cho {len(fees)} hộ (năm {year})"
+            )
+            return redirect("thuphi")
+
 
     # Lấy dữ liệu hiển thị
     campaigns = ContributionCampaign.objects.all().order_by('-ma_dot_dong_gop')
@@ -1025,11 +1080,20 @@ def thuphi(request):
     # Lấy danh sách đóng góp (JOIN thủ công hoặc query)
     recent_contributions = Contribution.objects.all().order_by('-ma_khoan_dong_gop')[:10]
 
+    # Phí vệ sinh
+    filter_year = request.GET.get("year")
+    hygiene_fees = HygieneFee.objects.all().order_by('nam_tinh_phi', 'ma_ho_khau')
+
+    # Lấy thông tin nhân khẩu và tạm trú ở mỗi HK
+    household_people_month=HouseholdPeopleMonth.objects.all()
 
     return render(request, "thuphi.html", {
         "campaigns": campaigns,
         "households": households,
-        "recent_contributions": recent_contributions
+        "recent_contributions": recent_contributions,
+        "hygiene_fees": hygiene_fees,
+        "selected_year": filter_year,
+        "household_people_month": household_people_month,
     })
 
 
