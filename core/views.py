@@ -413,11 +413,71 @@ def tachhk(request, household_id):
     if request.user.role.role != "TO_TRUONG" and request.user.role.role != "TO_PHO":
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
-    #lấy toàn bộ nk của toàn bộ hk
-    household_detail = HouseholdDetail.objects.filter(ma_ho_khau=household_id)
+
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
+    head = Person.objects.filter(ma_ho_khau=household_id, quan_he_chu_ho__icontains='Chủ hộ').first()
     persons = Person.objects.filter(ma_ho_khau=household_id).exclude(quan_he_chu_ho__in=["Chủ hộ"])
-    household = get_object_or_404(Household, ma_ho_khau=household_id) 
-    return render(request, "form_tach_hk.html", {"household": household, "persons": persons, "household_detail": household_detail})
+    household_detail = HouseholdDetail.objects.filter(ma_ho_khau=household_id)
+    household_js = {
+        "ma_ho_khau": household.ma_ho_khau,
+        "ten_chu_ho": head.ho_ten if head else "",
+        "so_nha": getattr(household, 'so_nha', ''),
+        "duong_pho": getattr(household, 'duong_pho', ''),
+        "phuong": getattr(household, 'phuong', ''),
+        "quan": getattr(household, 'quan', ''),
+    }
+    persons_js = [
+        {
+            "ma_nhan_khau": p.ma_nhan_khau,
+            "ho_ten": p.ho_ten,
+            "quan_he_chu_ho": p.quan_he_chu_ho,
+        } for p in persons
+    ]
+
+    if request.method == "POST":
+        import json
+        from django.http import JsonResponse
+
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            selected_members = data.get('selectedMembers', [])
+            new_head_id = data.get('newHeadId')
+            member_relationships = data.get('memberRelationships', {})
+            new_household_code = data.get('newHouseholdCode')
+            new_so_nha = data.get('newSoNha')
+            new_duong_pho = data.get('newDuongPho')
+
+            from django.db import transaction
+            with transaction.atomic():
+                # 1. Create new household (phường, quận mặc định)
+                new_hk = Household.objects.create(
+                    ma_ho_khau=new_household_code,
+                    so_nha=new_so_nha,
+                    duong_pho=new_duong_pho,
+                    phuong="La Khê",
+                    quan="Hà Đông"
+                )
+                # 2. Update selected members to new household
+                for member_id in selected_members:
+                    person = Person.objects.get(ma_nhan_khau=member_id)
+                    if int(member_id) == int(new_head_id):
+                        person.quan_he_chu_ho = "Chủ hộ"
+                    else:
+                        person.quan_he_chu_ho = member_relationships.get(str(member_id), member_relationships.get(int(member_id), ""))
+                    person.ma_ho_khau = new_household_code
+                    person.save()
+                # 3. Optionally: log split event, update old household, etc.
+            return JsonResponse({"status": "success", "message": "Tách hộ thành công!"})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": f"Lỗi: {str(e)}"}, status=500)
+
+    return render(request, "form_tach_hk.html", {
+        "household": household,
+        "persons": persons,
+        "household_detail": household_detail,
+        "household_json": household_js,
+        "persons_json": persons_js,
+    })
 
 
 
