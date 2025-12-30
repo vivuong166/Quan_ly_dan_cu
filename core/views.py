@@ -575,8 +575,7 @@ def themnk(request):
                 trang_thai="Thường trú"
             )
             messages.success(request, "Thêm nhân khẩu thành công!")
-            danh_sach_hk = Household.objects.all().values('ma_ho_khau', 'so_nha', 'duong_pho')
-            return render(request, "themnk.html", {"danh_sach_hk": danh_sach_hk})
+            return redirect("nhankhau")
            
         except Exception as e:
             messages.error(request, f"Lỗi: {e}")
