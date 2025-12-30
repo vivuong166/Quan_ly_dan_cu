@@ -3,33 +3,47 @@ function handleMoveTypeChange() {
     const transferFields = document.getElementById('transferFields');
     const pastFields = document.getElementById('pastFields');
     const personalSection = document.getElementById('personalInfoSection');
-    // const residenceSection = document.getElementById('residenceSection');
     const workSection = document.getElementById('workInfoSection');
+    const warning = document.getElementById('mustChangeOwnerWarning');
+
+    const form = document.getElementById('editPersonForm');
+    const relation = form.dataset.relation; // "Chủ hộ" hoặc khác
 
     // Ẩn tất cả ban đầu
     [transferFields, pastFields, personalSection, workSection].forEach(el => {
         if (el) el.style.display = 'none';
     });
+    if (warning) warning.style.display = 'none';
 
     // Reset required để tránh lỗi submit khi ẩn
     clearAllRequired();
 
+    // Nếu là Chủ hộ mà chọn chuyển đi / qua đời
+    if (relation === 'Chủ hộ' && (moveType === 'transfer' || moveType === 'past')) {
+        warning.style.display = 'block';
+        return; // DỪNG TẠI ĐÂY
+    }
+
+    // Các trường hợp hợp lệ
     if (moveType === 'transfer') {
         transferFields.style.display = 'block';
         document.getElementById('transferDate').required = true;
         document.getElementById('transferDestinationType').required = true;
-    } else if (moveType === 'update') {
+    } 
+    else if (moveType === 'update') {
         personalSection.style.display = 'block';
         // residenceSection.style.display = 'block';
         workSection.style.display = 'block';
-        // Chỉ bắt buộc các trường cốt lõi khi update
+
         document.getElementById('personFullName').required = true;
         document.getElementById('personDob').required = true;
         document.getElementById('personRelation').required = true;
-    } else if (moveType === 'past') {
+    } 
+    else if (moveType === 'past') {
         pastFields.style.display = 'block';
     }
 }
+
 
 function handleDestinationTypeChange() {
     const type = document.getElementById('transferDestinationType').value;
@@ -99,6 +113,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 alert('Không thể chuyển quan hệ thành Chủ hộ vì nhân khẩu này hiện không phải Chủ hộ!');
                 document.getElementById('personRelation').focus();
+                return;
+            }
+
+            if (currentRelation === 'Chủ hộ' && (moveType === 'transfer' || moveType === 'past')) {
+                e.preventDefault();
+                alert('Vui lòng thay đổi chủ hộ trước khi thực hiện thao tác này!');
                 return;
             }
             // Hiển thị thông báo UX
