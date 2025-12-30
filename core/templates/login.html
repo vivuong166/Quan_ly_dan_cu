@@ -31,8 +31,10 @@
                         <i class="fa fa-lock"></i>
                     </div>
                     <button class="login-btn" type="submit">ĐĂNG NHẬP</button>
-                    {% if error %}
-                        <div class="login-error">{{ error }}</div>
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="login-error">{{ message }}</div>
+                        {% endfor %}
                     {% endif %}
                 </form>
             </div>
