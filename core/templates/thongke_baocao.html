@@ -42,7 +42,7 @@
                 </div>
 
                 <div class="excel-table">
-                    <table border="1" style="width: 100%; border-collapse: collapse; text-align: center;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: center;">
                         <thead style="background-color: #f5f5f5;">
                             <tr>
                                 <th>STT</th>
@@ -73,7 +73,6 @@
                         </tfoot>
                     </table>
                 </div>
-                </div>
                 <!-- Bar chart: Số nhân khẩu theo tháng -->
                 <div style="margin-top: 32px;">
                     <h4>Biểu đồ số nhân khẩu theo từng tháng</h4>
@@ -88,6 +87,8 @@
                     <canvas id="nhankhauBarChart" height="320"></canvas>
                 </div>
             </div>
+        </div>
+    </div>
 
     <div class="tab-content" id="tab-tamtru">
         <div class="reports-container">
@@ -124,6 +125,10 @@
                             {% empty %}
                             <tr><td colspan="6" style="text-align: center;">Không có dữ liệu tạm trú</td></tr>
                             {% endfor %}
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
+                                <td><strong>{{ tamtru_list|length }} người</strong></td>
+                            </tr>
                         </tbody>
 
                     </table>
@@ -303,6 +308,7 @@
 <link rel="stylesheet" href="{% static 'css/thongke_baocao.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/bar_chart.js' %}"></script>
+<script src="{% static 'js/thongke_baocao.js' %}"></script>
 <script>
 window.barChartData = {{ bar_data|safe }};
 </script>
