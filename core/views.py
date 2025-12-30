@@ -379,8 +379,26 @@ def chitiet_hk(request, household_id):
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
     # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
-    person_ids = persons.values_list('ma_nhan_khau', flat=True)
-    person_changes = Person_Change.objects.filter(ma_nhan_khau__in=person_ids).order_by('-ngay_thay_doi')
+    person_changes = Person_Change.objects.filter(
+        ma_ho_khau=household_id
+    ).order_by('-ngay_thay_doi')
+
+    change_person_ids = person_changes.values_list('ma_nhan_khau', flat=True)
+
+    related_persons = Person.objects.filter(
+        ma_nhan_khau__in=change_person_ids
+    )
+
+    person_name_map = {
+        p.ma_nhan_khau: p.ho_ten
+        for p in related_persons
+    }
+
+    for pc in person_changes:
+        pc.ho_ten = person_name_map.get(
+            pc.ma_nhan_khau,
+            "Không xác định"
+        )
     
     # 4. Lấy lịch sử thay đổi hộ khẩu
     household_changes = HouseholdChange.objects.filter(ma_ho_khau=household_id).order_by('-ngay_thay_doi')
@@ -1104,6 +1122,7 @@ from .models import (
 
 
 from django.shortcuts import render
+from django.db import connection
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from .models import *
@@ -1113,11 +1132,28 @@ from django.db.models import Sum
 @login_required
 def thongke_baocao(request):
     today = date.today()
-    all_people = Person.objects.all()
+    
+    # 1. Lấy tháng năm từ request (mặc định là hiện tại)
+    try:
+        target_month = int(request.GET.get('month', today.month))
+        target_year = int(request.GET.get('year', today.year))
+    except (ValueError, TypeError):
+        target_month, target_year = today.month, today.year
+
+    # --- 2. TRUY VẤN NHÂN KHẨU THEO THÁNG/NĂM ---
+    with connection.cursor() as cursor:
+        # Gọi hàm get_active_persons_in_month (Hàm trả về danh sách ID nhân khẩu)
+        cursor.execute("SELECT * FROM get_active_persons_in_month(%s, %s)", [target_month, target_year])
+        rows_nk = cursor.fetchall()
+        # Chuyển đổi list tuples [(id1,), (id2,)] thành list phẳng [id1, id2]
+        active_nk_ids = [row[0] for row in rows_nk]
+
+    # Lọc danh sách people dựa trên ID trả về từ hàm DB
+    all_people = Person.objects.filter(ma_nhan_khau__in=active_nk_ids)
     all_households = Household.objects.all()
     total_hokhau = all_households.count()
 
-    # --- 1. THỐNG KÊ NHÂN KHẨU THEO ĐỘ TUỔI ---
+    # --- 3. THỐNG KÊ NHÂN KHẨU THEO ĐỘ TUỔI ---
     def get_stats(qs):
         return {
             'total': qs.count(),
@@ -1125,24 +1161,40 @@ def thongke_baocao(request):
             'nu': qs.filter(gioi_tinh__iexact='Nữ').count()
         }
 
+    # Tính toán stats_nk dựa trên all_people đã lọc và năm mục tiêu
     stats_nk = [
-        {'label': 'Mầm non (0-5 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__gt=today.year-6))},
-        {'label': 'Cấp 1 (6-10 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-6, ngay_sinh__year__gt=today.year-11))},
-        {'label': 'Cấp 2 (11-14 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-11, ngay_sinh__year__gt=today.year-15))},
-        {'label': 'Cấp 3 (15-17 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-15, ngay_sinh__year__gt=today.year-18))},
-        {'label': 'Lao động (18-60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-18, ngay_sinh__year__gt=today.year-60))},
-        {'label': 'Nghỉ hưu (>60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=today.year-60))},
+        {'label': 'Mầm non (0-5 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__gt=target_year-6))},
+        {'label': 'Cấp 1 (6-10 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=target_year-6, ngay_sinh__year__gt=target_year-11))},
+        {'label': 'Cấp 2 (11-14 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=target_year-11, ngay_sinh__year__gt=target_year-15))},
+        {'label': 'Cấp 3 (15-17 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=target_year-15, ngay_sinh__year__gt=target_year-18))},
+        {'label': 'Lao động (18-60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=target_year-18, ngay_sinh__year__gt=target_year-60))},
+        {'label': 'Nghỉ hưu (>60 tuổi)', 'data': get_stats(all_people.filter(ngay_sinh__year__lte=target_year-60))},
     ]
 
-    # LOGIC TÍNH TỔNG CỘNG CHO DÒNG CUỐI BẢNG NHÂN KHẨU
     tong_tat_ca = sum(item['data']['total'] for item in stats_nk)
     tong_nam = sum(item['data']['nam'] for item in stats_nk)
     tong_nu = sum(item['data']['nu'] for item in stats_nk)
 
-    # --- 2. TẠM TRÚ ---
-    tamtru_list = TemporaryResidence.objects.all().order_by('-ngay_bat_dau')
+    # --- TRUY VẤN TẠM TRÚ THEO THÁNG/NĂM ---
+    with connection.cursor() as cursor:
+        # Truy vấn lấy ma_tam_tru từ hàm TABLE
+        cursor.execute("SELECT ma_tam_tru FROM get_temporary_persons_in_month(%s, %s)", [target_month, target_year])
+        rows_tt = cursor.fetchall()
+        
+        # Chuyển đổi kết quả thành list ID: [1, 2, 3]
+        active_tt_ids = [row[0] for row in rows_tt]
 
-    # --- 3. TẠM VẮNG ---
+    # Lọc Model dựa trên danh sách ID thu được
+    tamtru_list = TemporaryResidence.objects.filter(ma_tam_tru__in=active_tt_ids).order_by('-ngay_bat_dau')
+
+    # Đừng quên đưa 'tamtru_list' vào context trả về
+    context = {
+        # ... các biến khác ...
+        'tamtru_list': tamtru_list,
+        'today': today,
+    }
+
+    # --- 5. TẠM VẮNG ---
     tamvang_qs = TemporaryAbsence.objects.filter(trang_thai_hoan_thanh=False)
     list_dang_vang = []
     list_qua_han = []
@@ -1161,7 +1213,7 @@ def thongke_baocao(request):
         else:
             list_dang_vang.append(item)
 
-    # --- 4. ĐÓNG GÓP (TỔNG QUÁT) ---
+    # --- 6. ĐÓNG GÓP ---
     campaigns = ContributionCampaign.objects.all()
     campaign_stats = []
     for camp in campaigns:
@@ -1199,6 +1251,10 @@ def thongke_baocao(request):
         'tong_tat_ca': tong_tat_ca,
         'tong_nam': tong_nam,
         'tong_nu': tong_nu,
+        'selected_month': target_month,
+        'selected_year': target_year,
+        'range_months': range(1, 13),
+        'range_years': range(today.year - 5, today.year + 1),
         'tamtru_list': tamtru_list,
         'list_dang_vang': list_dang_vang,
         'list_qua_han': list_qua_han,
