@@ -414,9 +414,9 @@ def tachhk(request, household_id):
         messages.error(request, "Bạn không có quyền quản lý hộ khẩu nhân khẩu")
         return redirect("home")
 
-    household = get_object_or_404(Household, ma_ho_khau=household_id) #thông tin của hộ khẩu
+    household = get_object_or_404(Household, ma_ho_khau=household_id)
     head = Person.objects.filter(ma_ho_khau=household_id, quan_he_chu_ho__icontains='Chủ hộ').first()
-    persons = Person.objects.filter(ma_ho_khau=household_id).exclude(quan_he_chu_ho__in=["Chủ hộ"]) # lấy thông trừ chủ hộ
+    persons = Person.objects.filter(ma_ho_khau=household_id).exclude(quan_he_chu_ho__in=["Chủ hộ"])
     household_detail = HouseholdDetail.objects.filter(ma_ho_khau=household_id)
     household_js = {
         "ma_ho_khau": household.ma_ho_khau,
@@ -963,18 +963,7 @@ def biendong(request):
 @login_required
 def formdoichuho(request):
     return render(request, "formdoichuho.html")
-from django.db import connection
-from .models import Household
 
-def tinh_phi_ve_sinh_cho_tat_ca_ho(nam):
-    ma_ho_khau_list = Household.objects.values_list("ma_ho_khau", flat=True)
-
-    with connection.cursor() as cursor:
-        for ma_ho_khau in ma_ho_khau_list:
-            cursor.execute(
-                "SELECT insert_household_data(%s, %s);",
-                [nam, ma_ho_khau]
-            )
 
 
 
@@ -983,28 +972,65 @@ def tinh_phi_ve_sinh_cho_tat_ca_ho(nam):
 # ==================================================
 @login_required
 def thuphi(request):
+    # Kiểm tra quyền
     if not hasattr(request.user, 'role') or request.user.role.role != "CAN_BO":
-        messages.error(request, "Bạn không có quyền quản lý thu phí")
+        messages.error(request, "Bạn không có quyền quản lý thu phí đóng góp")
         return redirect("home")
 
-    if request.method == "POST":
-        nam = request.POST.get("feeYear")
 
-        if not nam:
-            messages.error(request, "Vui lòng nhập năm")
+    if request.method == "POST":
+        action = request.POST.get("action")
+        print(f"Action nhận được: {action}") # Dòng này để bạn kiểm tra trong terminal/cmd
+
+
+        if action == "create_campaign":
+            ten = request.POST.get("ten_dot_dong_gop")
+            # Kiểm tra trùng tên
+            if ContributionCampaign.objects.filter(ten_dot_dong_gop=ten).exists():
+                messages.error(request, f"Tên đợt '{ten}' đã tồn tại!")
+            else:
+                ContributionCampaign.objects.create(
+                    ten_dot_dong_gop=ten,
+                    ngay_bat_dau=request.POST.get("ngay_bat_dau") or None,
+                    ngay_ket_thuc=request.POST.get("ngay_ket_thuc") or None
+                )
+                messages.success(request, f"Đã tạo đợt '{ten}' thành công!")
+           
             return redirect("thuphi")
 
-        try:
-            tinh_phi_ve_sinh_cho_tat_ca_ho(int(nam))
-            messages.success(request, f"Đã tính phí vệ sinh cho toàn bộ hộ năm {nam}")
-        except Exception as e:
-            messages.error(request, str(e))
-        lay_ra_bang_thu_phi_vs=HygieneFee.objects.all() # trả về bảng thu phí
-        HouseholdPeopleMonths=HouseholdPeopleMonth.objects.all() # lấy thông tin nhân khẩu tạm trú , tạm vắng ở mỗi HK
-        return redirect("thuphi")
 
-    return render(request, "thuphi.html")
+        # TRƯỜNG HỢP 2: GHI NHẬN TIỀN ĐÓNG GÓP
+        elif action == "record_donation":
+            ma_dot = request.POST.get("ma_dot_dong_gop")
+            ma_ho = request.POST.get("ma_ho_khau")
+            so_tien = request.POST.get("so_tien")
 
+
+            if ma_dot and ma_ho and so_tien:
+                Contribution.objects.create(
+                    ma_dot_dong_gop=int(ma_dot),
+                    ma_ho_khau=ma_ho,
+                    so_tien=so_tien
+                )
+                messages.success(request, f"Đã ghi nhận đóng góp cho hộ {ma_ho}")
+            else:
+                messages.error(request, "Vui lòng nhập đầy đủ thông tin!")
+            return redirect("thuphi")
+
+
+    # Lấy dữ liệu hiển thị
+    campaigns = ContributionCampaign.objects.all().order_by('-ma_dot_dong_gop')
+    # Lấy danh sách hộ khẩu từ View HouseholdDetail
+    households = HouseholdDetail.objects.all()
+    # Lấy danh sách đóng góp (JOIN thủ công hoặc query)
+    recent_contributions = Contribution.objects.all().order_by('-ma_khoan_dong_gop')[:10]
+
+
+    return render(request, "thuphi.html", {
+        "campaigns": campaigns,
+        "households": households,
+        "recent_contributions": recent_contributions
+    })
 
 
 from django.shortcuts import render
