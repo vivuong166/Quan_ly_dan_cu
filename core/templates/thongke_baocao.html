@@ -80,7 +80,8 @@
                         <label for="yearFilter">Lọc theo năm:</label>
                         <select id="yearFilter">
                             {% for y in bar_data.years %}
-                            <option value="{{ y }}">{{ y }}</option>
+                            <option value="{{ y }}" {% if y|add:"0" == selected_year|add:"0" %}selected{% endif %}>
+                            {{ y }}
                             {% endfor %}
                         </select>
                     </div>
@@ -312,4 +313,12 @@
 <script>
 window.barChartData = {{ bar_data|safe }};
 </script>
+{% if is_filtered %}
+<script>
+    // Đảm bảo các thành phần trang đã tải xong
+    window.addEventListener('load', function() {
+        alert("Đã lọc dữ liệu thành công cho Tháng {{ selected_month }} Năm {{ selected_year }}!");
+    });
+</script>
+{% endif %}
 {% endblock %}

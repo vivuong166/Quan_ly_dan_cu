@@ -1175,24 +1175,13 @@ def thongke_baocao(request):
     tong_nam = sum(item['data']['nam'] for item in stats_nk)
     tong_nu = sum(item['data']['nu'] for item in stats_nk)
 
-    # --- TRUY VẤN TẠM TRÚ THEO THÁNG/NĂM ---
+    # --- 4. TRUY VẤN TẠM TRÚ THEO THÁNG/NĂM (Sử dụng hàm SQL TABLE mới) ---
     with connection.cursor() as cursor:
-        # Truy vấn lấy ma_tam_tru từ hàm TABLE
         cursor.execute("SELECT ma_tam_tru FROM get_temporary_persons_in_month(%s, %s)", [target_month, target_year])
         rows_tt = cursor.fetchall()
-        
-        # Chuyển đổi kết quả thành list ID: [1, 2, 3]
         active_tt_ids = [row[0] for row in rows_tt]
 
-    # Lọc Model dựa trên danh sách ID thu được
     tamtru_list = TemporaryResidence.objects.filter(ma_tam_tru__in=active_tt_ids).order_by('-ngay_bat_dau')
-
-    # Đừng quên đưa 'tamtru_list' vào context trả về
-    context = {
-        # ... các biến khác ...
-        'tamtru_list': tamtru_list,
-        'today': today,
-    }
 
     # --- 5. TẠM VẮNG ---
     tamvang_qs = TemporaryAbsence.objects.filter(trang_thai_hoan_thanh=False)
@@ -1231,21 +1220,9 @@ def thongke_baocao(request):
             'ty_le': ty_le,
             'tong_tien': tong_tien
         })
-
-    # --- BAR CHART: SỐ NHÂN KHẨU THEO THÁNG, NHÓM THEO NĂM ---
-    from django.db.models.functions import ExtractYear, ExtractMonth
-    qs = Person.objects.annotate(year=ExtractYear('ngay_sinh'), month=ExtractMonth('ngay_sinh'))
-    stats = qs.values('year', 'month').annotate(count=Count('ma_nhan_khau')).order_by('year', 'month')
-    years = sorted({row['year'] for row in stats if row['year']})
-    data_by_year = {y: [0]*12 for y in years}
-    for row in stats:
-        y, m = row['year'], row['month']
-        if y and m:
-            data_by_year[y][m-1] = row['count']
-    bar_data = {
-        'years': years,
-        'data_by_year': data_by_year,
-    }
+    is_filtered = False
+    if 'month' in request.GET or 'year' in request.GET:
+        is_filtered = True
     context = {
         'stats_nk': stats_nk,
         'tong_tat_ca': tong_tat_ca,
@@ -1253,6 +1230,7 @@ def thongke_baocao(request):
         'tong_nu': tong_nu,
         'selected_month': target_month,
         'selected_year': target_year,
+        'is_filtered': is_filtered,
         'range_months': range(1, 13),
         'range_years': range(today.year - 5, today.year + 1),
         'tamtru_list': tamtru_list,
@@ -1261,8 +1239,37 @@ def thongke_baocao(request):
         'campaigns': campaigns,
         'campaign_stats': campaign_stats,
         'today': today,
-        'bar_data': bar_data,
     }
+    # Lấy dữ liệu cho năm hiện tại và năm trước
+    years_to_show = list(range(2020, 2026))
+    data_by_year = {}
+    today = date.today()
+    current_year = today.year
+    for y in years_to_show:
+        monthly_counts = []
+        for m in range(1, 13):
+            with connection.cursor() as cursor:
+                # 1. Đếm nhân khẩu thường trú hoạt động trong tháng m/năm y
+                cursor.execute("SELECT count(*) FROM get_active_persons_in_month(%s, %s)", [m, y])
+                count_nk = cursor.fetchone()[0] or 0
+                
+                # 2. Đếm nhân khẩu tạm trú hoạt động trong tháng m/năm y
+                cursor.execute("SELECT count(*) FROM get_temporary_persons_in_month(%s, %s)", [m, y])
+                count_tt = cursor.fetchone()[0] or 0
+                
+                # Tổng số người cư trú thực tế
+                monthly_counts.append(count_nk + count_tt)
+        
+        data_by_year[str(y)] = monthly_counts
+
+    bar_data = {
+        'years': [str(y) for y in years_to_show],
+        'data_by_year': data_by_year,
+        'selected_year': current_year,
+    }
+
+    # Đưa bar_data vào context
+    context['bar_data'] = bar_data
     return render(request, "thongke_baocao.html", context)
 
 # --- API: CHI TIẾT ĐÓNG GÓP THEO ĐỢT ---
