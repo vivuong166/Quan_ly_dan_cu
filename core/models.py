@@ -271,5 +271,20 @@ class HouseholdChange(models.Model):
 
     def __str__(self):
         return f"{self.ma_ho_khau} - {self.truong_thay_doi}"
+# ============================
+# SỐ NGƯỜI HỘ KHẨU TRONG THÁNG
+# ============================
+class HouseholdPeopleMonth(models.Model):
+    ma_ho_khau = models.CharField(max_length=10)           
+    thang = models.IntegerField()                         
+    nam = models.IntegerField()                              
+    so_nhan_khau = models.IntegerField()                        
+    so_tam_tru = models.IntegerField()       
 
+    class Meta:
+        db_table = "new_new_so_nguoi_ho_khau_theo_thang" 
+        managed = False                 
+
+    def __str__(self):
+        return f"{self.ma_ho_khau} - {self.thang}/{self.nam}"
 

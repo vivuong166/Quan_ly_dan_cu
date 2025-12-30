@@ -14,16 +14,16 @@
         <div class="login-card" id="loginCard">
             <div class="login-left">
                 <h2 class="login-title">Đăng nhập</h2>
-                <div class="login-social">
+                <!-- <div class="login-social">
                     <a href="#" class="login-social-btn"><i class="fab fa-google"></i></a>
                     <a href="#" class="login-social-btn"><i class="fab fa-facebook-f"></i></a>
                     <a href="#" class="login-social-btn"><i class="fab fa-github"></i></a>
                     <a href="#" class="login-social-btn"><i class="fab fa-linkedin-in"></i></a>
-                </div>
+                </div> -->
                 <form class="login-form" method="POST" action="">
                     {% csrf_token %}
                     <div class="login-input-group">
-                        <input type="text" name="username" placeholder="Email" required autocomplete="username">
+                        <input type="text" name="username" placeholder="Username" required autocomplete="username">
                         <i class="fa fa-user"></i>
                     </div>
                     <div class="login-input-group">
