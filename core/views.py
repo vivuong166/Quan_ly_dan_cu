@@ -1097,6 +1097,20 @@ def thongke_baocao(request):
             'tong_tien': tong_tien
         })
 
+    # --- BAR CHART: SỐ NHÂN KHẨU THEO THÁNG, NHÓM THEO NĂM ---
+    from django.db.models.functions import ExtractYear, ExtractMonth
+    qs = Person.objects.annotate(year=ExtractYear('ngay_sinh'), month=ExtractMonth('ngay_sinh'))
+    stats = qs.values('year', 'month').annotate(count=Count('ma_nhan_khau')).order_by('year', 'month')
+    years = sorted({row['year'] for row in stats if row['year']})
+    data_by_year = {y: [0]*12 for y in years}
+    for row in stats:
+        y, m = row['year'], row['month']
+        if y and m:
+            data_by_year[y][m-1] = row['count']
+    bar_data = {
+        'years': years,
+        'data_by_year': data_by_year,
+    }
     context = {
         'stats_nk': stats_nk,
         'tong_tat_ca': tong_tat_ca,
@@ -1108,6 +1122,7 @@ def thongke_baocao(request):
         'campaigns': campaigns,
         'campaign_stats': campaign_stats,
         'today': today,
+        'bar_data': bar_data,
     }
     return render(request, "thongke_baocao.html", context)
 
