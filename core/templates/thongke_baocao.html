@@ -17,10 +17,33 @@
     <div class="tab-content active" id="tab-nhankhau">
         <div class="reports-container">
             <div class="report-section">
-                <h3>Tổng hợp nhân khẩu theo độ tuổi</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin: 0; color: #1a237e;">Tổng hợp nhân khẩu theo độ tuổi</h3>
+                    
+                    <div class="filter-group" style="display: flex; align-items: center; gap: 10px; background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">
+                        <label style="font-weight: bold;">Tháng:</label>
+                        <select id="filter-month" class="form-control" style="width: 70px; height: 35px;">
+                            {% for m in range_months %}
+                            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <label style="font-weight: bold;">Năm:</label>
+                        <select id="filter-year" class="form-control" style="width: 100px; height: 35px;">
+                            {% for y in range_years %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                        </select>
+
+                        <button id="btn-filter-nk" class="btn primary" style="background-color: #3f51b5; color: white; border: none; padding: 8px 20px; border-radius: 4px; cursor: pointer;">
+                            Lọc dữ liệu
+                        </button>
+                    </div>
+                </div>
+
                 <div class="excel-table">
-                    <table>
-                        <thead>
+                    <table style="width: 100%; border-collapse: collapse; text-align: center;">
+                        <thead style="background-color: #f5f5f5;">
                             <tr>
                                 <th>STT</th>
                                 <th>Chỉ tiêu thống kê</th>
@@ -33,23 +56,22 @@
                             {% for item in stats_nk %}
                             <tr>
                                 <td>{{ forloop.counter }}</td>
-                                <td>{{ item.label }}</td>
-                                <td style="font-weight: bold;">{{ item.data.total }}</td>
+                                <td style="text-align: left; padding-left: 20px;">{{ item.label }}</td>
+                                <td><strong>{{ item.data.total }}</strong></td>
                                 <td>{{ item.data.nam }}</td>
                                 <td>{{ item.data.nu }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
-                        <tfoot>
-                            <tr class="total-row" style="background-color: #f8f9fa; font-weight: bold;">
-                                <td colspan="2" style="text-align: center;">TỔNG CỘNG</td>
+                        <tfoot style="background-color: #eeeeee; font-weight: bold;">
+                            <tr>
+                                <td colspan="2">TỔNG CỘNG</td>
                                 <td>{{ tong_tat_ca }}</td>
                                 <td>{{ tong_nam }}</td>
                                 <td>{{ tong_nu }}</td>
                             </tr>
                         </tfoot>
                     </table>
-                </div>
                 </div>
                 <!-- Bar chart: Số nhân khẩu theo tháng -->
                 <div style="margin-top: 32px;">
@@ -58,13 +80,16 @@
                         <label for="yearFilter">Lọc theo năm:</label>
                         <select id="yearFilter">
                             {% for y in bar_data.years %}
-                            <option value="{{ y }}">{{ y }}</option>
+                            <option value="{{ y }}" {% if y|add:"0" == selected_year|add:"0" %}selected{% endif %}>
+                            {{ y }}
                             {% endfor %}
                         </select>
                     </div>
                     <canvas id="nhankhauBarChart" height="320"></canvas>
                 </div>
             </div>
+        </div>
+    </div>
 
     <div class="tab-content" id="tab-tamtru">
         <div class="reports-container">
@@ -101,6 +126,10 @@
                             {% empty %}
                             <tr><td colspan="6" style="text-align: center;">Không có dữ liệu tạm trú</td></tr>
                             {% endfor %}
+                            <tr class="total-row">
+                                <td colspan="5"><strong>Tổng số người tạm trú</strong></td>
+                                <td><strong>{{ tamtru_list|length }} người</strong></td>
+                            </tr>
                         </tbody>
 
                     </table>
@@ -147,7 +176,7 @@
                 </div>
             </div>
 
-            <div class="report-section">
+            <!-- <div class="report-section">
                 <h3>Danh sách tạm vắng quá hạn</h3>
                 <div class="excel-table">
                     <table id="overdueAbsentTable">
@@ -181,7 +210,7 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 
@@ -252,7 +281,7 @@
                 <h3>Tra cứu đóng góp theo hộ khẩu</h3>
                 <div class="filter-row" style="margin-bottom: 15px;">
                     <label style="margin-left: 15px; margin-right: 10px;">Nhập</label>
-                    <input type="text" id="householdSearch" placeholder="VD: HK-001 hoặc Nguyễn Văn A" style="width: 227px;">
+                    <input type="text" id="householdSearch" placeholder=" VD: HK-001 " style="width: 227px;">
                     <button id="searchHouseholdBtn" class="btn primary">Tìm kiếm</button>
                 </div>
                 <div class="excel-table">
@@ -280,7 +309,16 @@
 <link rel="stylesheet" href="{% static 'css/thongke_baocao.css' %}">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="{% static 'js/bar_chart.js' %}"></script>
+<script src="{% static 'js/thongke_baocao.js' %}"></script>
 <script>
 window.barChartData = {{ bar_data|safe }};
 </script>
+{% if is_filtered %}
+<script>
+    // Đảm bảo các thành phần trang đã tải xong
+    window.addEventListener('load', function() {
+        alert("Đã lọc dữ liệu thành công cho Tháng {{ selected_month }} Năm {{ selected_year }}!");
+    });
+</script>
+{% endif %}
 {% endblock %}

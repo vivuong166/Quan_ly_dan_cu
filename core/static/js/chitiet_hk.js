@@ -31,7 +31,7 @@ function renderPersonChanges() {
         <tr>
             <td>${index + 1}</td>
             <td>${formatDate(c.date)}</td>
-            <td>NK-${c.id}</td>
+            <td>${c.name}</td>
             <td><span class="change-type-badge">${c.type}</span></td>
             <td>${c.note}</td>
         </tr>

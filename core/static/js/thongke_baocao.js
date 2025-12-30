@@ -11,6 +11,18 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById(targetId).classList.add('active');
         });
     });
+    // Xử lý nút Lọc Nhân Khẩu
+    const btnFilter = document.getElementById('btn-filter-nk');
+    if (btnFilter) {
+        btnFilter.addEventListener('click', function() {
+            const month = document.getElementById('filter-month').value;
+            const year = document.getElementById('filter-year').value;
+            
+            // Chuyển hướng trang kèm theo tham số để View xử lý
+            // Giữ nguyên tab hiện tại là 'nhankhau'
+            window.location.href = `?month=${month}&year=${year}&tab=nhankhau`;
+        });
+    }
 
     // 2. Xử lý khi đổi Select "Chọn đợt đóng góp"
     const selectCamp = document.getElementById('donationCampaign');
