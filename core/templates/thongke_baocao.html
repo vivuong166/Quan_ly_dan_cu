@@ -50,9 +50,21 @@
                         </tfoot>
                     </table>
                 </div>
+                </div>
+                <!-- Bar chart: Số nhân khẩu theo tháng -->
+                <div style="margin-top: 32px;">
+                    <h4>Biểu đồ số nhân khẩu theo từng tháng</h4>
+                    <div style="margin-bottom: 12px;">
+                        <label for="yearFilter">Lọc theo năm:</label>
+                        <select id="yearFilter">
+                            {% for y in bar_data.years %}
+                            <option value="{{ y }}">{{ y }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <canvas id="nhankhauBarChart" height="320"></canvas>
+                </div>
             </div>
-        </div>
-    </div>
 
     <div class="tab-content" id="tab-tamtru">
         <div class="reports-container">
@@ -266,5 +278,9 @@
 </div>
 
 <link rel="stylesheet" href="{% static 'css/thongke_baocao.css' %}">
-<script src="{% static 'js/thongke_baocao.js' %}" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/bar_chart.js' %}"></script>
+<script>
+window.barChartData = {{ bar_data|safe }};
+</script>
 {% endblock %}
