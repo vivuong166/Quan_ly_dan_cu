@@ -379,8 +379,26 @@ def chitiet_hk(request, household_id):
     persons = Person.objects.filter(ma_ho_khau=household_id)
     
     # 3. Lấy lịch sử thay đổi nhân khẩu (Dựa trên danh sách mã nhân khẩu trong hộ)
-    person_ids = persons.values_list('ma_nhan_khau', flat=True)
-    person_changes = Person_Change.objects.filter(ma_nhan_khau__in=person_ids).order_by('-ngay_thay_doi')
+    person_changes = Person_Change.objects.filter(
+        ma_ho_khau=household_id
+    ).order_by('-ngay_thay_doi')
+
+    change_person_ids = person_changes.values_list('ma_nhan_khau', flat=True)
+
+    related_persons = Person.objects.filter(
+        ma_nhan_khau__in=change_person_ids
+    )
+
+    person_name_map = {
+        p.ma_nhan_khau: p.ho_ten
+        for p in related_persons
+    }
+
+    for pc in person_changes:
+        pc.ho_ten = person_name_map.get(
+            pc.ma_nhan_khau,
+            "Không xác định"
+        )
     
     # 4. Lấy lịch sử thay đổi hộ khẩu
     household_changes = HouseholdChange.objects.filter(ma_ho_khau=household_id).order_by('-ngay_thay_doi')

@@ -59,7 +59,7 @@
         <div class="table-container">
             <table id="personChangesTable">
                 <thead>
-                    <tr><th>STT</th><th>Ngày thay đổi</th><th>Mã nhân khẩu</th><th>Dạng thay đổi</th><th>Ghi chú</th></tr>
+                    <tr><th>STT</th><th>Ngày thay đổi</th><th>Họ và tên</th><th>Dạng thay đổi</th><th>Ghi chú</th></tr>
                 </thead>
                 <tbody id="personChangesTableBody"></tbody>
             </table>
@@ -127,7 +127,7 @@
         {% for c in person_changes %}
         {
             "date": "{{ c.ngay_thay_doi|date:'Y-m-d' }}",
-            "id": "{{ c.ma_nhan_khau }}",
+            "name": "{{ c.ho_ten }}",
             "type": "{{ c.loai_thay_doi }}",
             "note": "{{ c.ghi_chu }}"
         }{% if not forloop.last %},{% endif %}
