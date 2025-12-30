@@ -43,7 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
 	ctx.style.maxWidth = '1300px';
 	ctx.style.maxHeight = '300px';
 
-	if (years.length) render(years[0]);
+	if (yearFilter) {
+        // Lấy giá trị thực tế đang được chọn (đã được Django set selected)
+        const defaultYear = yearFilter.value; 
+        render(defaultYear);
+    }
 	yearFilter.addEventListener('change', function() {
 		render(this.value);
 	});
