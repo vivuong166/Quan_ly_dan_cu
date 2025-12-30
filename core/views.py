@@ -54,28 +54,22 @@ def login_view(request):
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-
         user = authenticate(
             request,
             username=username,
             password=password
         )
 
-
         if user is None:
             messages.error(request, "Sai username hoặc mật khẩu")
             return redirect("login")
 
-
         login(request, user)
-
 
         # lấy role đã tồn tại (do signal tạo)
         request.session["user_role"] = user.role.role
 
-
         return redirect("home")
-
 
     return render(request, "login.html")
 
