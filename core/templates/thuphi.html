@@ -6,6 +6,15 @@
 {% endblock %}
 
 {% block content %}
+<div id="loading-overlay" style="display: flex;">
+    <div class="spinner"></div>
+    <p>Đang tải dữ liệu...</p>
+</div>
+
+<div id="main-content" style="display: none;">
+    </div>
+
+
 <h2>Quản lý thu phí - đóng góp</h2>
 
 <div class="fee-tabs">
@@ -15,7 +24,7 @@
 
 <div class="fee-container">
     <section id="tab-fee" class="fee-panel active">
-        <form action="POST" id="feeForm"></form>
+        <form method="POST" id="feeForm">
             <div class="fee-form">
                 <div class="row">
                     <label>Chọn năm lập phiếu</label>
@@ -193,7 +202,7 @@
 </script> -->
 
 <script>
-    window.householdsData = JSON.parse('{{ households_data|escapejs }}');
+    window.householdsData = {{ households_data|safe}};
 </script>
 
 <script src="{% static 'js/thuphi.js' %}" defer></script>
