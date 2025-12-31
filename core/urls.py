@@ -6,6 +6,7 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('get-contribution-detail/', views.get_contribution_detail, name='get_contribution_detail'),
     path('search-household-contribution/', views.search_household_contribution, name='search_household_contribution'),
+    
     # =====================
     # AUTH
     # =====================
