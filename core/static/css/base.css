@@ -163,6 +163,15 @@ body {
 }
 
 /* Avatar user tròn, to, nổi bật */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
 .user-avatar {
     width: 48px;
     height: 48px;
@@ -178,6 +187,13 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     cursor: pointer;
     transition: box-shadow 0.2s;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    font-size: 20px;
 }
 
 /* User menu dropdown in header */

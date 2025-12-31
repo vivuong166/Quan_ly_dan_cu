@@ -80,9 +80,33 @@
 
                     <!-- ================= USER DROPDOWN ================= -->
                     <div class="user-menu">
-                        <button class="user-avatar" id="userMenuButton" aria-haspopup="true" aria-expanded="false">
-                            N1
+                        <button class="user-info" id="userMenuButton"
+                                aria-haspopup="true" aria-expanded="false">
+                            <span class="user-name">
+                                {% if request.session.user_role == "TO_TRUONG" %}
+                                    Tổ trưởng
+                                {% elif request.session.user_role == "TO_PHO" %}
+                                    Tổ phó
+                                {% elif request.session.user_role == "CAN_BO" %}
+                                    Cán bộ
+                                {% else %}
+                                    Không xác định
+                                {% endif %}
+                            </span>
+                            <span class="user-avatar">
+                                {% if request.session.user_role == "TO_TRUONG" %}
+                                    TT
+                                {% elif request.session.user_role == "TO_PHO" %}
+                                    TP
+                                {% elif request.session.user_role == "CAN_BO" %}
+                                    CB
+                                {% else %}
+                                    ?
+                                {% endif %}
+                            </span>
                         </button>
+
+                        <!-- Dropdown -->
                         <div class="user-dropdown" id="userDropdown" role="menu">
                             <form action="{% url 'logout' %}" method="post">
                                 {% csrf_token %}

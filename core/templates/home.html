@@ -36,10 +36,17 @@
     <div class="quick-links-box">
         <h2>Chức năng nhanh</h2>
         <ul>
+            {% if request.session.user_role == "TO_TRUONG" or request.session.user_role == "TO_PHO" %}
             <li><a href="{% url 'qlnk' %}"><i class="fas fa-users"></i> Quản lý nhân khẩu - hộ khẩu</a></li>
             <li><a href="{% url 'qltv_tt' %}"><i class="fas fa-receipt"></i> Thêm tạm trú - tạm vắng</a></li>
+            {% endif %}
+            {% if request.session.user_role == "CAN_BO" %}
             <li><a href="{% url 'thuphi' %}"><i class="fas fa-file-invoice-dollar"></i> Thu phí đóng góp</a></li>
+            {% endif %}
             <li><a href="{% url 'thongke_baocao' %}"><i class="fas fa-chart-bar"></i> Xem báo cáo mới nhất</a></li>
+            {% if request.session.user_role == "TO_TRUONG" %}
+            <li><a href="{% url 'quanly_truycap' %}"><i class="fas fa-user"></i> Tạo tài khoản mới</a></li>
+            {% endif %}
         </ul>
     </div>
 </div>
