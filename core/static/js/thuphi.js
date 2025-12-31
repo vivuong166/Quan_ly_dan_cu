@@ -7,7 +7,10 @@ document.addEventListener('DOMContentLoaded', function(){
 
     const feeList = document.getElementById('feeList');
 
-    function formatVnd(n){ return n.toLocaleString('vi-VN') + 'đ'; }
+    function formatVnd(n){ 
+        if (typeof n !== 'number') return '0đ';
+        return n.toLocaleString('vi-VN') + 'đ'; 
+    }
     
     // Populate year dropdowns
     function populateYearDropdowns() {
@@ -78,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             chu: h.chu,
                             members: h.members,
                             year: f.year,
-                            //paid: f.paid,
+                            paid: Boolean(f.paid),
                             amount: f.amount,
                         });
                     }
@@ -104,6 +107,7 @@ document.addEventListener('DOMContentLoaded', function(){
                             <td><button class="btn-action" onclick="handleFeeAction(this, '${record.id}', ${record.year})">${record.paid ? 'Hoàn tác' : 'Thu phí'}</button></td>`;
             feeList.appendChild(tr);
         });
+
     }
     
     // Initialize page
@@ -170,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
             const formData = new FormData();
             formData.append("action", "create_hygiene_fee"); // 👈 ACTION Ở ĐÂY
-            formData.append("year", feeYearSelect);
+            formData.append("year", selectedYear);
 
             fetch("/thuphi/", {
                 method: "POST",
@@ -209,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             
             alert(`Đã tạo phiếu thu cho năm ${selectedYear} cho tất cả hộ gia đình!`);
-            console.log(action)
+            //console.log(action)
         });
     }
     
@@ -271,7 +275,7 @@ document.addEventListener('DOMContentLoaded', function(){
                         if (String(f.year) === String(selectedYear)) {
                             payload.push({
                                 ma_ho_khau: h.id,
-                                trang_thai: f.paid === true
+                                trang_thai: f.paid
                             });
                         }
                     });
@@ -305,13 +309,12 @@ document.addEventListener('DOMContentLoaded', function(){
                 location.reload();
 
             } catch (err) {
-                console.error(err);
+                // console.error(err);
                 alert("❌ Lưu thất bại");
             }
         });
     }
 }   
-
 });
 
 // Global function for fee action (Thu phí/Hoàn tác)
