@@ -249,70 +249,68 @@ document.addEventListener('DOMContentLoaded', function(){
         
         const saveBtn = document.getElementById("saveFeeList");
 
-if (saveBtn) {
-    saveBtn.addEventListener("click", async function () {
-        try {
-            // 1. Lấy năm đang lọc
-            const yearSelect = document.getElementById("filterYear");
-            const selectedYear = yearSelect.value;
+        if (saveBtn) {
+            saveBtn.addEventListener("click", async function () {
+            try {
+                // 1. Lấy năm đang lọc
+                const yearSelect = document.getElementById("filterYear");
+                const selectedYear = yearSelect.value;
 
-            if (!selectedYear) {
-                alert("⚠️ Vui lòng chọn năm cần lưu!");
-                return;
-            }
+                if (!selectedYear) {
+                    alert("⚠️ Vui lòng chọn năm cần lưu!");
+                    return;
+                }
 
-            // 2. Gom dữ liệu đúng năm
-            const payload = [];
+                // 2. Gom dữ liệu đúng năm
+                const payload = [];
 
-            householdsData.forEach(h => {
-                if (!h.fees) return;
+                householdsData.forEach(h => {
+                    if (!h.fees) return;
 
-                h.fees.forEach(f => {
-                    if (String(f.year) === String(selectedYear)) {
-                        payload.push({
-                            ma_ho_khau: h.id,
-                            trang_thai: f.paid === true
-                        });
-                    }
+                    h.fees.forEach(f => {
+                        if (String(f.year) === String(selectedYear)) {
+                            payload.push({
+                                ma_ho_khau: h.id,
+                                trang_thai: f.paid === true
+                            });
+                        }
+                    });
                 });
-            });
 
-            if (payload.length === 0) {
-                alert("⚠️ Không có dữ liệu để lưu");
-                return;
-            }
+                if (payload.length === 0) {
+                    alert("⚠️ Không có dữ liệu để lưu");
+                    return;
+                }
 
-            // 3. Chuẩn bị FormData
-            const formData = new FormData();
-            formData.append("action", "save_hygiene_fee");
-            formData.append("year", selectedYear);
-            formData.append("fees", JSON.stringify(payload));
+                // 3. Chuẩn bị FormData
+                const formData = new FormData();
+                formData.append("action", "save_hygiene_fee");
+                formData.append("year", selectedYear);
+                formData.append("fees", JSON.stringify(payload));
 
             // 4. Gửi về Django
-            const res = await fetch("/thuphi/", {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
-                },
-                body: formData
-            });
+                const res = await fetch("/thuphi/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: formData
+                });
 
-            if (!res.ok) {
-                throw new Error("Server error");
+                if (!res.ok) {
+                    throw new Error("Server error");
+                }
+
+                alert("✅ Đã lưu trạng thái thu phí thành công!");
+                location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert("❌ Lưu thất bại");
             }
-
-            alert("✅ Đã lưu trạng thái thu phí thành công!");
-            location.reload();
-
-        } catch (err) {
-            console.error(err);
-            alert("❌ Lưu thất bại");
-        }
-    });
-}
-
-
-    }   
+        });
+    }
+}   
 
 });
 
