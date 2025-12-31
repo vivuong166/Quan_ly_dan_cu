@@ -480,6 +480,22 @@ def tachhk(request, household_id):
                         person.quan_he_chu_ho = member_relationships.get(str(member_id), member_relationships.get(int(member_id), ""))
                     person.ma_ho_khau = new_household_code
                     person.save()
+                    
+                    Person_Change.objects.create(
+                        ma_ho_khau=household_id,
+                        ma_nhan_khau=member_id,
+                        loai_thay_doi="Tách hộ",
+                        ngay_thay_doi=date.today(),
+                        ghi_chu=f"Tách từ hộ {household_id} sang hộ {new_household_code}",
+                        noi_chuyen_di=f"Hộ {new_household_code}"
+                    )
+                    Person_Change.objects.create(
+                        ma_ho_khau=new_household_code,
+                        ma_nhan_khau=member_id,
+                        loai_thay_doi="Chuyển đến",
+                        ngay_thay_doi=date.today(),
+                        ghi_chu=f"Tách từ hộ {household_id} sang hộ {new_household_code}",
+                    )
                 # 3. Optionally: log split event, update old household, etc.
             return JsonResponse({"status": "success", "message": "Tách hộ thành công!"})
         except Exception as e:
@@ -1230,10 +1246,10 @@ def thongke_baocao(request):
             'den_ngay': tv.ngay_ket_thuc,
             'ly_do': tv.ly_do
         }
-        if tv.ngay_ket_thuc < today:
-            list_qua_han.append(item)
-        else:
-            list_dang_vang.append(item)
+        # if tv.ngay_ket_thuc < today:
+        #     list_qua_han.append(item)
+        # else:
+        list_dang_vang.append(item)
 
     # --- 6. ĐÓNG GÓP ---
     campaigns = ContributionCampaign.objects.all()
