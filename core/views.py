@@ -1137,13 +1137,15 @@ def thongke_baocao(request):
     try:
         target_month = int(request.GET.get('month', today.month))
         target_year = int(request.GET.get('year', today.year))
+        nk_month = int(request.GET.get('nk_month', today.month))
+        nk_year = int(request.GET.get('nk_year', today.year))
     except (ValueError, TypeError):
         target_month, target_year = today.month, today.year
 
     # --- 2. TRUY VẤN NHÂN KHẨU THEO THÁNG/NĂM ---
     with connection.cursor() as cursor:
         # Gọi hàm get_active_persons_in_month (Hàm trả về danh sách ID nhân khẩu)
-        cursor.execute("SELECT * FROM get_active_persons_in_month(%s, %s)", [target_month, target_year])
+        cursor.execute("SELECT * FROM get_active_persons_in_month(%s, %s)", [nk_month, nk_year])
         rows_nk = cursor.fetchall()
         # Chuyển đổi list tuples [(id1,), (id2,)] thành list phẳng [id1, id2]
         active_nk_ids = [row[0] for row in rows_nk]
@@ -1229,6 +1231,8 @@ def thongke_baocao(request):
         'tong_nam': tong_nam,
         'tong_nu': tong_nu,
         'selected_month': target_month,
+        'selected_month1':nk_month,
+        'selected_year1': nk_year,
         'selected_year': target_year,
         'is_filtered': is_filtered,
         'range_months': range(1, 13),

@@ -24,14 +24,14 @@
                         <label style="font-weight: bold;">Tháng:</label>
                         <select id="filter-month" class="form-control" style="width: 70px; height: 35px;">
                             {% for m in range_months %}
-                            <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+                            <option value="{{ m }}" {% if m == selected_month1 %}selected{% endif %}>{{ m }}</option>
                             {% endfor %}
                         </select>
 
                         <label style="font-weight: bold;">Năm:</label>
                         <select id="filter-year" class="form-control" style="width: 100px; height: 35px;">
                             {% for y in range_years %}
-                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                            <option value="{{ y }}" {% if y == selected_year1 %}selected{% endif %}>{{ y }}</option>
                             {% endfor %}
                         </select>
 
@@ -317,7 +317,7 @@ window.barChartData = {{ bar_data|safe }};
 <script>
     // Đảm bảo các thành phần trang đã tải xong
     window.addEventListener('load', function() {
-        alert("Đã lọc dữ liệu thành công cho Tháng {{ selected_month }} Năm {{ selected_year }}!");
+        alert("Đã lọc dữ liệu thành công cho Tháng {{ selected_month1 }} Năm {{ selected_year1 }}!");
     });
 </script>
 {% endif %}

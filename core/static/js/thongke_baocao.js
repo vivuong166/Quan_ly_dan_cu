@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Chuyển hướng trang kèm theo tham số để View xử lý
             // Giữ nguyên tab hiện tại là 'nhankhau'
-            window.location.href = `?month=${month}&year=${year}&tab=nhankhau`;
+            window.location.href = `?nk_month=${month}&nk_year=${year}&tab=nhankhau`;
         });
     }
 
