@@ -1143,7 +1143,6 @@ def thuphi(request):
     hygiene_fees = HygieneFee.objects.all().order_by('nam_tinh_phi', 'ma_ho_khau')
 
     # Lấy thông tin nhân khẩu và tạm trú ở mỗi HK
-    household_people_month=HouseholdPeopleMonth.objects.all()
 
     return render(request, "thuphi.html", {
         "campaigns": campaigns,
@@ -1151,10 +1150,22 @@ def thuphi(request):
         "recent_contributions": recent_contributions,
         "hygiene_fees": hygiene_fees,
         "selected_year": filter_year,
-        "household_people_month": household_people_month,
         "households_data": json.dumps(list(households_data))
     })
 
+def get_household_monthly_data(request):
+    try:
+        year = int(request.GET.get("year"))
+        household_id = request.GET.get("household_id")
+    except (TypeError, ValueError):
+        return JsonResponse({"error": "Invalid parameters"}, status=400)
+
+    data = HouseholdPeopleMonth.objects.filter(
+        ma_ho_khau=household_id,
+        nam=year
+    ).values("thang", "so_nhan_khau", "so_tam_tru")
+
+    return JsonResponse(list(data), safe=False)
 
 from django.shortcuts import render
 from django.utils import timezone

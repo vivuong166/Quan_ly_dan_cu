@@ -7,6 +7,7 @@ urlpatterns = [
     path('get-contribution-detail/', views.get_contribution_detail, name='get_contribution_detail'),
     path('search-household-contribution/', views.search_household_contribution, name='search_household_contribution'),
     path('get-nhankhau-in-month/', views.get_nhankhau_in_month, name='get_nhankhau_in_month'),
+    path('get-household-monthly-data/', views.get_household_monthly_data, name='get_household_monthly_data'),
     
     # =====================
     # AUTH

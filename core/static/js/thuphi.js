@@ -104,7 +104,10 @@ document.addEventListener('DOMContentLoaded', function(){
                             <td>${record.year}</td>
                             <td>${formatVnd(total)}</td>
                             <td><span class="status ${record.paid ? 'paid' : 'unpaid'}">${record.paid ? 'Đã thu' : 'Chưa thu'}</span></td>
-                            <td><button class="btn-action" onclick="handleFeeAction(this, '${record.id}', ${record.year})">${record.paid ? 'Hoàn tác' : 'Thu phí'}</button></td>`;
+                            <td style="display: flex; gap: 15px;">
+                                <button class="btn-view" onclick="handleFeeView('${record.id}', ${record.year})">Xem chi tiết</button>
+                                <button class="btn-action" onclick="handleFeeAction(this, '${record.id}', ${record.year})">${record.paid ? 'Hoàn tác' : 'Thu phí'}</button>
+                            </td>`;
             feeList.appendChild(tr);
         });
 
@@ -348,6 +351,59 @@ function handleFeeAction(btn, householdId, year) {
     setTimeout(() => {
         statusCell.style.transform = 'scale(1)';
     }, 150);
+}
+
+function handleFeeView(householdId, year) {
+    fetch(`/get-household-monthly-data/?year=${year}&household_id=${householdId}`)
+        .then(res => {
+            if (!res.ok) throw new Error("API error");
+            return res.json();
+        })
+        .then(data => {
+            renderFeeDetailModal(data, householdId, year);
+        })
+        .catch(err => {
+            console.error(err);
+            alert("Không thể tải chi tiết hộ khẩu");
+        });
+}
+
+function renderFeeDetailModal(data, householdId, year) {
+    const modal = document.getElementById("feeDetailModal");
+    const body = document.getElementById("feeDetailBody");
+    const title = document.getElementById("feeDetailTitle");
+    const totalEl = document.getElementById("feeDetailTotal");
+
+    title.innerText = `Chi tiết hộ ${householdId} năm ${year}`;
+    body.innerHTML = "";
+
+    let totalPeople = 0;
+
+    data.forEach(item => {
+        const nk = item.so_nhan_khau || 0;
+        const tt = item.so_tam_tru || 0;
+
+        totalPeople += nk + tt;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>Tháng ${item.thang}</td>
+            <td>${nk}</td>
+            <td>${tt}</td>
+            <td>${((nk + tt) * 6000).toLocaleString('vi-VN')}đ</td>
+        `;
+        body.appendChild(tr);
+    });
+
+    const totalMoney = totalPeople * 6000;
+
+    totalEl.innerText = `Thành tiền: ${(totalMoney).toLocaleString('vi-VN')}đ`;
+
+    modal.style.display = "block";
+}
+
+function closeFeeDetailModal() {
+    document.getElementById("feeDetailModal").style.display = "none";
 }
 
 // Modal functions
