@@ -110,10 +110,10 @@
                                 <td>{{ item.ngay_bat_dau|date:"d/m/Y" }}</td>
                                 <td>{{ item.ngay_ket_thuc|date:"d/m/Y" }}</td>
                                 <td>
-                                    {% if item.trang_thai_hoan_thanh %} 
-                                        <span style="color: gray;">Đã kết thúc</span> 
-                                    {% else %} 
-                                        <strong style="color: green;">Đang tạm trú</strong> 
+                                    {% if item.ngay_ket_thuc >= today %}
+                                        <strong style="color: green;">Đang tạm trú</strong>
+                                    {% else %}
+                                        <span style="color: gray;">Đã kết thúc</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -145,7 +145,7 @@
                                 <th>Họ tên</th>
                                 <th>Từ ngày</th>
                                 <th>Đến ngày</th>
-                                <th>Lý do</th>
+                                <th>Trạng thái</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -156,7 +156,13 @@
                                 <td>{{ item.ho_ten }}</td>
                                 <td>{{ item.tu_ngay|date:"d/m/Y" }}</td>
                                 <td>{{ item.den_ngay|date:"d/m/Y" }}</td>
-                                <td>{{ item.ly_do }}</td>
+                                <td>
+                                    {% if item.den_ngay >= today %}
+                                        <strong style="color: green;">Đang tạm trú</strong>
+                                    {% else %}
+                                        <span style="color: gray;">Đã kết thúc</span>
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr><td colspan="6" class="no-data" style="text-align: center;">Không có dữ liệu tạm vắng</td></tr>
