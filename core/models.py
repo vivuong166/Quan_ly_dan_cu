@@ -282,7 +282,7 @@ class HouseholdPeopleMonth(models.Model):
     so_tam_tru = models.IntegerField()       
 
     class Meta:
-        db_table = "new_new_so_nguoi_ho_khau_theo_thang" 
+        db_table = "new_so_nguoi_ho_khau_theo_thang" 
         managed = False                 
 
     def __str__(self):

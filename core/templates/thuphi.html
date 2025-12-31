@@ -15,26 +15,28 @@
 
 <div class="fee-container">
     <section id="tab-fee" class="fee-panel active">
-        <div class="fee-form">
-            <div class="row">
-                <label>Chọn năm lập phiếu</label>
-                <select id="feeYear">
-                    <option value="">-- Chọn năm --</option>
-                    <!-- <option value="2024">2024</option>
-                    <option value="2025">2025</option> -->
-                </select>
+        <form action="POST" id="feeForm"></form>
+            <div class="fee-form">
+                <div class="row">
+                    <label>Chọn năm lập phiếu</label>
+                    <select id="feeYear">
+                        <option value="">-- Chọn năm --</option>
+                        <!-- <option value="2024">2024</option>
+                        <option value="2025">2025</option> -->
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" id="addFee" class="btn primary">Lập phiếu thu</button>
+                </div>
             </div>
-            <div class="form-actions">
-                <button type="button" id="addFee" class="btn primary">Lập phiếu thu</button>
-            </div>
-        </div>
+        </form>
 
         <div class="list-panel">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <h3 style="margin: 0;">Phiếu thu gần đây</h3>
                 <div>
                     <button type="button" id="saveFeeList" class="btn secondary btn-save-fee" >Lưu</button>
-                    <button type="button" id="reloadFeeList" class="btn secondary btn-reload-fee">Reload</button>
+                    <!-- <button type="button" id="reloadFeeList" class="btn secondary btn-reload-fee">Reload</button> -->
                 </div>
             </div>
             <div class="filter-row">
@@ -172,7 +174,7 @@
     </div>
 </div>
 
-{% if messages %}
+<!-- {% if messages %}
 <script>
     {% for message in messages %}
         alert("{{ message|escapejs }}");
@@ -188,6 +190,11 @@
         {% endfor %}
     ];
     console.log("Dữ liệu hộ gia đình đã tải:", householdsData);
+</script> -->
+
+<script>
+    window.householdsData = JSON.parse('{{ households_data|escapejs }}');
 </script>
+
 <script src="{% static 'js/thuphi.js' %}" defer></script>
 {% endblock %}

@@ -1040,27 +1040,32 @@ def thuphi(request):
 
             households = HouseholdDetail.objects.all()
 
-            with connection.cursor() as cursor:
-                for h in households:
-                    cursor.execute(
-                        "SELECT insert_household_data(%s, %s)",
-                        [int(year), h.ma_ho_khau]
-                    )
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    for h in households:
+                        cursor.execute(
+                            "SELECT insert_household_data(%s, %s)",
+                            [int(year), h.ma_ho_khau]
+                        )
 
             messages.success(request, f"Đã lập phí vệ sinh cho năm {year}")
             return redirect("thuphi")
         
         elif action == "save_hygiene_fee":
-            year = request.POST.get("year")
+            year = int(request.POST.get("year"))
             fees_json = request.POST.get("fees")
 
             if not year or not fees_json:
                 messages.error(request, "Dữ liệu không hợp lệ")
                 return redirect("thuphi")
 
+            # if not fees_json:
+            #     return JsonResponse({"message": "Dữ liệu không hợp lệ hoặc bị thiếu"}, status=400)
+
             try:
                 fees = json.loads(fees_json)
             except json.JSONDecodeError:
+                # return JsonResponse({"error": "JSON lỗi"}, status=400)
                 messages.error(request, "Dữ liệu gửi lên bị lỗi")
                 return redirect("thuphi")
 
@@ -1068,11 +1073,12 @@ def thuphi(request):
             with transaction.atomic():
                 for item in fees:
                     ma_ho = item.get("ma_ho_khau")
-                    trang_thai = item.get("trang_thai")
+                    trang_thai_boolean = item.get("trang_thai")
 
                     if not ma_ho:
                         continue
-
+                        
+                    trang_thai = "Đã thu" if trang_thai_boolean else "Chưa thu"
                     HygieneFee.objects.filter(
                         ma_ho_khau=ma_ho,
                         nam_tinh_phi=year
@@ -1083,6 +1089,30 @@ def thuphi(request):
                 f"Đã lưu trạng thái thu phí vệ sinh cho {len(fees)} hộ (năm {year})"
             )
             return redirect("thuphi")
+        
+    households_data = []
+
+    for hk in HouseholdDetail.objects.all():
+        chu_ho = hk.ten_chu_ho if hk.ten_chu_ho else "Chưa có"
+        so_nhan_khau = HouseholdPeopleMonth.objects.filter(
+        ma_ho_khau=hk.ma_ho_khau
+        ).count()
+
+        fees = []
+        for fee in HygieneFee.objects.filter(ma_ho_khau=hk.ma_ho_khau):
+            fees.append({
+                "year": fee.nam_tinh_phi,
+                "paid": fee.trang_thai,
+                "amount": float(fee.so_tien)
+            })
+
+        households_data.append({
+            "id": hk.ma_ho_khau,
+            "chu": chu_ho,
+            "members": so_nhan_khau,
+            "fees": fees
+        })
+
 
 
     # Lấy dữ liệu hiển thị
@@ -1106,6 +1136,7 @@ def thuphi(request):
         "hygiene_fees": hygiene_fees,
         "selected_year": filter_year,
         "household_people_month": household_people_month,
+        "households_data": json.dumps(list(households_data))
     })
 
 
