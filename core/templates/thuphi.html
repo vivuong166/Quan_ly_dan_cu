@@ -6,10 +6,10 @@
 {% endblock %}
 
 {% block content %}
-<div id="loading-overlay" style="display: flex;">
+<!-- <div id="loading-overlay" style="display: flex;">
     <div class="spinner"></div>
     <p>Đang tải dữ liệu...</p>
-</div>
+</div> -->
 
 <div id="main-content" style="display: none;">
     </div>
@@ -147,6 +147,36 @@
             </table>
         </div>
     </section>
+</div>
+
+<div id="feeDetailModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h4 id="feeDetailTitle"></h4>
+            <span class="modal-close" onclick="closeFeeDetailModal()">&times;</span>
+        </div>
+
+        <div class="modal-body">
+            <table class="modal-table">
+                <thead>
+                    <tr>
+                        <th>Tháng</th>
+                        <th>Số nhân khẩu</th>
+                        <th>Số tạm trú</th>
+                        <th>Phí vệ sinh</th>
+                    </tr>
+                </thead>
+                <tbody id="feeDetailBody"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" id="feeDetailTotal"
+                            style="text-align:right;font-weight:bold;">
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div id="createCampaignModal" class="modal">
