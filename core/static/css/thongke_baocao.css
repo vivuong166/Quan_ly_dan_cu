@@ -13,10 +13,6 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    background: #f8f9fa;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
 }
 .filter-label {
     font-weight: bold;
@@ -24,10 +20,14 @@
 .filter-month {
     width: 70px;
     height: 35px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 .filter-year {
     width: 100px;
     height: 35px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 .filter-btn {
     background-color: #3195e8;
@@ -52,10 +52,11 @@
 }
 /* Bar chart section */
 .bar-chart-section {
-    margin-top: 32px;
+    margin-top: 0px;
 }
 .bar-chart-title {
-    margin-bottom: 0.5em;
+    margin-bottom: 10px;
+    color: #4371e5;
 }
 /* Bar chart year filter styles */
 .bar-year-filter {
@@ -86,11 +87,17 @@
     box-shadow: 0 1px 2px rgba(60,60,60,0.04);
     transition: border-color 0.2s;
 }
+
+.bar-chart-canvas {
+    width: 100%;
+    max-width: 1300px;
+    height: 320px;
+    background: white;
+    padding: 10px 10px 12px;
+}
 /* --- Thống kê & Báo cáo (thongke_baocao) --- */
 .page-header {
     padding-bottom: 16px;
-    border-bottom: 1px solid #e5e7eb;
-    margin-bottom: 20px;
 }
 
 .page-title {
@@ -105,12 +112,13 @@
     background: white;
     border-radius: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    border: 2px solid #e5e7eb;
     overflow: hidden;
 }
 
 .tabs-nav {
     display: flex;
-    background: #f8fafc;
+    background: #f9fafb;
     border-bottom: 2px solid #e5e7eb;
     gap: 4px;
     padding: 8px 8px 0 8px;
@@ -144,7 +152,7 @@
 
 .tab-content {
     display: none;
-    padding: 20px;
+    padding: 10px 20px 20px;
 }
 
 .tab-content.active {
@@ -199,17 +207,14 @@
 
 .report-section {
     background: white;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     overflow: hidden;
 }
 
 .report-section h3 {
     margin: 0;
-    padding: 16px 20px;
+    padding: 16px 0px 26px;
     background: white;
-    border-bottom: 1px solid #e5e7eb;
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #1e40af;
 }
@@ -324,9 +329,7 @@
 }
 
 /* Number formatting */
-.excel-table td:last-child,
-.excel-table td:nth-last-child(2),
-.excel-table td:nth-last-child(3) {
+.contribution-table td:last-child {
     text-align: right;
     font-weight: 500;
 }
