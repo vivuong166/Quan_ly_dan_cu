@@ -2,7 +2,7 @@
 
 
 document.addEventListener('DOMContentLoaded', function(){
-    const households = householdsData;
+    const households = Array.isArray(window.householdsData)? window.householdsData: [];
     const unit = 6000; // 6.000đ / người / năm
 
     const feeList = document.getElementById('feeList');
@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function(){
         
         if (feeYearSelect) {
             // Add years from current-1 back to 2020
-            for (let year = currentYear - 1; year >= 2020; year--) {
+            for (let year = currentYear; year >= 2020; year--) {
                 const option = document.createElement('option');
                 option.value = year;
                 option.textContent = year;
@@ -78,7 +78,8 @@ document.addEventListener('DOMContentLoaded', function(){
                             chu: h.chu,
                             members: h.members,
                             year: f.year,
-                            paid: f.paid
+                            //paid: f.paid,
+                            amount: f.amount,
                         });
                     }
                 });
@@ -93,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function(){
         
         // Render rows
         feeRecords.forEach(record => {
-            const total = record.members * unit;
+            const total = record.amount;
             const tr = document.createElement('tr');
             tr.innerHTML = `<td>${record.id}</td>
                             <td>${record.chu}</td>
@@ -166,6 +167,28 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             
             if (!confirm(`Tạo phiếu thu cho năm ${selectedYear} cho tất cả hộ gia đình?`)) return;
+
+            const formData = new FormData();
+            formData.append("action", "create_hygiene_fee"); // 👈 ACTION Ở ĐÂY
+            formData.append("year", feeYearSelect);
+
+            fetch("/thuphi/", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message || "Đã tạo phiếu thu");
+                location.reload();
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Có lỗi xảy ra");
+            });
+
             
             households.forEach(h => {
                 if (!h.fees) h.fees = [];
@@ -186,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function(){
             }
             
             alert(`Đã tạo phiếu thu cho năm ${selectedYear} cho tất cả hộ gia đình!`);
+            console.log(action)
         });
     }
     
@@ -222,7 +246,72 @@ document.addEventListener('DOMContentLoaded', function(){
             // Nếu mọi thứ OK, để Form tự gửi (không dùng e.preventDefault() ở đây)
             console.log("Đang gửi dữ liệu về Server...");
         });
+        
+        const saveBtn = document.getElementById("saveFeeList");
+
+        if (saveBtn) {
+            saveBtn.addEventListener("click", async function () {
+            try {
+                // 1. Lấy năm đang lọc
+                const yearSelect = document.getElementById("filterYear");
+                const selectedYear = yearSelect.value;
+
+                if (!selectedYear) {
+                    alert("⚠️ Vui lòng chọn năm cần lưu!");
+                    return;
+                }
+
+                // 2. Gom dữ liệu đúng năm
+                const payload = [];
+
+                householdsData.forEach(h => {
+                    if (!h.fees) return;
+
+                    h.fees.forEach(f => {
+                        if (String(f.year) === String(selectedYear)) {
+                            payload.push({
+                                ma_ho_khau: h.id,
+                                trang_thai: f.paid === true
+                            });
+                        }
+                    });
+                });
+
+                if (payload.length === 0) {
+                    alert("⚠️ Không có dữ liệu để lưu");
+                    return;
+                }
+
+                // 3. Chuẩn bị FormData
+                const formData = new FormData();
+                formData.append("action", "save_hygiene_fee");
+                formData.append("year", selectedYear);
+                formData.append("fees", JSON.stringify(payload));
+
+            // 4. Gửi về Django
+                const res = await fetch("/thuphi/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    throw new Error("Server error");
+                }
+
+                alert("✅ Đã lưu trạng thái thu phí thành công!");
+                location.reload();
+
+            } catch (err) {
+                console.error(err);
+                alert("❌ Lưu thất bại");
+            }
+        });
     }
+}   
+
 });
 
 // Global function for fee action (Thu phí/Hoàn tác)
