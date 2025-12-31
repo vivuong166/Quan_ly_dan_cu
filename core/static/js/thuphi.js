@@ -183,7 +183,6 @@ document.addEventListener('DOMContentLoaded', function(){
                 },
                 body: formData
             })
-            .then(res => res.json())
             .then(data => {
                 alert(data.message || "Đã tạo phiếu thu");
                 location.reload();
@@ -250,8 +249,9 @@ document.addEventListener('DOMContentLoaded', function(){
             // Nếu mọi thứ OK, để Form tự gửi (không dùng e.preventDefault() ở đây)
             console.log("Đang gửi dữ liệu về Server...");
         });
-        
-        const saveBtn = document.getElementById("saveFeeList");
+    }   
+
+    const saveBtn = document.getElementById("saveFeeList");
 
         if (saveBtn) {
             saveBtn.addEventListener("click", async function () {
@@ -314,7 +314,6 @@ document.addEventListener('DOMContentLoaded', function(){
             }
         });
     }
-}   
 });
 
 // Global function for fee action (Thu phí/Hoàn tác)
@@ -398,6 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
     
     // Handle form submission
     // Hàm này để nút "Tạo đợt đóng góp" gọi tới
@@ -442,21 +442,5 @@ function openCreateCampaignModal() {
     const modal = document.getElementById('createCampaignModal');
     if (modal) modal.style.display = 'block';
 }
-function validateAndSubmit() {
-    const form = document.getElementById('createCampaignForm');
-    const name = document.getElementById('campaignName').value;
-    const start = document.getElementById('startDate').value;
-    const end = document.getElementById('endDate').value;
 
-    if (!name || !start || !end) {
-        alert("Vui lòng nhập đầy đủ thông tin!");
-        return;
-    }
 
-    if (new Date(end) <= new Date(start)) {
-        alert("Ngày kết thúc phải sau ngày bắt đầu!");
-        return;
-    }
-
-    form.submit(); // Gửi về Django để check trùng trong DB
-}
