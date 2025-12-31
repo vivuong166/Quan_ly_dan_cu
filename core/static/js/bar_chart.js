@@ -1,54 +1,82 @@
-document.addEventListener('DOMContentLoaded', function() {
-	var ctx = document.getElementById('nhankhauBarChart');
-	if (!ctx || !window.barChartData) return;
-	var dataByYear = window.barChartData.data_by_year;
-	var years = window.barChartData.years;
-	var yearFilter = document.getElementById('yearFilter');
-	var chart = null;
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('nhankhauBarChart');
+    if (!ctx || !window.barChartData) return;
 
-	function render(year) {
-		var data = dataByYear[year] || [];
-		if (chart) chart.destroy();
-		chart = new Chart(ctx, {
-			type: 'bar',
-			data: {
-				labels: Array.from({length: 12}, (_, i) => 'Tháng ' + (i+1)),
-				datasets: [{
-					label: 'Năm ' + year,
-					data: data,
-					backgroundColor: 'rgba(54, 162, 235, 0.7)'
-				}]
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false, // Thu nhỏ chiều cao
-				plugins: {
-					legend: { position: 'top' },
-					title: { display: true, text: 'Số nhân khẩu theo từng tháng năm ' + year }
-				},
-				scales: {
-					y: {
-						beginAtZero: true,
-						ticks: {
-							stepSize: 1,
-							callback: function(value) { return Number.isInteger(value) ? value : null; }
-						}
-					}
-				}
-			}
-		});
-	}
+    const dataByYear = window.barChartData.data_by_year;
+    let chart = null;
 
-	// Thu nhỏ canvas
-	ctx.style.maxWidth = '1300px';
-	ctx.style.maxHeight = '300px';
+    function getLast12Months() {
+        const result = [];
+        const now = new Date();
 
-	if (yearFilter) {
-        // Lấy giá trị thực tế đang được chọn (đã được Django set selected)
-        const defaultYear = yearFilter.value; 
-        render(defaultYear);
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            result.push({
+                year: d.getFullYear(),
+                month: d.getMonth() + 1, // 1–12
+                label: `${d.getMonth() + 1}/${d.getFullYear()}`
+            });
+        }
+        return result;
     }
-	yearFilter.addEventListener('change', function() {
-		render(this.value);
-	});
+
+    function renderLast12Months() {
+        const months = getLast12Months();
+
+        const labels = [];
+        const data = [];
+
+        months.forEach(m => {
+            labels.push(m.label);
+
+            const yearData = dataByYear[m.year];
+            if (yearData && yearData[m.month - 1] !== undefined) {
+                data.push(yearData[m.month - 1]);
+            } else {
+                data.push(0); // không có dữ liệu
+            }
+        });
+
+        if (chart) chart.destroy();
+
+        chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Số nhân khẩu trong tháng',
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+						position: 'bottom'
+					},
+					title: {
+						display: false
+					}
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            callback: value => Number.isInteger(value) ? value : null
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Kích thước canvas
+    ctx.style.maxWidth = '1300px';
+    ctx.style.maxHeight = '400px';
+
+    // Render ngay khi load
+    renderLast12Months();
 });
