@@ -1102,7 +1102,7 @@ def thuphi(request):
         for fee in HygieneFee.objects.filter(ma_ho_khau=hk.ma_ho_khau):
             fees.append({
                 "year": fee.nam_tinh_phi,
-                "paid": fee.trang_thai,
+                "paid": fee.trang_thai == "Đã thu",
                 "amount": float(fee.so_tien)
             })
 
